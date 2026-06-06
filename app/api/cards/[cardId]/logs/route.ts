@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { ENTITY_TYPE } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -15,7 +15,7 @@ export async function GET(
 ) {
   try {
     const { cardId } = await params;
-    const { userId, orgId } = auth();
+    const { userId, orgId } = await auth();
 
     if (!userId || !orgId)
       return new NextResponse("Unauthorized", { status: 401 });

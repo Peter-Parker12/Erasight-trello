@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 import { ListContainer } from "./_components/list-container";
 import { db } from "@/lib/db";
@@ -12,7 +12,7 @@ type BoardIdPageProps = {
 
 const BoardIdPage = async ({ params }: BoardIdPageProps) => {
   const { boardId } = await params;
-  const { orgId } = auth();
+  const { orgId } = await auth();
 
   if (!orgId) redirect("/select-org");
 
@@ -25,8 +25,12 @@ const BoardIdPage = async ({ params }: BoardIdPageProps) => {
     },
     include: {
       cards: {
-        orderBy: {
-          order: "asc",
+        orderBy: { order: "asc" },
+        include: {
+          labels: { include: { label: true } },
+          members: true,
+          checklists: { include: { items: true } },
+          _count: { select: { comments: true, attachments: true } },
         },
       },
     },

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -7,7 +7,7 @@ import { ActivityItem } from "@/components/activity-item";
 import { db } from "@/lib/db";
 
 export const ActivityList = async () => {
-  const { orgId } = auth();
+  const { orgId } = await auth();
 
   if (!orgId) return redirect("/select-org");
 

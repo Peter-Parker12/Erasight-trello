@@ -21,4 +21,5 @@ export const UpdateCard = z.object({
       }),
   ),
   id: z.string(),
+  coverColor: z.string().nullable().optional(),
 });

@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useFormStatus } from "react-dom";
 import { Check, Loader2 } from "lucide-react";
 
-import { unsplash } from "@/lib/unsplash";
 import { cn } from "@/lib/utils";
 import { defaultImages } from "@/constants/images";
 import Link from "next/link";
@@ -18,34 +17,9 @@ type FormPickerProps = {
 
 export const FormPicker = ({ id, errors }: FormPickerProps) => {
   const { pending } = useFormStatus();
-  const [images, setImages] = useState<Array<Record<string, any>>>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [images, setImages] = useState<Array<Record<string, any>>>(defaultImages);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedImageId, setSelectedImageId] = useState(null);
-
-  useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const result = await unsplash.photos.getRandom({
-          collectionIds: ["317099"],
-          count: 9,
-        });
-
-        if (result && result.response) {
-          const newImages = result.response as Array<Record<string, any>>;
-          setImages(newImages);
-        } else {
-          console.error("Failed to get images from Unsplash.");
-        }
-      } catch (error) {
-        console.error(error);
-        setImages(defaultImages);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchImages();
-  }, []);
   if (isLoading) {
     return (
       <div className="p-6 flex items-center justify-center">

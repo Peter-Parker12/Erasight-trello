@@ -19,6 +19,7 @@ model Board {
   imageLinkHtml String    @db.Text
 
   lists         List[]
+  labels        Label[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -40,20 +41,139 @@ model List {
   @@index([boardId])
 }
 
+enum Priority {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
 
 model Card {
   id          String    @id @default(uuid())
   title       String
   order       Int
   description String?   @db.Text
+  priority    Priority  @default(NONE)
+  startDate   DateTime?
+  dueDate     DateTime?
+  completed   Boolean   @default(false)
+  coverColor  String?
 
   listId      String
   list        List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  labels      CardLabel[]
+  members     CardMember[]
+  checklists  Checklist[]
+  comments    Comment[]
+  attachments Attachment[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([listId])
+}
+
+model Label {
+  id      String  @id @default(uuid())
+  name    String
+  color   String
+  boardId String
+  board   Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  cards   CardLabel[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([boardId])
+}
+
+model CardLabel {
+  id      String @id @default(uuid())
+  cardId  String
+  labelId String
+
+  card    Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  label   Label  @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@unique([cardId, labelId])
+  @@index([cardId])
+  @@index([labelId])
+}
+
+model Checklist {
+  id     String @id @default(uuid())
+  title  String
+  order  Int    @default(0)
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  items  ChecklistItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cardId])
+}
+
+model ChecklistItem {
+  id          String    @id @default(uuid())
+  content     String    @db.Text
+  completed   Boolean   @default(false)
+  order       Int       @default(0)
+
+  checklistId String
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([checklistId])
+}
+
+model Comment {
+  id        String @id @default(uuid())
+  content   String @db.Text
+  cardId    String
+  orgId     String
+  userId    String
+  userName  String @db.Text
+  userImage String @db.Text
+
+  card      Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cardId])
+}
+
+model Attachment {
+  id     String @id @default(uuid())
+  name   String
+  url    String @db.Text
+  cardId String
+
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([cardId])
+}
+
+model CardMember {
+  id        String @id @default(uuid())
+  cardId    String
+  userId    String
+  userName  String @db.Text
+  userImage String @db.Text
+
+  card      Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([cardId, userId])
+  @@index([cardId])
 }
 
 enum ACTION {
@@ -66,6 +186,11 @@ enum ENTITY_TYPE {
   BOARD
   LIST
   CARD
+  CHECKLIST
+  CHECKLIST_ITEM
+  COMMENT
+  LABEL
+  ATTACHMENT
 }
 
 model AuditLog {
@@ -93,11 +218,11 @@ model OrgLimit {
 }
 
 model OrgSubscription {
-  id                String  @id @default(uuid())
-  orgId             String  @unique
+  id                     String    @id @default(uuid())
+  orgId                  String    @unique
 
-  stripeCustomerId  String? @unique @map(name: "stripe_customer_id")
-  stripeSubscriptionId  String? @unique @map(name: "stripe_subscription_id")
-  stripePriceId  String? @map(name: "stripe_price_id")
-  stripeCurrentPeriodEnd  DateTime? @map(name: "stripe_current_period_end")
+  stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
+  stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
+  stripePriceId          String?   @map(name: "stripe_price_id")
+  stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
 }

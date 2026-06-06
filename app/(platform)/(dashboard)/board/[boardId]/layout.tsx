@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 import { BoardNavbar } from "./_components/board-navbar";
 import { db } from "@/lib/db";
@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ boardId: string }>;
 }) {
   const { boardId } = await params;
-  const { orgId } = auth();
+  const { orgId } = await auth();
 
   if (!orgId) return { title: "Board" };
 
@@ -34,7 +34,7 @@ const BoardIdLayout = async ({
   params: Promise<{ boardId: string }>;
 }) => {
   const { boardId } = await params;
-  const { orgId } = auth();
+  const { orgId } = await auth();
 
   if (!orgId) redirect("/select-org");
 

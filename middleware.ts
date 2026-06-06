@@ -1,31 +1,28 @@
 import { NextResponse } from "next/server";
-import { authMiddleware, redirectToSignIn } from "@clerk/nextjs";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default authMiddleware({
-  publicRoutes: ["/", "/api/webhook"],
-  afterAuth(auth, req) {
-    if (auth.userId && auth.isPublicRoute) {
-      let path = "/select-org";
+const isPublicRoute = createRouteMatcher(["/", "/api/webhook", "/sign-in(.*)", "/sign-up(.*)"]);
 
-      if (auth.orgId) {
-        path = `/organization/${auth.orgId}`;
-      }
+export default clerkMiddleware(async (auth, req) => {
+  const authObj = await auth();
 
-      const orgSelection = new URL(path, req.url);
-      return NextResponse.redirect(orgSelection);
+  if (authObj.userId && isPublicRoute(req)) {
+    let path = "/select-org";
+    if (authObj.orgId) {
+      path = `/organization/${authObj.orgId}`;
     }
+    return NextResponse.redirect(new URL(path, req.url));
+  }
 
-    if (!auth.userId && !auth.isPublicRoute) {
-      return redirectToSignIn({ returnBackUrl: req.url });
-    }
+  if (!authObj.userId && !isPublicRoute(req)) {
+    return authObj.redirectToSignIn({ returnBackUrl: req.url });
+  }
 
-    if (auth.userId && !auth.orgId && req.nextUrl.pathname !== "/select-org") {
-      const orgSelection = new URL("/select-org", req.url);
-      return NextResponse.redirect(orgSelection);
-    }
-  },
+  if (authObj.userId && !authObj.orgId && req.nextUrl.pathname !== "/select-org") {
+    return NextResponse.redirect(new URL("/select-org", req.url));
+  }
 });
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)", "/__clerk/:path*"],
 };

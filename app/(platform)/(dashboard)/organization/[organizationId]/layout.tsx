@@ -1,11 +1,11 @@
 import type { PropsWithChildren } from "react";
 import { startCase } from "lodash";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 import { OrgControl } from "./_components/org-control";
 
 export async function generateMetadata() {
-  const { orgSlug } = auth();
+  const { orgSlug } = await auth();
 
   return {
     title: startCase(orgSlug || "Organization"),
