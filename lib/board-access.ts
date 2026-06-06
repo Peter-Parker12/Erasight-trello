@@ -5,11 +5,12 @@ export const isOrgAdmin = async (orgId: string): Promise<boolean> => {
   if (!userId) return false;
   try {
     const client = await clerkClient();
-    const membership = await client.organizations.getMembership({
+    const result = await client.organizations.getOrganizationMembershipList({
       organizationId: orgId,
-      userId,
+      userId: [userId],
+      limit: 1,
     });
-    return membership.role === "org:admin";
+    return result.data[0]?.role === "org:admin";
   } catch {
     return false;
   }
