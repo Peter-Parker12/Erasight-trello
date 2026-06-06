@@ -3,6 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { HelpCircle, User2 } from "lucide-react";
 
+import { BoardMembers } from "@/app/(platform)/(dashboard)/board/[boardId]/_components/board-members";
+
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { Hint } from "@/components/hint";
@@ -51,18 +53,24 @@ export const BoardList = async () => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {boards.map((board) => (
-          <Link
-            key={board.id}
-            href={`/board/${board.id}`}
-            style={{ backgroundImage: `url(${board.imageThumbUrl})` }}
-            className="group relative aspect-video bg-no-repeat bg-center bg-cover bg-sky-700 rounded-sm h-full w-full p-2 overflow-hidden"
-          >
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition"
-            />
-            <p className="relative font-semibold text-white">{board.title}</p>
-          </Link>
+          <div key={board.id} className="group relative aspect-video">
+            <Link
+              href={`/board/${board.id}`}
+              style={{ backgroundImage: `url(${board.imageThumbUrl})` }}
+              className="absolute inset-0 bg-no-repeat bg-center bg-cover bg-sky-700 rounded-sm p-2 overflow-hidden"
+            >
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition"
+              />
+              <p className="relative font-semibold text-white">{board.title}</p>
+            </Link>
+            {admin && (
+              <div className="absolute bottom-1 right-1 z-10">
+                <BoardMembers boardId={board.id} compact />
+              </div>
+            )}
+          </div>
         ))}
         <FormPopover sideOffset={10} side="right">
           <div

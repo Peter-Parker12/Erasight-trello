@@ -32,16 +32,18 @@ type BoardMembersData = {
 
 type BoardMembersProps = {
   boardId: string;
+  compact?: boolean;
 };
 
-export const BoardMembers = ({ boardId }: BoardMembersProps) => {
+export const BoardMembers = ({ boardId, compact = false }: BoardMembersProps) => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery<BoardMembersData>({
+  const { data, isLoading, isError } = useQuery<BoardMembersData>({
     queryKey: ["board-members", boardId],
     queryFn: () => fetcher(`/api/boards/${boardId}/members`),
     enabled: open,
+    retry: false,
   });
 
   const invalidate = () => {
@@ -65,9 +67,15 @@ export const BoardMembers = ({ boardId }: BoardMembersProps) => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="transparent" className="h-auto w-auto p-2 text-white">
-          <Users className="h-4 w-4 mr-1" />
-          <span className="text-sm">Members</span>
+        <Button
+          variant={compact ? "ghost" : "transparent"}
+          className={cn(
+            "h-auto w-auto p-1",
+            compact ? "bg-black/40 hover:bg-black/60 text-white rounded" : "p-2 text-white",
+          )}
+        >
+          <Users className="h-4 w-4" />
+          {!compact && <span className="text-sm ml-1">Members</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 pt-3 pb-3 px-0" side="bottom" align="start">
@@ -85,6 +93,10 @@ export const BoardMembers = ({ boardId }: BoardMembersProps) => {
 
         {isLoading ? (
           <div className="px-3 py-4 text-sm text-muted-foreground text-center">Loading...</div>
+        ) : isError ? (
+          <div className="px-3 py-4 text-sm text-red-500 text-center">
+            Failed to load members. Make sure the database schema is up to date (<code>prisma db push</code>).
+          </div>
         ) : (
           <div className="space-y-3 px-3">
             {/* Access mode indicator */}
