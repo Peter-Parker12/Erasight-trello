@@ -20,9 +20,24 @@ model Board {
 
   lists         List[]
   labels        Label[]
+  boardMembers  BoardMember[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
+
+model BoardMember {
+  id        String @id @default(uuid())
+  boardId   String
+  userId    String
+  userName  String @db.Text
+  userImage String @db.Text
+
+  board     Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  @@unique([boardId, userId])
+  @@index([boardId])
+  @@index([userId])
 }
 
 model List {

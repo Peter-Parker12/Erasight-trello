@@ -11,15 +11,26 @@ import { db } from "@/lib/db";
 import { getAvailableCount } from "@/lib/org-limit";
 import { MAX_FREE_BOARDS } from "@/constants/boards";
 import { checkSubscription } from "@/lib/subscription";
+import { isOrgAdmin } from "@/lib/board-access";
 
 export const BoardList = async () => {
-  const { orgId } = await auth();
+  const { orgId, userId } = await auth();
 
-  if (!orgId) return redirect("/select-org");
+  if (!orgId || !userId) return redirect("/select-org");
+
+  const admin = await isOrgAdmin(orgId);
 
   const boards = await db.board.findMany({
     where: {
       orgId,
+      ...(admin
+        ? {}
+        : {
+            OR: [
+              { boardMembers: { none: {} } },
+              { boardMembers: { some: { userId } } },
+            ],
+          }),
     },
     orderBy: {
       createdAt: "desc",
