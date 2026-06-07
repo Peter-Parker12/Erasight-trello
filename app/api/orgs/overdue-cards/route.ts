@@ -8,24 +8,29 @@ export async function GET() {
 
   const now = new Date();
 
-  const overdueCards = await db.card.findMany({
-    where: {
-      completed: false,
-      dueDate: { lt: now },
-      list: {
-        board: { orgId },
-      },
-    },
-    include: {
-      list: {
-        include: {
-          board: { select: { id: true, title: true } },
+  try {
+    const overdueCards = await db.card.findMany({
+      where: {
+        completed: false,
+        dueDate: { lt: now },
+        list: {
+          board: { orgId },
         },
       },
-    },
-    orderBy: { dueDate: "asc" },
-    take: 20,
-  });
+      include: {
+        list: {
+          include: {
+            board: { select: { id: true, title: true } },
+          },
+        },
+      },
+      orderBy: { dueDate: "asc" },
+      take: 20,
+    });
 
-  return NextResponse.json(overdueCards);
+    return NextResponse.json(overdueCards);
+  } catch (error) {
+    console.error("[OVERDUE_CARDS_GET]", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
 }

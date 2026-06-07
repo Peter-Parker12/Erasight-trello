@@ -81,6 +81,19 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
     enabled: active === "labels",
   });
 
+  type AssignableMember = { userId: string; userName: string; userImage: string; role: string; isBoardMember: boolean };
+  const { data: memberData } = useQuery<{ boardMembers: { userId: string }[]; orgMembers: AssignableMember[] }>({
+    queryKey: ["board-members", boardId],
+    queryFn: () => fetcher(`/api/boards/${boardId}/members`),
+    enabled: active === "members",
+  });
+
+  const assignableMembers: AssignableMember[] = memberData
+    ? memberData.boardMembers.length === 0
+      ? memberData.orgMembers
+      : memberData.orgMembers.filter((m) => m.isBoardMember || m.role === "org:admin")
+    : [];
+
   const { execute: execCopy } = useAction(copyCard, {
     onSuccess: (d) => { toast.success(`Card "${d.title}" copied.`); cardModal.onClose(); },
     onError: (e) => toast.error(e),
@@ -176,30 +189,37 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 
       <SidebarButton icon={Users} label="Members" popover="members" />
       {active === "members" && (
-        <div className="p-2 border rounded bg-white text-sm space-y-1">
+        <div className="p-2 border rounded bg-white text-sm space-y-1 max-h-72 overflow-y-auto">
           {data.members.length > 0 && (
             <div className="space-y-1 mb-2">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Assigned</p>
               {data.members.map((m) => (
                 <div key={m.id} className="flex items-center gap-2">
                   <Avatar className="h-6 w-6"><AvatarImage src={m.userImage} /><AvatarFallback>{m.userName[0]}</AvatarFallback></Avatar>
-                  <span className="flex-1 text-xs">{m.userName}</span>
-                  <button className="text-xs text-red-500 hover:underline" onClick={() => execRemoveMember({ cardId: data.id, boardId, userId: m.userId } as any)}>Remove</button>
+                  <span className="flex-1 text-xs truncate">{m.userName}</span>
+                  <button className="text-xs text-red-500 hover:underline shrink-0" onClick={() => execRemoveMember({ cardId: data.id, boardId, userId: m.userId } as any)}>Remove</button>
                 </div>
               ))}
             </div>
           )}
-          {userId && !assignedMemberIds.has(userId) && (
-            <button
-              className="text-xs text-sky-600 hover:underline"
-              onClick={() => {
-                // We add the current user — get their info from the DOM avatar if possible
-                // Simple approach: pass placeholder, server will fill from currentUser()
-                execAddMember({ cardId: data.id, boardId, userId, userName: "Me", userImage: "" } as any);
-              }}
-            >
-              Assign myself
-            </button>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Board members</p>
+          {!memberData && <Skeleton className="h-6 w-full" />}
+          {memberData && assignableMembers.filter((m) => m.userId && !assignedMemberIds.has(m.userId)).length === 0 && (
+            <p className="text-xs text-muted-foreground">Everyone is already assigned.</p>
           )}
+          {assignableMembers
+            .filter((m) => m.userId && !assignedMemberIds.has(m.userId))
+            .map((m) => (
+              <button
+                key={m.userId}
+                className="flex items-center gap-2 w-full p-1 rounded hover:bg-gray-50 text-left"
+                onClick={() => execAddMember({ cardId: data.id, boardId, userId: m.userId, userName: m.userName, userImage: m.userImage } as any)}
+              >
+                <Avatar className="h-6 w-6"><AvatarImage src={m.userImage} /><AvatarFallback>{m.userName[0]}</AvatarFallback></Avatar>
+                <span className="flex-1 text-xs truncate">{m.userName}</span>
+                {m.userId === userId && <span className="text-[10px] text-muted-foreground shrink-0">(you)</span>}
+              </button>
+            ))}
         </div>
       )}
 
