@@ -2,16 +2,19 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
 import { ListContainer } from "./_components/list-container";
+import { ListView } from "./_components/list-view";
 import { db } from "@/lib/db";
 
 type BoardIdPageProps = {
   params: Promise<{
     boardId: string;
   }>;
+  searchParams: Promise<{ view?: string }>;
 };
 
-const BoardIdPage = async ({ params }: BoardIdPageProps) => {
+const BoardIdPage = async ({ params, searchParams }: BoardIdPageProps) => {
   const { boardId } = await params;
+  const { view } = await searchParams;
   const { orgId } = await auth();
 
   if (!orgId) redirect("/select-org");
@@ -41,7 +44,11 @@ const BoardIdPage = async ({ params }: BoardIdPageProps) => {
 
   return (
     <div className="p-4 h-full overflow-x-auto">
-      <ListContainer boardId={boardId} data={lists} />
+      {view === "list" ? (
+        <ListView lists={lists} />
+      ) : (
+        <ListContainer boardId={boardId} data={lists} />
+      )}
     </div>
   );
 };

@@ -16,6 +16,7 @@ import { Checklists } from "./checklists";
 import { Comments } from "./comments";
 import { Attachments } from "./attachments";
 import { ActionsSidebar } from "./actions-sidebar";
+import { TranslatePanel } from "./translate-panel";
 
 export const CardModal = () => {
   const id = useCardModal((state) => state.id);
@@ -50,6 +51,7 @@ export const CardModal = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 md:gap-4 mt-2">
             <div className="col-span-3 space-y-5">
               {cardData ? <CardMeta data={cardData} /> : null}
+              {cardData ? <TranslatePanel data={cardData} /> : null}
               {cardData ? <Description data={cardData} /> : <Description.Skeleton />}
               {cardData ? <Checklists data={cardData} /> : null}
               {cardData ? <Attachments data={cardData} /> : null}

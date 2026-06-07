@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Paperclip, Plus, Trash2, ExternalLink } from "lucide-react";
+import { Paperclip, Plus, Trash2, ExternalLink, Upload, Link2, Image as ImageIcon, FileText, Film } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -12,21 +12,69 @@ import { useAction } from "@/hooks/use-action";
 import { createAttachment } from "@/actions/create-attachment";
 import { deleteAttachment } from "@/actions/delete-attachment";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type AttachmentsProps = { data: CardWithFullDetail };
+
+type AddTab = "url" | "file";
+
+const MAX_FILE_MB = 5;
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
+
+function getAttachmentType(url: string, name?: string): "image" | "video" | "file" {
+  if (url.startsWith("data:image/")) return "image";
+  if (url.startsWith("data:video/")) return "video";
+  const src = (name ?? url).split(".").pop()?.toLowerCase() ?? "";
+  if (["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp"].includes(src)) return "image";
+  if (["mp4", "mov", "avi", "mkv", "webm", "m4v"].includes(src)) return "video";
+  return "file";
+}
+
+function AttachmentPreview({ url, name }: { url: string; name: string }) {
+  const type = getAttachmentType(url, name);
+  if (type === "image") {
+    return (
+      <div className="w-14 h-10 rounded overflow-hidden border bg-gray-100 shrink-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={url} alt={name} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+  if (type === "video") {
+    return (
+      <div className="w-14 h-10 bg-gray-900 rounded flex items-center justify-center shrink-0 border">
+        <Film className="h-5 w-5 text-gray-300" />
+      </div>
+    );
+  }
+  return (
+    <div className="w-14 h-10 bg-gray-100 rounded flex items-center justify-center shrink-0 border">
+      <FileText className="h-5 w-5 text-gray-400" />
+    </div>
+  );
+}
 
 export const Attachments = ({ data }: AttachmentsProps) => {
   const params = useParams();
   const boardId = params.boardId as string;
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [showForm, setShowForm] = useState(false);
+  const [tab, setTab] = useState<AddTab>("url");
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
+  const [fileLoading, setFileLoading] = useState(false);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["card", data.id] });
 
-  const { execute: execCreate } = useAction(createAttachment, {
-    onSuccess: () => { invalidate(); setShowForm(false); setName(""); setUrl(""); },
+  const { execute: execCreate, isLoading: isCreating } = useAction(createAttachment, {
+    onSuccess: () => {
+      invalidate();
+      setShowForm(false);
+      setName("");
+      setUrl("");
+    },
     onError: (e) => toast.error(e),
   });
 
@@ -35,72 +83,155 @@ export const Attachments = ({ data }: AttachmentsProps) => {
     onError: (e) => toast.error(e),
   });
 
-  if (data.attachments.length === 0 && !showForm) return null;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_BYTES) {
+      toast.error(`File quá lớn. Tối đa ${MAX_FILE_MB}MB.`);
+      e.target.value = "";
+      return;
+    }
+
+    setFileLoading(true);
+    setName(file.name);
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setUrl(ev.target?.result as string);
+      setFileLoading(false);
+    };
+    reader.onerror = () => {
+      toast.error("Không thể đọc file.");
+      setFileLoading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAttach = () => {
+    if (!name.trim() || !url.trim()) {
+      toast.error("Vui lòng nhập đầy đủ thông tin.");
+      return;
+    }
+    execCreate({ cardId: data.id, boardId, name: name.trim(), url: url.trim() });
+  };
+
+  const resetForm = () => {
+    setShowForm(false);
+    setName("");
+    setUrl("");
+    setTab("url");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   return (
     <div className="flex items-start gap-x-3 w-full">
       <Paperclip className="h-5 w-5 mt-0.5 text-neutral-700 shrink-0" />
       <div className="w-full">
-        <p className="font-semibold text-neutral-700 mb-2">Attachments</p>
+        <p className="font-semibold text-neutral-700 mb-2">Tệp đính kèm</p>
 
-        <div className="space-y-2 mb-3">
-          {data.attachments.map((att) => (
-            <div key={att.id} className="flex items-center gap-3 group p-2 rounded hover:bg-gray-50">
-              <div className="w-10 h-8 bg-gray-200 rounded flex items-center justify-center shrink-0">
-                <Paperclip className="h-4 w-4 text-gray-500" />
+        <div className="space-y-1.5 mb-3">
+          {data.attachments.map((att) => {
+            const attType = getAttachmentType(att.url, att.name);
+            const isBase64 = att.url.startsWith("data:");
+            return (
+              <div key={att.id} className="flex items-center gap-3 group p-2 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">
+                <AttachmentPreview url={att.url} name={att.name} />
+                <div className="flex-1 min-w-0">
+                  {isBase64 ? (
+                    <p className="text-sm font-medium text-gray-700 truncate flex items-center gap-1">
+                      {attType === "image" ? <ImageIcon className="h-3 w-3 shrink-0 text-gray-400" /> : attType === "video" ? <Film className="h-3 w-3 shrink-0 text-gray-400" /> : <FileText className="h-3 w-3 shrink-0 text-gray-400" />}
+                      {att.name}
+                    </p>
+                  ) : (
+                    <a href={att.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-sky-700 hover:underline flex items-center gap-1 truncate">
+                      {att.name}
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                    </a>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Thêm vào {format(new Date(att.createdAt), "dd/MM/yyyy")}
+                    {isBase64 && <span className="ml-1 text-[10px] bg-gray-100 px-1 py-0.5 rounded text-gray-500">File nội bộ</span>}
+                  </p>
+                </div>
+                <button onClick={() => execDelete({ id: att.id, boardId })} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition shrink-0" title="Xóa">
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <a
-                  href={att.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-sky-700 hover:underline flex items-center gap-1 truncate"
-                >
-                  {att.name}
-                  <ExternalLink className="h-3 w-3 shrink-0" />
-                </a>
-                <p className="text-xs text-muted-foreground">Added {format(new Date(att.createdAt), "MMM d, yyyy")}</p>
-              </div>
-              <button
-                onClick={() => execDelete({ id: att.id, boardId })}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {showForm ? (
-          <div className="space-y-2 p-3 border rounded-md bg-gray-50">
-            <input
-              autoFocus
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Display name..."
-              className="w-full text-sm border rounded p-2 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white"
-            />
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full text-sm border rounded p-2 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white"
-            />
-            <div className="flex gap-2">
-              <Button size="sm" className="h-7 text-xs" onClick={() => {
-                if (name.trim() && url.trim()) execCreate({ cardId: data.id, boardId, name: name.trim(), url: url.trim() });
-              }}>Attach</Button>
-              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setShowForm(false); setName(""); setUrl(""); }}>Cancel</Button>
+          <div className="border rounded-lg bg-gray-50 overflow-hidden">
+            <div className="flex border-b bg-white">
+              <button
+                onClick={() => { setTab("url"); setName(""); setUrl(""); }}
+                className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors", tab === "url" ? "text-sky-600 border-b-2 border-sky-500 bg-sky-50" : "text-muted-foreground hover:text-gray-700")}
+              >
+                <Link2 className="h-3.5 w-3.5" />
+                Nhập URL
+              </button>
+              <button
+                onClick={() => { setTab("file"); setName(""); setUrl(""); }}
+                className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors", tab === "file" ? "text-sky-600 border-b-2 border-sky-500 bg-sky-50" : "text-muted-foreground hover:text-gray-700")}
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Tải file lên
+              </button>
+            </div>
+
+            <div className="p-3 space-y-2">
+              {tab === "url" ? (
+                <>
+                  <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên hiển thị..." className="w-full text-sm border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white" />
+                  <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="w-full text-sm border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white" />
+                </>
+              ) : (
+                <>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-sky-400 hover:bg-sky-50 transition-colors" onClick={() => fileInputRef.current?.click()}>
+                    {url ? (
+                      <div className="flex flex-col items-center gap-1">
+                        {url.startsWith("data:image/") ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={url} alt="preview" className="max-h-24 rounded shadow-sm" />
+                        ) : url.startsWith("data:video/") ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <Film className="h-8 w-8 text-sky-400" />
+                            <span className="text-[10px] bg-sky-100 text-sky-600 px-1.5 py-0.5 rounded">Video</span>
+                          </div>
+                        ) : (
+                          <FileText className="h-8 w-8 text-sky-400" />
+                        )}
+                        <p className="text-xs font-medium text-gray-700 truncate max-w-full">{name}</p>
+                        <p className="text-[10px] text-muted-foreground">Nhấn để đổi file</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
+                        <Upload className="h-6 w-6" />
+                        <p className="text-xs font-medium">Nhấn để chọn file</p>
+                        <p className="text-[10px]">Ảnh (JPEG, PNG, GIF...), PDF, Word, Excel, Video (MP4, MOV...) — tối đa {MAX_FILE_MB}MB</p>
+                      </div>
+                    )}
+                    <input ref={fileInputRef} type="file" className="hidden" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,video/mp4,video/quicktime,video/x-msvideo,video/webm,.mov" onChange={handleFileChange} />
+                  </div>
+                  {name && (
+                    <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên file..." className="w-full text-sm border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white" />
+                  )}
+                </>
+              )}
+              <div className="flex gap-2">
+                <Button size="sm" className="h-7 text-xs" disabled={isCreating || fileLoading || !name.trim() || !url.trim()} onClick={handleAttach}>
+                  {fileLoading ? "Đang đọc..." : "Đính kèm"}
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={resetForm}>Hủy</Button>
+              </div>
             </div>
           </div>
         ) : (
-          <Button
-            variant="gray"
-            size="inline"
-            className="text-xs"
-            onClick={() => setShowForm(true)}
-          >
-            <Plus className="h-3.5 w-3.5 mr-1" /> Add link
+          <Button variant="gray" size="inline" className="text-xs" onClick={() => setShowForm(true)}>
+            <Plus className="h-3.5 w-3.5 mr-1" />
+            Thêm đính kèm
           </Button>
         )}
       </div>

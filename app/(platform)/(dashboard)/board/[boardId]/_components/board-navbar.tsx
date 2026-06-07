@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { Board } from "@prisma/client";
 
 import { BoardTitleForm } from "./board-title-form";
 import { BoardOptions } from "./board-options";
 import { BoardMembers } from "./board-members";
+import { ViewToggle } from "./view-toggle";
 
 type BoardNavbarProps = {
   data: Board;
@@ -15,6 +17,7 @@ export const BoardNavbar = async ({ data, isAdmin }: BoardNavbarProps) => {
       <BoardTitleForm data={data} />
 
       <div className="ml-auto flex items-center gap-x-2">
+        <Suspense><ViewToggle /></Suspense>
         {isAdmin && <BoardMembers boardId={data.id} />}
         <BoardOptions id={data.id} />
       </div>
