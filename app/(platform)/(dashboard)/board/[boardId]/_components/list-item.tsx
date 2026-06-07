@@ -1,6 +1,6 @@
 "use client";
 
-import { ElementRef, useRef, useState } from "react";
+import { CSSProperties, ElementRef, useRef, useState } from "react";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 
 import { ListHeader } from "./list-header";
@@ -37,6 +37,7 @@ export const ListItem = ({ data, index }: ListItemProps) => {
           {...provided.draggableProps}
           ref={provided.innerRef}
           className="shrink-0 h-full w-[272px] select-none"
+          style={provided.draggableProps.style as CSSProperties | undefined}
         >
           <div
             {...provided.dragHandleProps}

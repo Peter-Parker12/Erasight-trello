@@ -1,5 +1,6 @@
 "use client";
 
+import { CSSProperties } from "react";
 import { CalendarDays, CheckSquare, MessageSquare, Paperclip, Flag } from "lucide-react";
 import { Draggable } from "@hello-pangea/dnd";
 import { format } from "date-fns";
@@ -46,6 +47,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           role="button"
           onClick={() => cardModal.onOpen(data.id)}
           className="border-2 border-transparent hover:border-black py-2 px-3 text-sm bg-white rounded-md shadow-sm space-y-1.5"
+          style={provided.draggableProps.style as CSSProperties | undefined}
         >
           {/* Cover color */}
           {data.coverColor && (
