@@ -75,6 +75,7 @@ model List {
   id        String    @id  @default(uuid())
   title     String
   order     Int
+  wipLimit  Int?
 
   boardId   String
   board     Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
@@ -96,32 +97,37 @@ enum Priority {
 }
 
 model Card {
-  id          String    @id @default(uuid())
-  title       String
-  order       Int
-  description String?   @db.Text
-  priority    Priority  @default(NONE)
-  startDate   DateTime?
-  dueDate     DateTime?
-  completed   Boolean   @default(false)
-  coverColor  String?
-  isTemplate  Boolean   @default(false)
+  id            String    @id @default(uuid())
+  cardNumber    Int       @default(autoincrement())
+  title         String
+  order         Int
+  description   String?   @db.Text
+  priority      Priority  @default(NONE)
+  startDate     DateTime?
+  dueDate       DateTime?
+  completed     Boolean   @default(false)
+  coverColor    String?
+  isTemplate    Boolean   @default(false)
   templateOrgId String?
+  parentCardId  String?
 
-  listId      String
-  list        List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId        String
+  list          List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  parentCard    Card?     @relation("CardSubtasks", fields: [parentCardId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  subtasks      Card[]    @relation("CardSubtasks")
 
-  labels      CardLabel[]
-  members     CardMember[]
-  checklists  Checklist[]
-  comments    Comment[]
-  attachments Attachment[]
-  watchers    CardWatcher[]
+  labels        CardLabel[]
+  members       CardMember[]
+  checklists    Checklist[]
+  comments      Comment[]
+  attachments   Attachment[]
+  watchers      CardWatcher[]
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([listId])
+  @@index([parentCardId])
 }
 
 model Label {

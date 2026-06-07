@@ -17,4 +17,5 @@ export type CardWithFullDetail = Card & {
   checklists: (Checklist & { items: ChecklistItem[] })[];
   comments: Comment[];
   attachments: Attachment[];
+  subtasks: (Card & { members: CardMember[] })[];
 };

@@ -29,6 +29,10 @@ export async function GET(
         },
         comments: { orderBy: { createdAt: "desc" } },
         attachments: { orderBy: { createdAt: "desc" } },
+        subtasks: {
+          orderBy: { order: "asc" },
+          include: { members: true },
+        },
       },
     });
 

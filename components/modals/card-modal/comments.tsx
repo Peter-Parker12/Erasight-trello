@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, KeyboardEvent } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageSquare, Trash2 } from "lucide-react";
+import { MessageSquare, Trash2, AtSign } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useAuth } from "@clerk/nextjs";
-import { Comment } from "@prisma/client";
+import type { Comment } from "@prisma/client";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -18,8 +18,13 @@ import { deleteComment } from "@/actions/delete-comment";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 type CommentsProps = { cardId: string };
+type MemberOption = { userId: string; userName: string; userImage: string };
+
+const renderWithMentions = (text: string) =>
+  text.replace(/@(\S+)/g, "**@$1**");
 
 export const Comments = ({ cardId }: CommentsProps) => {
   const params = useParams();
@@ -28,6 +33,10 @@ export const Comments = ({ cardId }: CommentsProps) => {
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionStart, setMentionStart] = useState(0);
+  const [mentionIndex, setMentionIndex] = useState(0);
 
   const { data: comments, isLoading } = useQuery<Comment[]>({
     queryKey: ["card-comments", cardId],
@@ -35,7 +44,21 @@ export const Comments = ({ cardId }: CommentsProps) => {
     refetchInterval: 5000,
   });
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["card-comments", cardId] });
+  const { data: boardMembers } = useQuery<MemberOption[]>({
+    queryKey: ["board-members-mentions", boardId],
+    queryFn: () => fetcher(`/api/boards/${boardId}/members`).then((res: { orgMembers: MemberOption[] }) => res.orgMembers),
+    enabled: !!boardId,
+  });
+
+  const mentionSuggestions = (boardMembers ?? []).filter(
+    (m) =>
+      mentionQuery !== null &&
+      (m.userName.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+        m.userId.toLowerCase().includes(mentionQuery.toLowerCase()))
+  ).slice(0, 6);
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ["card-comments", cardId] });
 
   const { execute: execCreate, isLoading: isPosting } = useAction(createComment, {
     onSuccess: () => { invalidate(); setContent(""); },
@@ -47,7 +70,43 @@ export const Comments = ({ cardId }: CommentsProps) => {
     onError: (e) => toast.error(e),
   });
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setContent(val);
+    const cursor = e.target.selectionStart ?? val.length;
+    const textBefore = val.slice(0, cursor);
+    const match = textBefore.match(/@(\w*)$/);
+    if (match) {
+      setMentionQuery(match[1]);
+      setMentionStart(cursor - match[0].length);
+      setMentionIndex(0);
+    } else {
+      setMentionQuery(null);
+    }
+  };
+
+  const insertMention = (member: MemberOption) => {
+    const before = content.slice(0, mentionStart);
+    const after = content.slice(
+      textareaRef.current?.selectionStart ?? mentionStart + (mentionQuery?.length ?? 0) + 1
+    );
+    const inserted = `@${member.userName.replace(/\s+/g, "")} `;
+    setContent(before + inserted + after);
+    setMentionQuery(null);
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      const pos = before.length + inserted.length;
+      textareaRef.current?.setSelectionRange(pos, pos);
+    });
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (mentionQuery !== null && mentionSuggestions.length > 0) {
+      if (e.key === "ArrowDown") { e.preventDefault(); setMentionIndex((i) => Math.min(i + 1, mentionSuggestions.length - 1)); return; }
+      if (e.key === "ArrowUp") { e.preventDefault(); setMentionIndex((i) => Math.max(i - 1, 0)); return; }
+      if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); insertMention(mentionSuggestions[mentionIndex]); return; }
+      if (e.key === "Escape") { setMentionQuery(null); return; }
+    }
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
       if (content.trim()) execCreate({ cardId, boardId, content: content.trim() });
@@ -60,25 +119,48 @@ export const Comments = ({ cardId }: CommentsProps) => {
       <div className="w-full">
         <p className="font-semibold text-neutral-700 mb-3">Comments</p>
 
-        {/* Comment input */}
-        <div className="mb-4">
+        <div className="mb-4 relative">
           <textarea
             ref={textareaRef}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder="Write a comment... (Ctrl+Enter to submit)"
+            placeholder="Write a comment... (@name to mention, Ctrl+Enter to submit)"
             className="w-full text-sm border rounded-md p-3 resize-none focus:outline-none focus:ring-1 focus:ring-sky-500 min-h-[60px]"
             rows={2}
           />
+
+          {mentionQuery !== null && mentionSuggestions.length > 0 && (
+            <div
+              ref={dropdownRef}
+              className="absolute z-50 bg-white border rounded-lg shadow-lg w-56 overflow-hidden bottom-full mb-1"
+            >
+              {mentionSuggestions.map((m, i) => (
+                <button
+                  key={m.userId}
+                  onMouseDown={(e) => { e.preventDefault(); insertMention(m); }}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition",
+                    i === mentionIndex && "bg-sky-50"
+                  )}
+                >
+                  <Avatar className="h-6 w-6 shrink-0">
+                    <AvatarImage src={m.userImage} />
+                    <AvatarFallback className="text-[9px]">{m.userName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span className="truncate">{m.userName}</span>
+                </button>
+              ))}
+              <div className="px-3 py-1.5 border-t text-[10px] text-muted-foreground flex items-center gap-1">
+                <AtSign className="h-3 w-3" /> press Enter to select
+              </div>
+            </div>
+          )}
+
           {content.trim() && (
             <div className="flex gap-2 mt-1">
-              <Button
-                size="sm"
-                className="h-7 text-xs"
-                disabled={isPosting}
-                onClick={() => execCreate({ cardId, boardId, content: content.trim() })}
-              >
+              <Button size="sm" className="h-7 text-xs" disabled={isPosting}
+                onClick={() => execCreate({ cardId, boardId, content: content.trim() })}>
                 Save
               </Button>
               <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setContent("")}>
@@ -88,7 +170,6 @@ export const Comments = ({ cardId }: CommentsProps) => {
           )}
         </div>
 
-        {/* Comment list */}
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2].map((i) => (
@@ -112,11 +193,15 @@ export const Comments = ({ cardId }: CommentsProps) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
                     <span className="text-sm font-semibold">{comment.userName}</span>
-                    <span className="text-xs text-muted-foreground">{format(new Date(comment.createdAt), "MMM d 'at' h:mm a")}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(comment.createdAt), "MMM d 'at' h:mm a")}
+                    </span>
                   </div>
                   <div className="mt-0.5 text-sm bg-gray-100 rounded-md px-3 py-2">
-                    <div className="prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{comment.content}</ReactMarkdown>
+                    <div className="prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded [&_strong]:text-sky-700">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {renderWithMentions(comment.content)}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 </div>

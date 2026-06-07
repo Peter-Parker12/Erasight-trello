@@ -72,6 +72,7 @@ export const Header = ({ data }: HeaderProps) => {
           />
         </form>
         <p className="text-sm text-muted-foreground">
+          <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded mr-1.5">#{data.cardNumber}</span>
           In list <span className="underline">{data.list.title}</span>
         </p>
       </div>
