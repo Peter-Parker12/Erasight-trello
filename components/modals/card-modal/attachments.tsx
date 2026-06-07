@@ -3,9 +3,10 @@
 import { useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Paperclip, Plus, Trash2, ExternalLink, Upload, Link2, Image as ImageIcon, FileText, Film } from "lucide-react";
+import { Paperclip, Plus, Trash2, ExternalLink, Upload, Link2, Image as ImageIcon, FileText, Film, Download, Copy, X, Info } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import type { Attachment } from "@prisma/client";
 
 import { CardWithFullDetail } from "@/types";
 import { useAction } from "@/hooks/use-action";
@@ -65,6 +66,21 @@ export const Attachments = ({ data }: AttachmentsProps) => {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [fileLoading, setFileLoading] = useState(false);
+  const [selectedAttId, setSelectedAttId] = useState<string | null>(null);
+
+  const downloadAttachment = (att: Attachment) => {
+    const a = document.createElement("a");
+    a.href = att.url;
+    a.download = att.name;
+    if (!att.url.startsWith("data:")) a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const copyUrl = (url: string) => {
+    navigator.clipboard.writeText(url).then(() => toast.success("Đã sao chép liên kết"));
+  };
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["card", data.id] });
 
@@ -134,29 +150,146 @@ export const Attachments = ({ data }: AttachmentsProps) => {
           {data.attachments.map((att) => {
             const attType = getAttachmentType(att.url, att.name);
             const isBase64 = att.url.startsWith("data:");
+            const isSelected = selectedAttId === att.id;
+            const ext = att.name.split(".").pop()?.toUpperCase() ?? "FILE";
+
+            // Estimate file size from base64
+            let sizeLabel = "";
+            if (isBase64) {
+              const base64Data = att.url.split(",")[1] ?? "";
+              const bytes = Math.round((base64Data.length * 3) / 4);
+              sizeLabel = bytes > 1024 * 1024
+                ? `${(bytes / 1024 / 1024).toFixed(1)} MB`
+                : bytes > 1024
+                ? `${(bytes / 1024).toFixed(0)} KB`
+                : `${bytes} B`;
+            }
+
             return (
-              <div key={att.id} className="flex items-center gap-3 group p-2 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">
-                <AttachmentPreview url={att.url} name={att.name} />
-                <div className="flex-1 min-w-0">
-                  {isBase64 ? (
-                    <p className="text-sm font-medium text-gray-700 truncate flex items-center gap-1">
+              <div key={att.id} className="rounded-lg border border-transparent hover:border-gray-200 overflow-hidden transition">
+                {/* Row */}
+                <div
+                  className={cn(
+                    "flex items-center gap-3 group p-2 rounded-lg cursor-pointer hover:bg-gray-50 transition",
+                    isSelected && "bg-sky-50 border-sky-200"
+                  )}
+                  onClick={() => setSelectedAttId(isSelected ? null : att.id)}
+                >
+                  <AttachmentPreview url={att.url} name={att.name} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 truncate flex items-center gap-1">
                       {attType === "image" ? <ImageIcon className="h-3 w-3 shrink-0 text-gray-400" /> : attType === "video" ? <Film className="h-3 w-3 shrink-0 text-gray-400" /> : <FileText className="h-3 w-3 shrink-0 text-gray-400" />}
                       {att.name}
                     </p>
-                  ) : (
-                    <a href={att.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-sky-700 hover:underline flex items-center gap-1 truncate">
-                      {att.name}
-                      <ExternalLink className="h-3 w-3 shrink-0" />
-                    </a>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Thêm vào {format(new Date(att.createdAt), "dd/MM/yyyy")}
-                    {isBase64 && <span className="ml-1 text-[10px] bg-gray-100 px-1 py-0.5 rounded text-gray-500">File nội bộ</span>}
-                  </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {format(new Date(att.createdAt), "dd/MM/yyyy")}
+                      {isBase64 && sizeLabel && <span className="ml-2 text-[10px] bg-gray-100 px-1 py-0.5 rounded text-gray-500">{sizeLabel}</span>}
+                      {isBase64 && <span className="ml-1 text-[10px] bg-gray-100 px-1 py-0.5 rounded text-gray-500">File nội bộ</span>}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className={cn("text-[10px] text-muted-foreground transition", isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
+                      <Info className="h-3.5 w-3.5" />
+                    </span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); execDelete({ id: att.id, boardId }); }}
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition"
+                      title="Xóa"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-                <button onClick={() => execDelete({ id: att.id, boardId })} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition shrink-0" title="Xóa">
-                  <Trash2 className="h-4 w-4" />
-                </button>
+
+                {/* Detail panel */}
+                {isSelected && (
+                  <div className="border-t bg-white px-3 py-3 space-y-3">
+                    <div className="flex items-start gap-3">
+                      {/* Large preview */}
+                      <div className="shrink-0">
+                        {attType === "image" ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={att.url} alt={att.name} className="max-h-36 max-w-[180px] rounded-md border object-contain bg-gray-50 shadow-sm" />
+                        ) : attType === "video" ? (
+                          <video src={att.url} className="max-h-36 max-w-[180px] rounded-md border shadow-sm" controls />
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex flex-col items-center justify-center border shadow-sm gap-1">
+                            <FileText className="h-7 w-7 text-gray-400" />
+                            <span className="text-[9px] font-bold text-gray-500 uppercase">{ext}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{att.name}</p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                          <div>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Loại</p>
+                            <p className="text-xs font-medium capitalize text-gray-700">
+                              {attType === "image" ? "Hình ảnh" : attType === "video" ? "Video" : "Tài liệu"} {!isBase64 && "(URL)"}
+                            </p>
+                          </div>
+                          {sizeLabel && (
+                            <div>
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Kích thước</p>
+                              <p className="text-xs font-medium text-gray-700">{sizeLabel}</p>
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Thêm lúc</p>
+                            <p className="text-xs font-medium text-gray-700">{format(new Date(att.createdAt), "HH:mm dd/MM/yyyy")}</p>
+                          </div>
+                          {!isBase64 && (
+                            <div className="col-span-2">
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">URL</p>
+                              <p className="text-xs text-sky-700 truncate">{att.url}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 pt-1">
+                          <button
+                            onClick={() => downloadAttachment(att)}
+                            className="inline-flex items-center gap-1 text-xs bg-gray-900 text-white px-2.5 py-1 rounded-md hover:bg-gray-700 transition font-medium"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            Tải xuống
+                          </button>
+                          {!isBase64 && (
+                            <>
+                              <a
+                                href={att.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-1 rounded-md hover:bg-sky-100 transition font-medium"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                Mở liên kết
+                              </a>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); copyUrl(att.url); }}
+                                className="inline-flex items-center gap-1 text-xs bg-gray-50 text-gray-700 border border-gray-200 px-2.5 py-1 rounded-md hover:bg-gray-100 transition font-medium"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                                Sao chép
+                              </button>
+                            </>
+                          )}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setSelectedAttId(null); }}
+                            className="ml-auto text-muted-foreground hover:text-gray-700"
+                            title="Đóng"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
