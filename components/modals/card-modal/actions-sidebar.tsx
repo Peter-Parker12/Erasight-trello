@@ -126,6 +126,17 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
     onError: (e) => toast.error(e),
   });
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const hasSubtasks = data.subtasks && data.subtasks.length > 0;
+
+  const handleDeleteClick = () => {
+    if (hasSubtasks) {
+      setShowDeleteConfirm(true);
+    } else {
+      execDelete({ id: data.id, boardId });
+    }
+  };
+
   const { execute: execDates } = useAction(updateCardDates, {
     onSuccess: () => { invalidate(); setActive(null); },
     onError: (e) => toast.error(e),
@@ -348,9 +359,37 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
         <Button onClick={() => execCopy({ id: data.id, boardId })} variant="gray" className="w-full justify-start" size="inline">
           <Copy className="h-4 w-4 mr-2" /> Copy
         </Button>
-        <Button onClick={() => execDelete({ id: data.id, boardId })} variant="destructive" className="w-full justify-start" size="inline">
-          <Trash className="h-4 w-4 mr-2" /> Delete
-        </Button>
+
+        {showDeleteConfirm ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 space-y-2">
+            <p className="text-xs font-semibold text-red-700">Xóa thẻ này?</p>
+            <p className="text-xs text-red-600">
+              Thẻ này còn <span className="font-bold">{data.subtasks.length} subtask</span>. Xóa sẽ xóa toàn bộ subtasks.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="destructive"
+                className="flex-1 h-7 text-xs"
+                onClick={() => { execDelete({ id: data.id, boardId }); setShowDeleteConfirm(false); }}
+              >
+                Có, xóa tất cả
+              </Button>
+              <Button
+                size="sm"
+                variant="gray"
+                className="flex-1 h-7 text-xs"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Không
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button onClick={handleDeleteClick} variant="destructive" className="w-full justify-start" size="inline">
+            <Trash className="h-4 w-4 mr-2" /> Delete
+          </Button>
+        )}
       </div>
     </div>
   );
