@@ -12,6 +12,7 @@ import { FormPopover } from "@/components/form/form-popover";
 
 import { Logo } from "@/components/logo";
 import { MobileSidebar } from "./mobile-sidebar";
+import { TelegramAccount } from "./telegram-account";
 
 export const Navbar = () => {
   return (
@@ -39,6 +40,7 @@ export const Navbar = () => {
           <Skeleton className="h-10 w-10 rounded-full" />
         </ClerkLoading>
         <ClerkLoaded>
+          <TelegramAccount />
           <OrganizationSwitcher
             hidePersonal
             afterCreateOrganizationUrl="/organization/:id"

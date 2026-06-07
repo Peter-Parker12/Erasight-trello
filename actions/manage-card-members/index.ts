@@ -8,6 +8,7 @@ import { AddCardMember, RemoveCardMember } from "./schema";
 import type { AddInputType, RemoveInputType } from "./types";
 import { ActionState } from "@/lib/create-safe-action";
 import { CardMember } from "@prisma/client";
+import { notifyCardAssigned } from "@/lib/board-telegram";
 
 const addHandler = async (data: AddInputType): Promise<ActionState<AddInputType, CardMember | null>> => {
   const { userId, orgId } = await auth();
@@ -25,6 +26,15 @@ const addHandler = async (data: AddInputType): Promise<ActionState<AddInputType,
   if (existing) return { data: existing };
 
   const member = await db.cardMember.create({ data: { cardId, userId: memberId, userName, userImage } });
+
+  await notifyCardAssigned({
+    boardId,
+    orgId,
+    cardTitle: card.title,
+    assigneeUserId: memberId,
+    assigneeName: userName,
+  });
+
   revalidatePath(`/board/${boardId}`);
   return { data: member };
 };

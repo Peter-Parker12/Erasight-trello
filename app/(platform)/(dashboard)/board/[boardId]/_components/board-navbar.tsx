@@ -4,6 +4,7 @@ import { Board } from "@prisma/client";
 import { BoardTitleForm } from "./board-title-form";
 import { BoardOptions } from "./board-options";
 import { BoardMembers } from "./board-members";
+import { TelegramSettings } from "./telegram-settings";
 import { ViewToggle } from "./view-toggle";
 
 type BoardNavbarProps = {
@@ -19,6 +20,7 @@ export const BoardNavbar = async ({ data, isAdmin }: BoardNavbarProps) => {
       <div className="ml-auto flex items-center gap-x-2">
         <Suspense><ViewToggle /></Suspense>
         {isAdmin && <BoardMembers boardId={data.id} />}
+        {isAdmin && <TelegramSettings boardId={data.id} />}
         <BoardOptions id={data.id} />
       </div>
     </div>

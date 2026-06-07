@@ -7,6 +7,7 @@ import { UpdateCardOrder } from "./schema";
 import { InputType, ReturnType } from "./types";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
+import { notifyCardInReview } from "@/lib/board-telegram";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = await auth();
@@ -20,8 +21,24 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   const { items, boardId } = data;
 
   let updatedCards;
+  let movedToReview: { title: string }[] = [];
 
   try {
+    const config = await db.boardTelegramConfig.findUnique({ where: { boardId } });
+
+    if (config?.enabled && config.reviewListId) {
+      const candidates = items.filter((i) => i.listId === config.reviewListId);
+      if (candidates.length > 0) {
+        const before = await db.card.findMany({
+          where: { id: { in: candidates.map((c) => c.id) } },
+          select: { id: true, listId: true, title: true },
+        });
+        movedToReview = before
+          .filter((b) => b.listId !== config.reviewListId && candidates.some((c) => c.id === b.id))
+          .map((b) => ({ title: b.title }));
+      }
+    }
+
     const transaction = items.map((card) =>
       db.card.update({
         where: {
@@ -44,6 +61,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return {
       error: "Failed to update.",
     };
+  }
+
+  for (const card of movedToReview) {
+    await notifyCardInReview({ boardId, cardTitle: card.title });
   }
 
   revalidatePath(`/board/${boardId}`);
