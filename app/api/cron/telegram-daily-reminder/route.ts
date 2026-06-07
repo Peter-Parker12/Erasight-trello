@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
       await sendDueTodayReminder({
         boardId: config.boardId,
-        cards: cards.map((c) => ({ title: c.title, listTitle: c.list.title })),
+        cards: cards.map((c) => ({ id: c.id, title: c.title, listTitle: c.list.title })),
       });
       notified++;
     }

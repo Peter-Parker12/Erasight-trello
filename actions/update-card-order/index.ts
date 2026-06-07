@@ -21,7 +21,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   const { items, boardId } = data;
 
   let updatedCards;
-  let movedToReview: { title: string }[] = [];
+  let movedToReview: { id: string; title: string }[] = [];
 
   try {
     const config = await db.boardTelegramConfig.findUnique({ where: { boardId } });
@@ -35,7 +35,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         });
         movedToReview = before
           .filter((b) => b.listId !== config.reviewListId && candidates.some((c) => c.id === b.id))
-          .map((b) => ({ title: b.title }));
+          .map((b) => ({ id: b.id, title: b.title }));
       }
     }
 
@@ -64,7 +64,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   }
 
   for (const card of movedToReview) {
-    await notifyCardInReview({ boardId, cardTitle: card.title });
+    await notifyCardInReview({ boardId, cardId: card.id, cardTitle: card.title });
   }
 
   revalidatePath(`/board/${boardId}`);

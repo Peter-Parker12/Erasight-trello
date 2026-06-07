@@ -32,6 +32,7 @@ const addHandler = async (data: AddInputType): Promise<ActionState<AddInputType,
   await notifyCardAssigned({
     boardId,
     orgId,
+    cardId: card.id,
     cardTitle: card.title,
     assigneeUserId: memberId,
     assigneeName: userName,

@@ -1,15 +1,21 @@
 import { db } from "@/lib/db";
 import { sendTelegramMessage, escapeHtml } from "@/lib/telegram";
+import { absoluteUrl } from "@/lib/utils";
+
+const cardLink = (boardId: string, cardId: string): string =>
+  absoluteUrl(`/board/${boardId}?card=${cardId}`);
 
 export const notifyCardAssigned = async ({
   boardId,
   orgId,
+  cardId,
   cardTitle,
   assigneeUserId,
   assigneeName,
 }: {
   boardId: string;
   orgId: string;
+  cardId: string;
   cardTitle: string;
   assigneeUserId: string;
   assigneeName: string;
@@ -22,30 +28,35 @@ export const notifyCardAssigned = async ({
   });
 
   const mention = account ? `@${escapeHtml(account.telegramUsername)}` : escapeHtml(assigneeName);
+  const link = escapeHtml(cardLink(boardId, cardId));
 
   await sendTelegramMessage({
     botToken: config.botToken,
     chatId: config.chatId,
     topicId: config.topicId,
-    text: `📌 <b>${escapeHtml(cardTitle)}</b> has been assigned to ${mention}`,
+    text: `📌 <a href="${link}"><b>${escapeHtml(cardTitle)}</b></a> has been assigned to ${mention}`,
   });
 };
 
 export const notifyCardInReview = async ({
   boardId,
+  cardId,
   cardTitle,
 }: {
   boardId: string;
+  cardId: string;
   cardTitle: string;
 }): Promise<void> => {
   const config = await db.boardTelegramConfig.findUnique({ where: { boardId } });
   if (!config || !config.enabled || !config.reviewListId) return;
 
+  const link = escapeHtml(cardLink(boardId, cardId));
+
   await sendTelegramMessage({
     botToken: config.botToken,
     chatId: config.chatId,
     topicId: config.topicId,
-    text: `🔍 <b>${escapeHtml(cardTitle)}</b> has moved to review. Mentors, please take a look!`,
+    text: `🔍 <a href="${link}"><b>${escapeHtml(cardTitle)}</b></a> has moved to review. Mentors, please take a look!`,
   });
 };
 
@@ -54,14 +65,17 @@ export const sendDueTodayReminder = async ({
   cards,
 }: {
   boardId: string;
-  cards: { title: string; listTitle: string }[];
+  cards: { id: string; title: string; listTitle: string }[];
 }): Promise<void> => {
   if (cards.length === 0) return;
 
   const config = await db.boardTelegramConfig.findUnique({ where: { boardId } });
   if (!config || !config.enabled) return;
 
-  const lines = cards.map((c) => `• <b>${escapeHtml(c.title)}</b> (${escapeHtml(c.listTitle)})`);
+  const lines = cards.map(
+    (c) =>
+      `• <a href="${escapeHtml(cardLink(boardId, c.id))}"><b>${escapeHtml(c.title)}</b></a> (${escapeHtml(c.listTitle)})`
+  );
 
   await sendTelegramMessage({
     botToken: config.botToken,

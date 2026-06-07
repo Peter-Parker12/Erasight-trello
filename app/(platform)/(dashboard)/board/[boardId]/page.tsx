@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { ListContainer } from "./_components/list-container";
 import { ListView } from "./_components/list-view";
 import { CalendarView } from "./_components/calendar-view";
+import { CardDeepLink } from "./_components/card-deep-link";
 import { db } from "@/lib/db";
 
 type BoardIdPageProps = {
@@ -45,6 +46,7 @@ const BoardIdPage = async ({ params, searchParams }: BoardIdPageProps) => {
 
   return (
     <div className={view === "board" ? "h-full overflow-x-auto" : "p-4 h-full overflow-x-auto"}>
+      <CardDeepLink />
       {view === "list" ? (
         <ListView lists={lists} />
       ) : view === "calendar" ? (
