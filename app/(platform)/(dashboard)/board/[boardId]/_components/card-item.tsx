@@ -71,6 +71,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
             {priorityDot && <span className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", priorityDot)} />}
             <p className="truncate">{data.title}</p>
           </div>
+          <span className="text-[10px] font-mono text-muted-foreground/60">#{data.cardNumber}</span>
 
           {/* Footer stats */}
           {(due || hasChecklist || data._count.comments > 0 || data._count.attachments > 0 || data.members.length > 0) && (
