@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Send, X } from "lucide-react";
 import { toast } from "sonner";
@@ -42,16 +42,16 @@ export const TelegramSettings = ({ boardId }: TelegramSettingsProps) => {
   const [topicId, setTopicId] = useState("");
   const [reviewListId, setReviewListId] = useState("");
   const [enabled, setEnabled] = useState(true);
+  const [loadedConfig, setLoadedConfig] = useState<TelegramSettingsData["config"] | undefined>(undefined);
 
-  useEffect(() => {
-    if (data?.config) {
-      setBotToken(data.config.botToken);
-      setChatId(data.config.chatId);
-      setTopicId(data.config.topicId ?? "");
-      setReviewListId(data.config.reviewListId ?? "");
-      setEnabled(data.config.enabled);
-    }
-  }, [data?.config]);
+  if (data?.config && data.config !== loadedConfig) {
+    setLoadedConfig(data.config);
+    setBotToken(data.config.botToken);
+    setChatId(data.config.chatId);
+    setTopicId(data.config.topicId ?? "");
+    setReviewListId(data.config.reviewListId ?? "");
+    setEnabled(data.config.enabled);
+  }
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["telegram-settings", boardId] });
 

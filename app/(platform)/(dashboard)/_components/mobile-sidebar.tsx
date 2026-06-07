@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
+import { useIsClient } from "usehooks-ts";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,21 +19,17 @@ import { Logo } from "@/components/logo";
 
 export const MobileSidebar = () => {
   const pathname = usePathname();
-  const [isMounted, setIsMounted] = useState(false);
+  const isClient = useIsClient();
 
   const onOpen = useMobileSidebar((state) => state.onOpen);
   const onClose = useMobileSidebar((state) => state.onClose);
   const isOpen = useMobileSidebar((state) => state.isOpen);
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
     onClose();
   }, [pathname, onClose]);
 
-  if (!isMounted) return null;
+  if (!isClient) return null;
 
   return (
     <>

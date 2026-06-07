@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { DragDropContext, type DropResult, Droppable } from "@hello-pangea/dnd";
 
@@ -28,7 +28,13 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number) {
 
 export const ListContainer = ({ data, boardId }: ListContainerProps) => {
   const [orderedData, setOrderedData] = useState(data);
+  const [prevData, setPrevData] = useState(data);
   const { filter, update, reset, isActive, applyFilter } = useBoardFilter();
+
+  if (data !== prevData) {
+    setPrevData(data);
+    setOrderedData(data);
+  }
 
   const { execute: executeUpdateListOrder } = useAction(updateListOrder, {
     onSuccess: (data) => {
@@ -47,10 +53,6 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
       toast.error(error);
     },
   });
-
-  useEffect(() => {
-    setOrderedData(data);
-  }, [data]);
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, type } = result;

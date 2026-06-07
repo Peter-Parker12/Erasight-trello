@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Send, X } from "lucide-react";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ type TelegramAccountData = {
 export const TelegramAccount = () => {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
+  const [loadedUsername, setLoadedUsername] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery<TelegramAccountData>({
@@ -31,9 +32,10 @@ export const TelegramAccount = () => {
     enabled: open,
   });
 
-  useEffect(() => {
+  if ((data?.telegramUsername ?? null) !== loadedUsername) {
+    setLoadedUsername(data?.telegramUsername ?? null);
     setUsername(data?.telegramUsername ?? "");
-  }, [data?.telegramUsername]);
+  }
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["telegram-account"] });
 

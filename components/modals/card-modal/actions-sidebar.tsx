@@ -42,6 +42,28 @@ type ActionsSidebarProps = { data: CardWithFullDetail };
 
 type ActivePopover = "labels" | "dates" | "priority" | "checklist" | "attachment" | "members" | "cover" | null;
 
+type SidebarButtonProps = {
+  icon: any;
+  label: string;
+  popover: ActivePopover;
+  active: ActivePopover;
+  onToggle: (popover: ActivePopover) => void;
+};
+
+const SidebarButton = ({ icon: Icon, label, popover, active, onToggle }: SidebarButtonProps) => (
+  <div className="relative">
+    <Button
+      variant="gray"
+      className={cn("w-full justify-start", active === popover && "bg-gray-300")}
+      size="inline"
+      onClick={() => onToggle(popover)}
+    >
+      <Icon className="h-4 w-4 mr-2" />
+      {label}
+    </Button>
+  </div>
+);
+
 export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
   const params = useParams();
   const boardId = params.boardId as string;
@@ -169,25 +191,11 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
     setActive(null);
   };
 
-  const SidebarButton = ({ icon: Icon, label, popover }: { icon: any; label: string; popover: ActivePopover }) => (
-    <div className="relative">
-      <Button
-        variant="gray"
-        className={cn("w-full justify-start", active === popover && "bg-gray-300")}
-        size="inline"
-        onClick={() => toggle(popover)}
-      >
-        <Icon className="h-4 w-4 mr-2" />
-        {label}
-      </Button>
-    </div>
-  );
-
   return (
     <div className="space-y-2 mt-2">
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Add to card</p>
 
-      <SidebarButton icon={Users} label="Members" popover="members" />
+      <SidebarButton icon={Users} label="Members" popover="members" active={active} onToggle={toggle} />
       {active === "members" && (
         <div className="p-2 border rounded bg-white text-sm space-y-1 max-h-72 overflow-y-auto">
           {data.members.length > 0 && (
@@ -223,7 +231,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
         </div>
       )}
 
-      <SidebarButton icon={Tag} label="Labels" popover="labels" />
+      <SidebarButton icon={Tag} label="Labels" popover="labels" active={active} onToggle={toggle} />
       {active === "labels" && (
         <div className="p-2 border rounded bg-white text-sm space-y-1">
           {(boardLabels ?? []).map((label) => (
@@ -250,7 +258,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
         </div>
       )}
 
-      <SidebarButton icon={CalendarDays} label="Dates" popover="dates" />
+      <SidebarButton icon={CalendarDays} label="Dates" popover="dates" active={active} onToggle={toggle} />
       {active === "dates" && (
         <div className="p-2 border rounded bg-white text-sm space-y-2">
           <div>
@@ -265,7 +273,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
         </div>
       )}
 
-      <SidebarButton icon={Flag} label="Priority" popover="priority" />
+      <SidebarButton icon={Flag} label="Priority" popover="priority" active={active} onToggle={toggle} />
       {active === "priority" && (
         <div className="p-2 border rounded bg-white text-sm space-y-1">
           {PRIORITY_OPTIONS.map((opt) => (
@@ -281,7 +289,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
         </div>
       )}
 
-      <SidebarButton icon={CheckSquare} label="Checklist" popover="checklist" />
+      <SidebarButton icon={CheckSquare} label="Checklist" popover="checklist" active={active} onToggle={toggle} />
       {active === "checklist" && (
         <div className="p-2 border rounded bg-white text-sm space-y-2">
           <input autoFocus className="w-full border rounded p-1 text-xs" placeholder="Checklist title..." value={checklistTitle} onChange={(e) => setChecklistTitle(e.target.value)}
@@ -290,7 +298,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
         </div>
       )}
 
-      <SidebarButton icon={Paperclip} label="Attachment" popover="attachment" />
+      <SidebarButton icon={Paperclip} label="Attachment" popover="attachment" active={active} onToggle={toggle} />
       {active === "attachment" && (
         <div className="p-2 border rounded bg-white text-sm space-y-2">
           <input className="w-full border rounded p-1 text-xs" placeholder="Display name" value={attName} onChange={(e) => setAttName(e.target.value)} />
@@ -299,7 +307,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
         </div>
       )}
 
-      <SidebarButton icon={Palette} label="Cover" popover="cover" />
+      <SidebarButton icon={Palette} label="Cover" popover="cover" active={active} onToggle={toggle} />
       {active === "cover" && (
         <div className="p-2 border rounded bg-white text-sm space-y-2">
           <p className="text-xs text-muted-foreground">Choose a color</p>
