@@ -1,17 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { AddCardMember, RemoveCardMember } from "./schema";
 import type { AddInputType, RemoveInputType } from "./types";
 import { ActionState } from "@/lib/create-safe-action";
 import { CardMember } from "@prisma/client";
+import { createNotifications } from "@/lib/create-notification";
 
 const addHandler = async (data: AddInputType): Promise<ActionState<AddInputType, CardMember | null>> => {
   const { userId, orgId } = await auth();
-  if (!userId || !orgId) return { error: "Unauthorized" };
+  const actor = await currentUser();
+  if (!userId || !orgId || !actor) return { error: "Unauthorized" };
 
   const { cardId, boardId, userId: memberId, userName, userImage } = data;
 
@@ -25,6 +27,23 @@ const addHandler = async (data: AddInputType): Promise<ActionState<AddInputType,
   if (existing) return { data: existing };
 
   const member = await db.cardMember.create({ data: { cardId, userId: memberId, userName, userImage } });
+
+  // Notify assigned member (skip self-assign)
+  if (memberId !== userId) {
+    const actorName = `${actor.firstName ?? ""} ${actor.lastName ?? ""}`.trim() || "Someone";
+    await createNotifications({
+      userIds: [memberId],
+      orgId,
+      type: "CARD_ASSIGNED",
+      message: `${actorName} assigned you to "${card.title}"`,
+      cardId,
+      cardTitle: card.title,
+      boardId,
+      actorName,
+      actorImage: actor.imageUrl,
+    });
+  }
+
   revalidatePath(`/board/${boardId}`);
   return { data: member };
 };

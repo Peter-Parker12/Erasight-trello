@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useState, useRef, ElementRef } from "react";
 import { useParams } from "next/navigation";
 import { useEventListener, useOnClickOutside } from "usehooks-ts";
-import { AlignLeft } from "lucide-react";
+import { AlignLeft, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,7 +49,7 @@ export const Description = ({ data }: DescriptionProps) => {
   useEventListener("keydown", onKeyDown);
   useOnClickOutside(formRef as React.RefObject<HTMLElement>, disableEditing);
 
-  const { execute, fieldErrors } = useAction(updateCard, {
+  const { execute, fieldErrors, isLoading: isSaving } = useAction(updateCard, {
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["card", data.id],
@@ -95,12 +95,17 @@ export const Description = ({ data }: DescriptionProps) => {
             />
 
             <div className="flex items-center gap-x-2">
-              <FormSubmit>Save</FormSubmit>
+              <FormSubmit disabled={isSaving}>
+                {isSaving ? (
+                  <span className="flex items-center gap-1.5"><Loader2 className="h-3.5 w-3.5 animate-spin" />Saving...</span>
+                ) : "Save"}
+              </FormSubmit>
               <Button
                 type="button"
                 onClick={disableEditing}
                 size="sm"
                 variant="ghost"
+                disabled={isSaving}
               >
                 Cancel
               </Button>

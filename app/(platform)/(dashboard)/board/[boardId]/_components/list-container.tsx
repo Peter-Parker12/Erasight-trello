@@ -6,10 +6,12 @@ import { DragDropContext, type DropResult, Droppable } from "@hello-pangea/dnd";
 
 import { ListForm } from "./list-form";
 import { ListItem } from "./list-item";
+import { BoardFilterBar } from "./board-filter-bar";
 import type { ListWithCards } from "@/types";
 import { useAction } from "@/hooks/use-action";
 import { updateListOrder } from "@/actions/update-list-order";
 import { updateCardOrder } from "@/actions/update-card-order";
+import { useBoardFilter } from "@/hooks/use-board-filter";
 
 type ListContainerProps = {
   data: ListWithCards[];
@@ -26,6 +28,7 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number) {
 
 export const ListContainer = ({ data, boardId }: ListContainerProps) => {
   const [orderedData, setOrderedData] = useState(data);
+  const { filter, update, reset, isActive, applyFilter } = useBoardFilter();
 
   const { execute: executeUpdateListOrder } = useAction(updateListOrder, {
     onSuccess: (data) => {
@@ -149,16 +152,27 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
   };
 
   return (
+    <>
+      <BoardFilterBar
+        lists={orderedData}
+        filter={filter}
+        update={update}
+        reset={reset}
+        isActive={isActive}
+      />
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="lists" type="list" direction="horizontal">
         {(provided) => (
           <ol
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className="flex gap-x-3 h-full"
+            className="flex gap-x-3 h-full px-4 pt-3"
           >
             {orderedData.map((list, i) => (
-              <ListItem key={list.id} index={i} data={list} />
+              <ListItem key={list.id} index={i} data={{
+                ...list,
+                cards: isActive ? applyFilter(list.cards) : list.cards,
+              }} />
             ))}
 
             {provided.placeholder}
@@ -169,5 +183,6 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
         )}
       </Droppable>
     </DragDropContext>
+    </>
   );
 };

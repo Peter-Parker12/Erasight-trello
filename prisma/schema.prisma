@@ -241,3 +241,29 @@ model OrgSubscription {
   stripePriceId          String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
 }
+
+enum NOTIFICATION_TYPE {
+  CARD_ASSIGNED
+  COMMENT_ADDED
+  DUE_DATE_SOON
+  CARD_UPDATED
+}
+
+model Notification {
+  id         String            @id @default(uuid())
+  userId     String
+  type       NOTIFICATION_TYPE
+  read       Boolean           @default(false)
+  message    String            @db.Text
+  cardId     String?
+  cardTitle  String?           @db.Text
+  boardId    String?
+  orgId      String
+  actorName  String            @db.Text
+  actorImage String            @db.Text
+
+  createdAt  DateTime          @default(now())
+
+  @@index([userId])
+  @@index([orgId])
+}

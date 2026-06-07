@@ -9,9 +9,9 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FormPopover } from "@/components/form/form-popover";
-
 import { Logo } from "@/components/logo";
 import { MobileSidebar } from "./mobile-sidebar";
+import { NotificationBell } from "@/components/notification-bell";
 
 export const Navbar = () => {
   return (
@@ -39,6 +39,7 @@ export const Navbar = () => {
           <Skeleton className="h-10 w-10 rounded-full" />
         </ClerkLoading>
         <ClerkLoaded>
+          <NotificationBell />
           <OrganizationSwitcher
             hidePersonal
             afterCreateOrganizationUrl="/organization/:id"
