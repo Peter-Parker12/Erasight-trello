@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 
 import { ListContainer } from "./_components/list-container";
 import { ListView } from "./_components/list-view";
+import { CalendarView } from "./_components/calendar-view";
 import { db } from "@/lib/db";
 
 type BoardIdPageProps = {
@@ -43,9 +44,11 @@ const BoardIdPage = async ({ params, searchParams }: BoardIdPageProps) => {
   });
 
   return (
-    <div className="p-4 h-full overflow-x-auto">
+    <div className={view === "board" ? "h-full overflow-x-auto" : "p-4 h-full overflow-x-auto"}>
       {view === "list" ? (
         <ListView lists={lists} />
+      ) : view === "calendar" ? (
+        <CalendarView lists={lists} />
       ) : (
         <ListContainer boardId={boardId} data={lists} />
       )}

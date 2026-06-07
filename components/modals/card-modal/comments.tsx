@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { useAuth } from "@clerk/nextjs";
 import { Comment } from "@prisma/client";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { fetcher } from "@/lib/fetcher";
 import { useAction } from "@/hooks/use-action";
@@ -112,8 +114,10 @@ export const Comments = ({ cardId }: CommentsProps) => {
                     <span className="text-sm font-semibold">{comment.userName}</span>
                     <span className="text-xs text-muted-foreground">{format(new Date(comment.createdAt), "MMM d 'at' h:mm a")}</span>
                   </div>
-                  <div className="mt-0.5 text-sm bg-gray-100 rounded-md px-3 py-2 whitespace-pre-wrap">
-                    {comment.content}
+                  <div className="mt-0.5 text-sm bg-gray-100 rounded-md px-3 py-2">
+                    <div className="prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{comment.content}</ReactMarkdown>
+                    </div>
                   </div>
                 </div>
                 {comment.userId === userId && (

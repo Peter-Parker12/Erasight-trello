@@ -9,22 +9,24 @@ datasource db {
 }
 
 model Board {
-  id            String    @id @default(uuid())
-  orgId         String
-  title         String
-  imageId       String
-  imageThumbUrl String    @db.Text
-  imageFullUrl  String    @db.Text
-  imageUserName String    @db.Text
-  imageLinkHtml String    @db.Text
+  id               String    @id @default(uuid())
+  orgId            String
+  title            String
+  imageId          String
+  imageThumbUrl    String    @db.Text
+  imageFullUrl     String    @db.Text
+  imageUserName    String    @db.Text
+  imageLinkHtml    String    @db.Text
+  backgroundType   String    @default("image")
+  backgroundColor  String?
 
-  lists         List[]
-  labels        Label[]
-  boardMembers  BoardMember[]
-  telegramConfig BoardTelegramConfig?
+  lists            List[]
+  labels           Label[]
+  boardMembers     BoardMember[]
+  telegramConfig   BoardTelegramConfig?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 model BoardTelegramConfig {
@@ -103,6 +105,8 @@ model Card {
   dueDate     DateTime?
   completed   Boolean   @default(false)
   coverColor  String?
+  isTemplate  Boolean   @default(false)
+  templateOrgId String?
 
   listId      String
   list        List      @relation(fields: [listId], references: [id], onDelete: Cascade)
@@ -112,6 +116,7 @@ model Card {
   checklists  Checklist[]
   comments    Comment[]
   attachments Attachment[]
+  watchers    CardWatcher[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -220,6 +225,33 @@ model CardMember {
   @@index([cardId])
 }
 
+model CardWatcher {
+  id        String @id @default(uuid())
+  cardId    String
+  userId    String
+
+  card      Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([cardId, userId])
+  @@index([cardId])
+  @@index([userId])
+}
+
+model CardTemplate {
+  id             String   @id @default(uuid())
+  orgId          String
+  title          String
+  description    String?  @db.Text
+  checklistsJson String?  @db.Text
+  labelsJson     String?  @db.Text
+  createdBy      String
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([orgId])
+}
+
 enum ACTION {
   CREATE
   UPDATE
@@ -269,4 +301,31 @@ model OrgSubscription {
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
   stripePriceId          String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
+}
+
+enum NOTIFICATION_TYPE {
+  CARD_ASSIGNED
+  COMMENT_ADDED
+  DUE_DATE_SOON
+  CARD_UPDATED
+  CARD_WATCHED_UPDATE
+}
+
+model Notification {
+  id         String            @id @default(uuid())
+  userId     String
+  type       NOTIFICATION_TYPE
+  read       Boolean           @default(false)
+  message    String            @db.Text
+  cardId     String?
+  cardTitle  String?           @db.Text
+  boardId    String?
+  orgId      String
+  actorName  String            @db.Text
+  actorImage String            @db.Text
+
+  createdAt  DateTime          @default(now())
+
+  @@index([userId])
+  @@index([orgId])
 }

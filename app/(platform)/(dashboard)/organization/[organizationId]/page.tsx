@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { Info } from "./_components/info";
 import { BoardList } from "./_components/board-list";
+import { OverdueBanner } from "./_components/overdue-banner";
 import { checkSubscription } from "@/lib/subscription";
 
 const OrganizationIdPage = async () => {
@@ -16,6 +17,7 @@ const OrganizationIdPage = async () => {
       <Separator className="my-4" />
 
       <div className="px-2 md:px-4">
+        <OverdueBanner />
         <Suspense fallback={<BoardList.Skeleton />}>
           <BoardList />
         </Suspense>

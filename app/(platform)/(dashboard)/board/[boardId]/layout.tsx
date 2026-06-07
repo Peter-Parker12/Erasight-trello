@@ -53,9 +53,16 @@ const BoardIdLayout = async ({
 
   const admin = await isOrgAdmin(orgId);
 
+  const bgStyle: React.CSSProperties =
+    board.backgroundType === "color"
+      ? { backgroundColor: board.backgroundColor ?? "#1e3a5f" }
+      : board.backgroundType === "gradient"
+      ? { background: board.backgroundColor ?? "linear-gradient(135deg, #667eea, #764ba2)" }
+      : { backgroundImage: `url(${board.imageFullUrl})` };
+
   return (
     <div
-      style={{ backgroundImage: `url(${board.imageFullUrl})` }}
+      style={bgStyle}
       className="relative h-full bg-no-repeat bg-cover bg-center"
     >
       <BoardNavbar data={board} isAdmin={admin} />

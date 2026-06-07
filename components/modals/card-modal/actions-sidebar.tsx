@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Trash, Tag, CalendarDays, Flag, CheckSquare, Paperclip, Users, Palette } from "lucide-react";
+import { Copy, Trash, Tag, CalendarDays, Flag, CheckSquare, Paperclip, Users, Palette, Bell, BellOff, BookTemplate } from "lucide-react";
 import { toast } from "sonner";
 import { Priority } from "@prisma/client";
 import { useAuth } from "@clerk/nextjs";
@@ -20,6 +20,8 @@ import { createAttachment } from "@/actions/create-attachment";
 import { toggleCardLabel } from "@/actions/toggle-card-label";
 import { createLabel } from "@/actions/create-label";
 import { addCardMember, removeCardMember } from "@/actions/manage-card-members";
+import { saveCardTemplate } from "@/actions/save-card-template";
+import { toggleCardWatch } from "@/actions/toggle-card-watch";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetcher } from "@/lib/fetcher";
@@ -49,6 +51,14 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 
   const [active, setActive] = useState<ActivePopover>(null);
   const toggle = (p: ActivePopover) => setActive((prev) => (prev === p ? null : p));
+
+  // Watch state
+  const [watching, setWatching] = useState(false);
+  const { data: watchData } = useQuery<{ watching: boolean; count: number }>({
+    queryKey: ["card-watchers", data.id],
+    queryFn: () => fetcher(`/api/cards/${data.id}/watchers`),
+  });
+  const isWatching = watchData?.watching ?? watching;
 
   // Form states
   const [startDate, setStartDate] = useState(data.startDate ? new Date(data.startDate).toISOString().slice(0, 10) : "");
@@ -118,6 +128,20 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 
   const { execute: execRemoveMember } = useAction(removeCardMember as any, {
     onSuccess: () => invalidate(),
+    onError: (e) => toast.error(e),
+  });
+
+  const { execute: execSaveTemplate } = useAction(saveCardTemplate, {
+    onSuccess: () => toast.success("Template saved!"),
+    onError: (e) => toast.error(e),
+  });
+
+  const { execute: execToggleWatch } = useAction(toggleCardWatch, {
+    onSuccess: (d) => {
+      setWatching(d.watching);
+      queryClient.invalidateQueries({ queryKey: ["card-watchers", data.id] });
+      toast.success(d.watching ? "Watching this card" : "Stopped watching");
+    },
     onError: (e) => toast.error(e),
   });
 
@@ -271,6 +295,28 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 
       <div className="pt-2 border-t space-y-2">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Actions</p>
+        <Button
+          onClick={() => execToggleWatch({ cardId: data.id, boardId })}
+          variant="gray"
+          className={cn("w-full justify-start", isWatching && "bg-sky-100 text-sky-700")}
+          size="inline"
+        >
+          {isWatching ? <BellOff className="h-4 w-4 mr-2" /> : <Bell className="h-4 w-4 mr-2" />}
+          {isWatching ? "Unwatch" : "Watch"}
+          {(watchData?.count ?? 0) > 0 && (
+            <span className="ml-auto text-xs bg-sky-200 text-sky-800 px-1.5 py-0.5 rounded-full">
+              {watchData?.count}
+            </span>
+          )}
+        </Button>
+        <Button
+          onClick={() => execSaveTemplate({ cardId: data.id, boardId })}
+          variant="gray"
+          className="w-full justify-start"
+          size="inline"
+        >
+          <BookTemplate className="h-4 w-4 mr-2" /> Save as Template
+        </Button>
         <Button onClick={() => execCopy({ id: data.id, boardId })} variant="gray" className="w-full justify-start" size="inline">
           <Copy className="h-4 w-4 mr-2" /> Copy
         </Button>

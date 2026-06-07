@@ -39,17 +39,22 @@ export const CardModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl w-full p-0 overflow-hidden">
-        {/* Cover color stripe */}
+      <DialogContent className="max-w-3xl w-full p-0 overflow-hidden flex flex-col h-[90vh]">
+        {/* Cover color stripe — fixed at top */}
         {coverColor && (
-          <div className="h-10 w-full rounded-t-lg" style={{ backgroundColor: coverColor }} />
+          <div className="h-10 w-full rounded-t-lg shrink-0" style={{ backgroundColor: coverColor }} />
         )}
 
-        <div className="px-6 pb-6 pt-4">
+        {/* Header — fixed, no scroll */}
+        <div className="px-6 pt-4 shrink-0">
           {cardData ? <Header data={cardData} /> : <Header.Skeleton />}
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 md:gap-4 mt-2">
-            <div className="col-span-3 space-y-5">
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-hidden px-6 pb-6 min-h-0">
+          <div className="grid grid-cols-1 md:grid-cols-4 md:gap-4 h-full min-h-0">
+            {/* Left col — scrollable */}
+            <div className="col-span-3 overflow-y-auto pr-1 space-y-5 h-full max-h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
               {cardData ? <CardMeta data={cardData} /> : null}
               {cardData ? <TranslatePanel data={cardData} /> : null}
               {cardData ? <Description data={cardData} /> : <Description.Skeleton />}
@@ -57,9 +62,14 @@ export const CardModal = () => {
               {cardData ? <Attachments data={cardData} /> : null}
               {cardData ? <Comments cardId={cardData.id} /> : null}
               {auditLogsData ? <Activity data={auditLogsData} /> : <Activity.Skeleton />}
+              {/* Bottom padding so last item isn't flush */}
+              <div className="h-2" />
             </div>
 
-            {cardData ? <ActionsSidebar data={cardData} /> : null}
+            {/* Right sidebar — scrollable independently */}
+            <div className="overflow-y-auto h-full max-h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+              {cardData ? <ActionsSidebar data={cardData} /> : null}
+            </div>
           </div>
         </div>
       </DialogContent>

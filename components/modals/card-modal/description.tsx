@@ -4,8 +4,10 @@ import { toast } from "sonner";
 import { useState, useRef, ElementRef } from "react";
 import { useParams } from "next/navigation";
 import { useEventListener, useOnClickOutside } from "usehooks-ts";
-import { AlignLeft } from "lucide-react";
+import { AlignLeft, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -49,7 +51,7 @@ export const Description = ({ data }: DescriptionProps) => {
   useEventListener("keydown", onKeyDown);
   useOnClickOutside(formRef as React.RefObject<HTMLElement>, disableEditing);
 
-  const { execute, fieldErrors } = useAction(updateCard, {
+  const { execute, fieldErrors, isLoading: isSaving } = useAction(updateCard, {
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["card", data.id],
@@ -95,12 +97,17 @@ export const Description = ({ data }: DescriptionProps) => {
             />
 
             <div className="flex items-center gap-x-2">
-              <FormSubmit>Save</FormSubmit>
+              <FormSubmit disabled={isSaving}>
+                {isSaving ? (
+                  <span className="flex items-center gap-1.5"><Loader2 className="h-3.5 w-3.5 animate-spin" />Saving...</span>
+                ) : "Save"}
+              </FormSubmit>
               <Button
                 type="button"
                 onClick={disableEditing}
                 size="sm"
                 variant="ghost"
+                disabled={isSaving}
               >
                 Cancel
               </Button>
@@ -112,7 +119,13 @@ export const Description = ({ data }: DescriptionProps) => {
             role="button"
             className="min-h-[78px] bg-neutral-200 text-sm font-medium py-3 px-3.5 rounded-md"
           >
-            {data.description || "Add a more detailed description..."}
+            {data.description ? (
+              <div className="prose prose-sm max-w-none prose-p:my-0.5 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0 prose-headings:my-1 prose-code:bg-gray-300 prose-code:px-1 prose-code:rounded">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.description}</ReactMarkdown>
+              </div>
+            ) : (
+              "Add a more detailed description..."
+            )}
           </div>
         )}
       </div>

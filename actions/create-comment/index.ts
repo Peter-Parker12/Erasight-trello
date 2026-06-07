@@ -6,6 +6,7 @@ import { ACTION, ENTITY_TYPE } from "@prisma/client";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { createAuditLog } from "@/lib/create-audit-log";
+import { createNotifications } from "@/lib/create-notification";
 import { CreateComment } from "./schema";
 import { InputType, ReturnType } from "./types";
 
@@ -18,9 +19,11 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   const card = await db.card.findUnique({
     where: { id: cardId },
-    include: { list: { include: { board: true } } },
+    include: { list: { include: { board: true } }, members: true },
   });
   if (!card || card.list.board.orgId !== orgId) return { error: "Card not found" };
+
+  const actorName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.emailAddresses[0]?.emailAddress || "Unknown";
 
   const comment = await db.comment.create({
     data: {
@@ -28,10 +31,26 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       orgId,
       userId,
       content,
-      userName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.emailAddresses[0]?.emailAddress || "Unknown",
+      userName: actorName,
       userImage: user.imageUrl,
     },
   });
+
+  // Notify card members (except commenter)
+  const recipientIds = card.members.map((m) => m.userId).filter((id) => id !== userId);
+  if (recipientIds.length > 0) {
+    await createNotifications({
+      userIds: recipientIds,
+      orgId,
+      type: "COMMENT_ADDED",
+      message: `${actorName} commented on "${card.title}": ${content.slice(0, 80)}${content.length > 80 ? "…" : ""}`,
+      cardId,
+      cardTitle: card.title,
+      boardId,
+      actorName,
+      actorImage: user.imageUrl,
+    });
+  }
 
   await createAuditLog({ entityId: comment.id, entityType: ENTITY_TYPE.COMMENT, entityTitle: content.slice(0, 50), action: ACTION.CREATE });
   revalidatePath(`/board/${boardId}`);

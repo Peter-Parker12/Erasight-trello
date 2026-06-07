@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef, forwardRef, ElementRef, KeyboardEventHandler } from "react";
+import { useRef, forwardRef, ElementRef, KeyboardEventHandler, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { useOnClickOutside, useEventListener } from "usehooks-ts";
-import { Plus, X } from "lucide-react";
+import { Plus, X, LayoutTemplate } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { CardTemplate } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
 
@@ -12,6 +14,7 @@ import { FormTextarea } from "@/components/form/form-textarea";
 import { FormSubmit } from "@/components/form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { createCard } from "@/actions/create-card";
+import { fetcher } from "@/lib/fetcher";
 
 type CardFormProps = {
   listId: string;
@@ -24,6 +27,14 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
   ({ listId, enableEditing, disableEditing, isEditing }, ref) => {
     const params = useParams();
     const formRef = useRef<HTMLFormElement>(null);
+    const [showTemplates, setShowTemplates] = useState(false);
+    const textareaRef = ref as React.RefObject<HTMLTextAreaElement>;
+
+    const { data: templates } = useQuery<CardTemplate[]>({
+      queryKey: ["org-templates"],
+      queryFn: () => fetcher("/api/orgs/templates"),
+      enabled: isEditing,
+    });
 
     const { execute, fieldErrors } = useAction(createCard, {
       onSuccess: (data) => {
@@ -49,7 +60,10 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       execute({ title, listId, boardId });
     };
 
-    useOnClickOutside(formRef as React.RefObject<HTMLElement>, disableEditing);
+    useOnClickOutside(formRef as React.RefObject<HTMLElement>, () => {
+      setShowTemplates(false);
+      disableEditing();
+    });
     useEventListener("keydown", onKeyDown);
 
     const onTextareaKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (
@@ -59,6 +73,15 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
         e.preventDefault();
         formRef.current?.requestSubmit();
       }
+    };
+
+    const applyTemplate = (template: CardTemplate) => {
+      if (textareaRef?.current) {
+        textareaRef.current.value = template.title;
+      }
+      setShowTemplates(false);
+      // Dispatch input event so React sees the change
+      textareaRef?.current?.dispatchEvent(new Event("input", { bubbles: true }));
     };
 
     if (isEditing) {
@@ -78,6 +101,33 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
 
           <input hidden id="listId" name="listId" value={listId} />
           <input hidden id="boardId" name="boardId" value={params.boardId} />
+
+          {/* Template picker */}
+          {templates && templates.length > 0 && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowTemplates((v) => !v)}
+                className="flex items-center gap-1 text-xs text-sky-600 hover:underline"
+              >
+                <LayoutTemplate className="h-3 w-3" /> Dùng template
+              </button>
+              {showTemplates && (
+                <div className="absolute z-50 bottom-full mb-1 bg-white border rounded shadow-md w-56 max-h-48 overflow-y-auto text-sm">
+                  {templates.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => applyTemplate(t)}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b last:border-b-0 truncate"
+                    >
+                      {t.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-x-1">
             <FormSubmit>Add card</FormSubmit>
