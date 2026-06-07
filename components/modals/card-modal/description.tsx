@@ -6,6 +6,8 @@ import { useParams } from "next/navigation";
 import { useEventListener, useOnClickOutside } from "usehooks-ts";
 import { AlignLeft, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -117,7 +119,13 @@ export const Description = ({ data }: DescriptionProps) => {
             role="button"
             className="min-h-[78px] bg-neutral-200 text-sm font-medium py-3 px-3.5 rounded-md"
           >
-            {data.description || "Add a more detailed description..."}
+            {data.description ? (
+              <div className="prose prose-sm max-w-none prose-p:my-0.5 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0 prose-headings:my-1 prose-code:bg-gray-300 prose-code:px-1 prose-code:rounded">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.description}</ReactMarkdown>
+              </div>
+            ) : (
+              "Add a more detailed description..."
+            )}
           </div>
         )}
       </div>

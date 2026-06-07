@@ -5,6 +5,7 @@ import { BoardTitleForm } from "./board-title-form";
 import { BoardOptions } from "./board-options";
 import { BoardMembers } from "./board-members";
 import { ViewToggle } from "./view-toggle";
+import { BoardBackgroundPicker } from "./board-background-picker";
 
 type BoardNavbarProps = {
   data: Board;
@@ -18,6 +19,7 @@ export const BoardNavbar = async ({ data, isAdmin }: BoardNavbarProps) => {
 
       <div className="ml-auto flex items-center gap-x-2">
         <Suspense><ViewToggle /></Suspense>
+        <BoardBackgroundPicker boardId={data.id} />
         {isAdmin && <BoardMembers boardId={data.id} />}
         <BoardOptions id={data.id} />
       </div>
