@@ -54,8 +54,8 @@
     "email": "sanidhya.verma12345@gmail.com"
   },
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "postinstall": "prisma generate"

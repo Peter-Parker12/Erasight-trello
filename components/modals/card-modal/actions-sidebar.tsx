@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Trash, Tag, CalendarDays, Flag, CheckSquare, Paperclip, Users, Palette, Bell, BellOff, BookTemplate } from "lucide-react";
+import { Copy, Trash, Tag, CalendarDays, Flag, CheckSquare, Paperclip, Users, Palette, Bell, BellOff, BookTemplate, X } from "lucide-react";
 import { toast } from "sonner";
 import { Priority } from "@prisma/client";
 import { useAuth } from "@clerk/nextjs";
@@ -24,6 +24,7 @@ import { saveCardTemplate } from "@/actions/save-card-template";
 import { toggleCardWatch } from "@/actions/toggle-card-watch";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { fetcher } from "@/lib/fetcher";
 import { Label } from "@prisma/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -248,12 +249,25 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
           {(boardLabels ?? []).map((label) => (
             <div
               key={label.id}
-              className={cn("flex items-center gap-2 p-1 rounded cursor-pointer hover:bg-gray-50", assignedLabelIds.has(label.id) && "bg-gray-100")}
-              onClick={() => execToggleLabel({ cardId: data.id, labelId: label.id, boardId })}
+              className={cn("flex items-center gap-2 p-1 rounded", assignedLabelIds.has(label.id) && "bg-gray-100")}
             >
-              <div className="w-8 h-4 rounded" style={{ backgroundColor: label.color }} />
-              <span className="flex-1 text-xs">{label.name}</span>
-              {assignedLabelIds.has(label.id) && <span className="text-xs text-green-600">✓</span>}
+              <div
+                className="flex items-center gap-2 flex-1 cursor-pointer hover:bg-gray-50 rounded"
+                onClick={() => execToggleLabel({ cardId: data.id, labelId: label.id, boardId })}
+              >
+                <div className="w-8 h-4 rounded" style={{ backgroundColor: label.color }} />
+                <span className="flex-1 text-xs">{label.name}</span>
+                {assignedLabelIds.has(label.id) && <span className="text-xs text-green-600">✓</span>}
+              </div>
+              {assignedLabelIds.has(label.id) && (
+                <button
+                  onClick={() => execToggleLabel({ cardId: data.id, labelId: label.id, boardId })}
+                  className="shrink-0 text-gray-300 hover:text-red-500 transition-colors"
+                  title="Remove label"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
           ))}
           <div className="border-t pt-2 mt-1 space-y-1">
@@ -297,15 +311,6 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
               {data.priority === opt.value && <span className="ml-auto">✓</span>}
             </button>
           ))}
-        </div>
-      )}
-
-      <SidebarButton icon={CheckSquare} label="Checklist" popover="checklist" active={active} onToggle={toggle} />
-      {active === "checklist" && (
-        <div className="p-2 border rounded bg-white text-sm space-y-2">
-          <input autoFocus className="w-full border rounded p-1 text-xs" placeholder="Checklist title..." value={checklistTitle} onChange={(e) => setChecklistTitle(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && checklistTitle.trim()) execChecklist({ cardId: data.id, boardId, title: checklistTitle.trim() }); }} />
-          <Button size="sm" className="h-7 text-xs w-full" onClick={() => { if (checklistTitle.trim()) execChecklist({ cardId: data.id, boardId, title: checklistTitle.trim() }); }}>Add</Button>
         </div>
       )}
 
@@ -360,36 +365,33 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
           <Copy className="h-4 w-4 mr-2" /> Copy
         </Button>
 
-        {showDeleteConfirm ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 space-y-2">
-            <p className="text-xs font-semibold text-red-700">Xóa thẻ này?</p>
-            <p className="text-xs text-red-600">
-              Thẻ này còn <span className="font-bold">{data.subtasks.length} subtask</span>. Xóa sẽ xóa toàn bộ subtasks.
+        <Button onClick={handleDeleteClick} variant="destructive" className="w-full justify-start" size="inline">
+          <Trash className="h-4 w-4 mr-2" /> Delete
+        </Button>
+
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete this card?</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-gray-700">
+              This card has{" "}
+              <span className="font-bold text-red-600">{data.subtasks?.length ?? 0} subtask{(data.subtasks?.length ?? 0) !== 1 ? "s" : ""}</span>.{" "}
+              Deleting it will also permanently delete all subtasks.
             </p>
-            <div className="flex gap-2">
+            <DialogFooter className="gap-2 sm:justify-start">
               <Button
-                size="sm"
                 variant="destructive"
-                className="flex-1 h-7 text-xs"
                 onClick={() => { execDelete({ id: data.id, boardId }); setShowDeleteConfirm(false); }}
               >
-                Có, xóa tất cả
+                Yes, delete all
               </Button>
-              <Button
-                size="sm"
-                variant="gray"
-                className="flex-1 h-7 text-xs"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                Không
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
               </Button>
-            </div>
-          </div>
-        ) : (
-          <Button onClick={handleDeleteClick} variant="destructive" className="w-full justify-start" size="inline">
-            <Trash className="h-4 w-4 mr-2" /> Delete
-          </Button>
-        )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
