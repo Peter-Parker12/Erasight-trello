@@ -30,12 +30,17 @@ const BoardIdPage = async ({ params, searchParams }: BoardIdPageProps) => {
     },
     include: {
       cards: {
+        where: { parentCardId: null },
         orderBy: { order: "asc" },
         include: {
           labels: { include: { label: true } },
           members: true,
           checklists: { include: { items: true } },
           _count: { select: { comments: true, attachments: true } },
+          subtasks: {
+            orderBy: { createdAt: "asc" },
+            include: { members: true },
+          },
         },
       },
     },

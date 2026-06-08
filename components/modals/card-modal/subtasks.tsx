@@ -9,6 +9,7 @@ import { Card, CardMember } from "@prisma/client";
 
 import { useAction } from "@/hooks/use-action";
 import { createSubtask } from "@/actions/create-subtask";
+import { toggleSubtaskComplete } from "@/actions/toggle-subtask-complete";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -55,6 +56,11 @@ export const Subtasks = ({ data }: SubtasksProps) => {
     onError: (e) => toast.error(e),
   });
 
+  const { execute: execToggle } = useAction(toggleSubtaskComplete, {
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["card", data.id] }),
+    onError: (e) => toast.error(e),
+  });
+
   return (
     <div className="flex items-start gap-x-3 w-full">
       <GitBranch className="h-5 w-5 mt-0.5 text-neutral-700 shrink-0" />
@@ -95,11 +101,25 @@ export const Subtasks = ({ data }: SubtasksProps) => {
             {data.subtasks.map((subtask) => (
               <li
                 key={subtask.id}
-                className="flex items-center gap-2 py-1 px-2 rounded hover:bg-muted/50 group"
+                className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-muted/50 group"
               >
-                <span
-                  className={cn("h-2 w-2 rounded-full shrink-0", PRIORITY_DOT[subtask.priority])}
-                />
+                {/* Checkbox */}
+                <button
+                  onClick={() => execToggle({ id: subtask.id, boardId, completed: !subtask.completed })}
+                  className={cn(
+                    "h-4 w-4 rounded border-2 shrink-0 flex items-center justify-center transition-colors",
+                    subtask.completed
+                      ? "bg-green-500 border-green-500 text-white"
+                      : "border-gray-300 hover:border-sky-400"
+                  )}
+                  title={subtask.completed ? "Mark incomplete" : "Mark complete"}
+                >
+                  {subtask.completed && (
+                    <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
                 <span
                   className={cn(
                     "flex-1 text-sm truncate",
