@@ -237,6 +237,89 @@ const GroupSection = ({ label, color, entries, selectedIds, onSelect }: GroupSec
   );
 };
 
+type ListGroup = { key: string; name: string; color: string; entries: GroupEntry[] };
+type ProjectGroup = { key: string; title: string; color: string; lists: ListGroup[] };
+
+type ListSubSectionProps = {
+  list: ListGroup;
+  selectedIds: Set<string>;
+  onSelect: (id: string) => void;
+};
+
+const ListSubSection = ({ list, selectedIds, onSelect }: ListSubSectionProps) => {
+  const [open, setOpen] = useState(true);
+  const allSel = list.entries.length > 0 && list.entries.every((e) => selectedIds.has(e.card.id));
+  return (
+    <>
+      <tr className="bg-muted/20 border-b">
+        <td className="py-1.5 px-3">
+          <input
+            type="checkbox"
+            checked={allSel}
+            onChange={() => list.entries.forEach((e) => onSelect(e.card.id))}
+            className="rounded border-gray-300 text-sky-600"
+          />
+        </td>
+        <td colSpan={9} className="py-1 px-2 pl-8">
+          <button
+            className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+            <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: list.color }} />
+            {list.name}
+            <span className="font-normal text-muted-foreground/50">({list.entries.length})</span>
+          </button>
+        </td>
+      </tr>
+      {open && list.entries.map((entry) => (
+        <CardRow key={entry.card.id} entry={entry} selected={selectedIds.has(entry.card.id)} onSelect={onSelect} />
+      ))}
+    </>
+  );
+};
+
+type ProjectListSectionProps = {
+  project: ProjectGroup;
+  selectedIds: Set<string>;
+  onSelect: (id: string) => void;
+};
+
+const ProjectListSection = ({ project, selectedIds, onSelect }: ProjectListSectionProps) => {
+  const [open, setOpen] = useState(true);
+  const allEntries = project.lists.flatMap((l) => l.entries);
+  const totalCount = allEntries.length;
+  const allSel = totalCount > 0 && allEntries.every((e) => selectedIds.has(e.card.id));
+  return (
+    <>
+      <tr className="bg-muted/50 border-b">
+        <td className="py-2 px-3">
+          <input
+            type="checkbox"
+            checked={allSel}
+            onChange={() => allEntries.forEach((e) => onSelect(e.card.id))}
+            className="rounded border-gray-300 text-sky-600"
+          />
+        </td>
+        <td colSpan={9} className="py-2 px-2">
+          <button
+            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground/70 hover:text-foreground transition"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
+            {project.title}
+            <span className="font-normal text-muted-foreground/60">({totalCount})</span>
+          </button>
+        </td>
+      </tr>
+      {open && project.lists.map((list) => (
+        <ListSubSection key={list.key} list={list} selectedIds={selectedIds} onSelect={onSelect} />
+      ))}
+    </>
+  );
+};
+
 type MyTasksViewProps = {
   cards: TaskCard[];
   isAdmin: boolean;
@@ -259,6 +342,35 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
   const toggleSelect = (id: string) =>
     setSelectedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
+  // Two-level grouping used only for "list" mode: project → lists → cards
+  const listGroups = useMemo<ProjectGroup[] | null>(() => {
+    if (groupBy !== "list") return null;
+    const boardMap = new Map<string, { title: string; color: string; lists: Map<string, { name: string; color: string; entries: GroupEntry[] }> }>();
+    allEntries.forEach((e) => {
+      const boardId = e.card.list.board.id;
+      if (!boardMap.has(boardId)) {
+        boardMap.set(boardId, { title: e.boardTitle, color: getListColor(e.boardTitle), lists: new Map() });
+      }
+      const board = boardMap.get(boardId)!;
+      const listId = e.card.list.id;
+      if (!board.lists.has(listId)) {
+        board.lists.set(listId, { name: e.listName, color: e.listColor, entries: [] });
+      }
+      board.lists.get(listId)!.entries.push(e);
+    });
+    return Array.from(boardMap.entries()).map(([boardId, board]) => ({
+      key: boardId,
+      title: board.title,
+      color: board.color,
+      lists: Array.from(board.lists.entries()).map(([listId, list]) => ({
+        key: listId,
+        name: list.name,
+        color: list.color,
+        entries: list.entries,
+      })),
+    }));
+  }, [groupBy, allEntries]);
+
   const groups = useMemo(() => {
     if (groupBy === "project") {
       const map = new Map<string, { title: string; entries: GroupEntry[] }>();
@@ -271,21 +383,6 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
         key: id,
         label: v.title,
         color: getListColor(v.title) as string | undefined,
-        entries: v.entries,
-      }));
-    }
-    if (groupBy === "list") {
-      const map = new Map<string, { name: string; board: string; color: string; entries: GroupEntry[] }>();
-      allEntries.forEach((e) => {
-        const id = e.card.list.id;
-        if (!map.has(id)) map.set(id, { name: e.listName, board: e.boardTitle, color: e.listColor, entries: [] });
-        map.get(id)!.entries.push(e);
-      });
-      return Array.from(map.entries()).map(([id, v]) => ({
-        key: id,
-        // show board name alongside list name so identical list names from different boards are distinguishable
-        label: `${v.name} · ${v.board}`,
-        color: v.color as string | undefined,
         entries: v.entries,
       }));
     }
@@ -369,16 +466,25 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
             </tr>
           </thead>
           <tbody>
-            {groups.map((group) => (
-              <GroupSection
-                key={group.key}
-                label={group.label}
-                color={group.color}
-                entries={group.entries}
-                selectedIds={selectedIds}
-                onSelect={toggleSelect}
-              />
-            ))}
+            {listGroups
+              ? listGroups.map((project) => (
+                  <ProjectListSection
+                    key={project.key}
+                    project={project}
+                    selectedIds={selectedIds}
+                    onSelect={toggleSelect}
+                  />
+                ))
+              : groups.map((group) => (
+                  <GroupSection
+                    key={group.key}
+                    label={group.label}
+                    color={group.color}
+                    entries={group.entries}
+                    selectedIds={selectedIds}
+                    onSelect={toggleSelect}
+                  />
+                ))}
           </tbody>
         </table>
       </div>
