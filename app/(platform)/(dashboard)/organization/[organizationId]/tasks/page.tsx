@@ -25,7 +25,19 @@ const TasksPage = async ({ params }: Props) => {
   const cards = await db.card.findMany({
     where: {
       parentCardId: null,
-      list: { board: { orgId } },
+      list: {
+        board: {
+          orgId,
+          ...(admin
+            ? {}
+            : {
+                OR: [
+                  { boardMembers: { none: {} } },
+                  { boardMembers: { some: { userId } } },
+                ],
+              }),
+        },
+      },
       ...(admin ? {} : { members: { some: { userId } } }),
     },
     include: {
