@@ -38,6 +38,7 @@ export async function GET(
 
     return NextResponse.json(card);
   } catch (error) {
+    console.error("[/api/cards/:id GET]", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
