@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, CalendarDays, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertTriangle, CalendarDays, ChevronDown, ChevronUp } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import Link from "next/link";
@@ -55,7 +55,11 @@ export const OverdueBanner = () => {
         {shown.map((card) => {
           const due = new Date(card.dueDate);
           return (
-            <div key={card.id} className="flex items-center gap-3 px-4 py-2 hover:bg-red-100/50 transition-colors">
+            <Link
+              key={card.id}
+              href={`/board/${card.list.board.id}?card=${card.id}`}
+              className="flex items-center gap-3 px-4 py-2 hover:bg-red-100/50 transition-colors cursor-pointer"
+            >
               <CalendarDays className="h-3.5 w-3.5 text-red-500 shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 truncate">{card.title}</p>
@@ -67,14 +71,7 @@ export const OverdueBanner = () => {
                 <p className="text-xs font-semibold text-red-600">{format(due, "MMM d")}</p>
                 <p className="text-[10px] text-red-400">{formatDistanceToNow(due, { addSuffix: true })}</p>
               </div>
-              <Link
-                href={`/board/${card.list.board.id}`}
-                className="shrink-0 text-muted-foreground hover:text-red-600 transition-colors"
-                title="Go to board"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-              </Link>
-            </div>
+            </Link>
           );
         })}
       </div>
