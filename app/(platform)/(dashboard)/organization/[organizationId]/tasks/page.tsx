@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { db } from "@/lib/db";
 import { isOrgAdmin } from "@/lib/board-access";
-import { checkSubscription } from "@/lib/subscription";
 import { Info } from "../_components/info";
 import { MyTasksView } from "./_components/my-tasks-view";
 
@@ -19,7 +18,6 @@ const TasksPage = async ({ params }: Props) => {
   if (!userId || !orgId) redirect("/select-org");
   if (orgId !== organizationId) redirect(`/organization/${orgId}/tasks`);
 
-  const isPro = await checkSubscription();
   const admin = await isOrgAdmin(orgId);
 
   const cards = await db.card.findMany({
@@ -53,7 +51,7 @@ const TasksPage = async ({ params }: Props) => {
 
   return (
     <div className="w-full mb-20">
-      <Info isPro={isPro} />
+      <Info />
       <Separator className="my-4" />
       <div className="px-2 md:px-4">
         <MyTasksView cards={cards as any} isAdmin={admin} />

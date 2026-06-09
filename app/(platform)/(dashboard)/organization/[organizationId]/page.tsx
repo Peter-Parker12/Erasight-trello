@@ -5,14 +5,11 @@ import { Separator } from "@/components/ui/separator";
 import { Info } from "./_components/info";
 import { BoardList } from "./_components/board-list";
 import { OverdueBanner } from "./_components/overdue-banner";
-import { checkSubscription } from "@/lib/subscription";
 
 const OrganizationIdPage = async () => {
-  const isPro = await checkSubscription();
-
   return (
     <div className="w-full mb-20">
-      <Info isPro={isPro} />
+      <Info />
 
       <Separator className="my-4" />
 
