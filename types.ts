@@ -22,3 +22,7 @@ export type CardWithFullDetail = Card & {
   attachments: Attachment[];
   subtasks: (Card & { members: CardMember[] })[];
 };
+
+export type TaskCard = CardPreview & {
+  list: { id: string; title: string; board: { id: string; title: string } };
+};

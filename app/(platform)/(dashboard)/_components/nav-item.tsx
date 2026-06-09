@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Activity, CreditCard, Layout, Settings } from "lucide-react";
+import { Activity, CreditCard, Layout, ListTodo, Settings } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 import {
@@ -42,6 +42,11 @@ export const NavItem = ({
       label: "Boards",
       icon: <Layout className="h-4 w-4 mr-2" />,
       href: `/organization/${organization.id}`,
+    },
+    {
+      label: "My Tasks",
+      icon: <ListTodo className="h-4 w-4 mr-2" />,
+      href: `/organization/${organization.id}/tasks`,
     },
     {
       label: "Activity",

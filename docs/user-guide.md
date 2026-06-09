@@ -93,23 +93,47 @@ Once your username is set, you will receive Telegram messages for boards that ha
 
 ---
 
-## 3. Switching Between Views
+## 3. Views
 
-At the top of a board, use the **view toggle** (a button group with **Board**, **List**, and **Calendar**) to change how cards are displayed. The selected view is reflected in the URL (`?view=board`, `?view=list`, `?view=calendar`).
+### 3.1 My Tasks (home page)
 
-### 3.1 Board view (default)
+**My Tasks** is a cross-project task list accessible from the sidebar of the home page, alongside Boards, Activity, Settings, and Billing.
+
+**How to open it:**
+1. In the left sidebar, expand your organization.
+2. Click **"My Tasks"** (the checklist icon).
+
+**What it shows:**
+- **Members** see every card assigned to them across all boards in the organization.
+- **Admins** see all cards from all boards in the organization, regardless of assignment.
+
+**Columns:** Title, Project, List, Labels, Priority, Due Date, Checklist, Activity, Members.
+
+**Group by:** Use the **"Group by:"** buttons at the top to group cards by **Project**, **List**, **Priority**, or **Assignee**. Click a group header to expand/collapse it.
+
+**Selection:** Check individual rows or use the header checkbox to select all. A floating toolbar at the bottom shows the count and a **"Clear selection"** button.
+
+**Opening a card:** Click any row to open the full card modal.
+
+---
+
+### 3.2 Per-board views (Board, List, Calendar)
+
+Inside any individual board, use the **view toggle** at the top of the board page (a button group with **Board**, **List**, and **Calendar**) to change how that board's cards are displayed. The selected view is reflected in the URL (`?view=board`, `?view=list`, `?view=calendar`).
+
+#### Board view (default)
 - Classic Kanban layout: lists are columns, cards are draggable items within and between lists.
 - Each card preview shows its title, number, cover color, priority badge, due-date badge, labels, assigned members, comment count, and attachment count.
 - Click a card to open the full card modal; drag and drop to reorder or move cards between lists.
 
-### 3.2 List view
-- Shows all cards from the board in a single table, with columns: **Title**, **List**, **Labels**, **Priority**, **Due Date**, **Checklist**, **Activity**, **Members**.
+#### List view
+- Shows all cards from the current board in a single table, with columns: **Title**, **List**, **Labels**, **Priority**, **Due Date**, **Checklist**, **Activity**, **Members**.
 - Use **"Group by:"** to group rows by **List**, **Priority**, or **Assignee**. Click a group's header to expand/collapse it.
 - Within each group, cards are sorted by priority by default (Urgent → High → Medium → Low → None).
 - Select cards using the checkboxes (a header checkbox selects all visible rows). A toolbar then shows the selection count and a **"Clear selection"** button.
 - Click any row to open that card's modal.
 
-### 3.3 Calendar view
+#### Calendar view
 - Displays a month grid (Monday–Sunday). Use the chevron buttons to move to the previous/next month; the current month and year are shown in the header (e.g. "June 2026").
 - Cards appear on the day matching their **due date** (up to 3 per day; click **"+N more"** to see additional ones). The current day is highlighted.
 - Card chips are color-coded by status: green + strikethrough (completed), red (overdue), the card's cover color (if set and not completed), or plain white (no special status).
