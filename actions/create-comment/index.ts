@@ -55,7 +55,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     });
   }
 
-  await createAuditLog({ entityId: comment.id, entityType: ENTITY_TYPE.COMMENT, entityTitle: content.slice(0, 50), action: ACTION.CREATE });
+  await createAuditLog({ entityId: comment.id, entityType: ENTITY_TYPE.COMMENT, entityTitle: (content ?? "").slice(0, 50) || "[image]", action: ACTION.CREATE });
   revalidatePath(`/board/${boardId}`);
   return { data: comment };
 };
