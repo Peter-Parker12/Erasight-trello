@@ -18,16 +18,23 @@ const addHandler = async (data: AddInputType): Promise<ActionState<AddInputType,
 
   const { cardId, boardId, userId: memberId, userName, userImage } = data;
 
-  const card = await db.card.findUnique({
-    where: { id: cardId },
-    include: { list: { include: { board: true } } },
-  });
+  const [card, displayNameRecord] = await Promise.all([
+    db.card.findUnique({
+      where: { id: cardId },
+      include: { list: { include: { board: true } } },
+    }),
+    db.userDisplayName.findUnique({
+      where: { orgId_userId: { orgId, userId: memberId } },
+    }),
+  ]);
   if (!card || card.list.board.orgId !== orgId) return { error: "Card not found" };
+
+  const resolvedName = displayNameRecord?.displayName || userName;
 
   const existing = await db.cardMember.findUnique({ where: { cardId_userId: { cardId, userId: memberId } } });
   if (existing) return { data: existing };
 
-  const member = await db.cardMember.create({ data: { cardId, userId: memberId, userName, userImage } });
+  const member = await db.cardMember.create({ data: { cardId, userId: memberId, userName: resolvedName, userImage } });
 
   await notifyCardAssigned({
     boardId,
@@ -35,7 +42,7 @@ const addHandler = async (data: AddInputType): Promise<ActionState<AddInputType,
     cardId: card.id,
     cardTitle: card.title,
     assigneeUserId: memberId,
-    assigneeName: userName,
+    assigneeName: resolvedName,
   });
 
   // Notify assigned member (skip self-assign)

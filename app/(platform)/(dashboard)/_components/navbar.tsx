@@ -12,6 +12,7 @@ import { FormPopover } from "@/components/form/form-popover";
 import { Logo } from "@/components/logo";
 import { MobileSidebar } from "./mobile-sidebar";
 import { TelegramAccount } from "./telegram-account";
+import { DisplayNameAccount } from "./display-name-account";
 import { NotificationBell } from "@/components/notification-bell";
 
 export const Navbar = () => {
@@ -40,6 +41,7 @@ export const Navbar = () => {
           <Skeleton className="h-10 w-10 rounded-full" />
         </ClerkLoading>
         <ClerkLoaded>
+          <DisplayNameAccount />
           <TelegramAccount />
           <NotificationBell />
           <OrganizationSwitcher
