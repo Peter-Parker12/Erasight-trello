@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { isOrgAdmin } from "@/lib/board-access";
 
 export async function GET() {
-  const { orgId } = await auth();
-  if (!orgId) return new NextResponse("Unauthorized", { status: 401 });
+  const { userId, orgId } = await auth();
+  if (!userId || !orgId) return new NextResponse("Unauthorized", { status: 401 });
 
   const now = new Date();
+  const admin = await isOrgAdmin(orgId);
 
   try {
     const overdueCards = await db.card.findMany({
@@ -16,6 +18,7 @@ export async function GET() {
         list: {
           board: { orgId },
         },
+        ...(admin ? {} : { members: { some: { userId } } }),
       },
       include: {
         list: {
