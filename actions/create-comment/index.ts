@@ -15,7 +15,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   const user = await currentUser();
   if (!userId || !orgId || !user) return { error: "Unauthorized" };
 
-  const { cardId, boardId, content } = data;
+  const { cardId, boardId, content, imageUrl } = data;
 
   const card = await db.card.findUnique({
     where: { id: cardId },
@@ -30,7 +30,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       cardId,
       orgId,
       userId,
-      content,
+      content: content ?? "",
+      imageUrl: imageUrl ?? null,
       userName: actorName,
       userImage: user.imageUrl,
     },
@@ -39,11 +40,13 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   // Notify card members (except commenter)
   const recipientIds = card.members.map((m) => m.userId).filter((id) => id !== userId);
   if (recipientIds.length > 0) {
+    const preview = content?.trim() ? `${content.slice(0, 80)}${content.length > 80 ? "…" : ""}` : "[image]";
     await createNotifications({
       userIds: recipientIds,
       orgId,
       type: "COMMENT_ADDED",
-      message: `${actorName} commented on "${card.title}": ${content.slice(0, 80)}${content.length > 80 ? "…" : ""}`,
+      message: `${actorName} commented on "${card.title}": ${preview}`,
+      // @ts-ignore -- extra fields ignored below
       cardId,
       cardTitle: card.title,
       boardId,
