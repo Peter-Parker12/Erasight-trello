@@ -15,22 +15,28 @@ export async function GET(
     if (!board) return new NextResponse("Not found", { status: 404 });
 
     const client = await clerkClient();
-    const [boardMembers, orgMemberList] = await Promise.all([
+    const [boardMembers, orgMemberList, displayNames] = await Promise.all([
       db.boardMember.findMany({ where: { boardId } }),
       client.organizations.getOrganizationMembershipList({ organizationId: orgId, limit: 100 }),
+      db.userDisplayName.findMany({ where: { orgId } }),
     ]);
 
     const boardMemberIds = new Set(boardMembers.map((m) => m.userId));
+    const displayNameMap = new Map(displayNames.map((d) => [d.userId, d.displayName]));
 
-    const orgMembers = orgMemberList.data.map((m) => ({
-      userId: m.publicUserData?.userId ?? "",
-      userName: `${m.publicUserData?.firstName ?? ""} ${m.publicUserData?.lastName ?? ""}`.trim()
+    const orgMembers = orgMemberList.data.map((m) => {
+      const uid = m.publicUserData?.userId ?? "";
+      const clerkName = `${m.publicUserData?.firstName ?? ""} ${m.publicUserData?.lastName ?? ""}`.trim()
         || m.publicUserData?.identifier
-        || "Unknown",
-      userImage: m.publicUserData?.imageUrl ?? "",
-      role: m.role,
-      isBoardMember: boardMemberIds.has(m.publicUserData?.userId ?? ""),
-    }));
+        || "Unknown";
+      return {
+        userId: uid,
+        userName: displayNameMap.get(uid) ?? clerkName,
+        userImage: m.publicUserData?.imageUrl ?? "",
+        role: m.role,
+        isBoardMember: boardMemberIds.has(uid),
+      };
+    });
 
     return NextResponse.json({ boardMembers, orgMembers });
   } catch (e) {
