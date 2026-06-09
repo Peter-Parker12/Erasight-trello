@@ -16,9 +16,11 @@ export async function GET() {
         completed: false,
         dueDate: { lt: now },
         list: {
-          board: { orgId },
+          board: {
+            orgId,
+            ...(admin ? {} : { boardMembers: { some: { userId } } }),
+          },
         },
-        ...(admin ? {} : { members: { some: { userId } } }),
       },
       include: {
         list: {
