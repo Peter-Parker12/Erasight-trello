@@ -29,3 +29,4 @@ export const ActivityItem = ({ data }: ActivityItemProps) => {
     </li>
   );
 };
+ 
