@@ -3,5 +3,8 @@ import { z } from "zod";
 export const CreateComment = z.object({
   cardId: z.string(),
   boardId: z.string(),
-  content: z.string().min(1, "Comment cannot be empty").max(2000),
+  content: z.string().max(2000).optional().default(""),
+  imageUrl: z.string().optional(),
+}).refine((d) => (d.content && d.content.trim().length > 0) || !!d.imageUrl, {
+  message: "Comment cannot be empty",
 });
