@@ -263,25 +263,28 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
     if (groupBy === "project") {
       const map = new Map<string, { title: string; entries: GroupEntry[] }>();
       allEntries.forEach((e) => {
-        const key = e.card.list.board.id;
-        if (!map.has(key)) map.set(key, { title: e.boardTitle, entries: [] });
-        map.get(key)!.entries.push(e);
+        const id = e.card.list.board.id;
+        if (!map.has(id)) map.set(id, { title: e.boardTitle, entries: [] });
+        map.get(id)!.entries.push(e);
       });
-      return Array.from(map.values()).map((v) => ({
+      return Array.from(map.entries()).map(([id, v]) => ({
+        key: id,
         label: v.title,
         color: getListColor(v.title) as string | undefined,
         entries: v.entries,
       }));
     }
     if (groupBy === "list") {
-      const map = new Map<string, { name: string; color: string; entries: GroupEntry[] }>();
+      const map = new Map<string, { name: string; board: string; color: string; entries: GroupEntry[] }>();
       allEntries.forEach((e) => {
-        const key = e.card.list.id;
-        if (!map.has(key)) map.set(key, { name: e.listName, color: e.listColor, entries: [] });
-        map.get(key)!.entries.push(e);
+        const id = e.card.list.id;
+        if (!map.has(id)) map.set(id, { name: e.listName, board: e.boardTitle, color: e.listColor, entries: [] });
+        map.get(id)!.entries.push(e);
       });
-      return Array.from(map.values()).map((v) => ({
-        label: v.name,
+      return Array.from(map.entries()).map(([id, v]) => ({
+        key: id,
+        // show board name alongside list name so identical list names from different boards are distinguishable
+        label: `${v.name} · ${v.board}`,
         color: v.color as string | undefined,
         entries: v.entries,
       }));
@@ -289,6 +292,7 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
     if (groupBy === "priority") {
       return PRIORITY_ORDER
         .map((p) => ({
+          key: p,
           label: PRIORITY_BADGE[p].label,
           color: undefined as string | undefined,
           entries: allEntries.filter((e) => e.card.priority === p),
@@ -308,7 +312,8 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
         });
       }
     });
-    return Array.from(map.values()).map((v) => ({
+    return Array.from(map.entries()).map(([id, v]) => ({
+      key: id,
       label: v.name,
       color: undefined as string | undefined,
       entries: v.entries,
@@ -366,7 +371,7 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
           <tbody>
             {groups.map((group) => (
               <GroupSection
-                key={group.label}
+                key={group.key}
                 label={group.label}
                 color={group.color}
                 entries={group.entries}
