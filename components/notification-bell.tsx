@@ -46,7 +46,7 @@ const NotifPopup = ({
   return (
     <div
       className={cn(
-        "flex items-start gap-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-200",
+        "flex items-start gap-3 w-full sm:w-80 bg-white rounded-xl shadow-2xl border border-gray-200",
         "px-4 py-3 animate-in slide-in-from-right-8 fade-in duration-300"
       )}
     >
@@ -145,7 +145,7 @@ export const NotificationBell = () => {
       {/* Floating popup stack — rendered in portal outside navbar */}
       {mounted &&
         createPortal(
-          <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 items-end pointer-events-none">
+          <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 z-[9999] flex flex-col gap-2 items-stretch sm:items-end pointer-events-none">
             {popups.map((n) => (
               <div key={n.id} className="pointer-events-auto">
                 <NotifPopup n={n} onDismiss={dismiss} />

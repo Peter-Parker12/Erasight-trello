@@ -17,9 +17,9 @@ import { NotificationBell } from "@/components/notification-bell";
 
 export const Navbar = () => {
   return (
-    <nav className="fixed z-50 top-0 w-full px-4 h-14 border-b shadow-sm bg-white flex items-center">
+    <nav className="fixed z-50 top-0 w-full px-2 sm:px-4 h-14 border-b shadow-sm bg-white flex items-center">
       <MobileSidebar />
-      <div className="flex items-center gap-x-4">
+      <div className="flex items-center gap-x-2 sm:gap-x-4">
         <div className="hidden md:flex">
           <Logo />
         </div>
@@ -35,7 +35,7 @@ export const Navbar = () => {
         </FormPopover>
       </div>
 
-      <div className="ml-auto flex items-center gap-x-2">
+      <div className="ml-auto flex items-center gap-x-1 sm:gap-x-2 overflow-x-auto">
         <ClerkLoading>
           <Skeleton className="h-10 w-40" />
           <Skeleton className="h-10 w-10 rounded-full" />

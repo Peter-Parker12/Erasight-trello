@@ -168,7 +168,7 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
           <ol
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className="flex gap-x-3 h-full px-4 pt-3"
+            className="flex gap-x-3 h-full px-2 sm:px-4 pt-3 snap-x snap-mandatory sm:snap-none"
           >
             {orderedData.map((list, i) => (
               <ListItem key={list.id} index={i} data={{
