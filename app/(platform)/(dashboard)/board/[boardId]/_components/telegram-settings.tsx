@@ -88,11 +88,11 @@ export const TelegramSettings = ({ boardId }: TelegramSettingsProps) => {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="transparent" className="h-auto w-auto p-2 text-white">
-          <Send className="h-4 w-4 mr-1" />
-          <span className="text-sm">Telegram</span>
+          <Send className="h-4 w-4 sm:mr-1" />
+          <span className="hidden sm:inline text-sm">Telegram</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 pt-3 pb-3 px-0" side="bottom" align="start">
+      <PopoverContent className="w-80 max-w-[calc(100vw-1.5rem)] pt-3 pb-3 px-0" side="bottom" align="start">
         <div className="text-sm font-medium text-center text-neutral-600 pb-2 px-3">
           Telegram Notifications
         </div>

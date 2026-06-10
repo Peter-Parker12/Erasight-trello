@@ -36,7 +36,7 @@ export const ListItem = ({ data, index }: ListItemProps) => {
         <li
           {...provided.draggableProps}
           ref={provided.innerRef}
-          className="shrink-0 h-full w-[272px] select-none"
+          className="shrink-0 h-full w-[85vw] max-w-[272px] sm:w-[272px] select-none snap-center sm:snap-align-none"
           style={provided.draggableProps.style as CSSProperties | undefined}
         >
           <div

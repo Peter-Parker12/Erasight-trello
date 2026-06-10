@@ -75,10 +75,10 @@ export const BoardMembers = ({ boardId, compact = false }: BoardMembersProps) =>
           )}
         >
           <Users className="h-4 w-4" />
-          {!compact && <span className="text-sm ml-1">Members</span>}
+          {!compact && <span className="hidden sm:inline text-sm ml-1">Members</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 pt-3 pb-3 px-0" side="bottom" align="start">
+      <PopoverContent className="w-72 max-w-[calc(100vw-1.5rem)] pt-3 pb-3 px-0" side="bottom" align="start">
         <div className="text-sm font-medium text-center text-neutral-600 pb-2 px-3">
           Board Members
         </div>

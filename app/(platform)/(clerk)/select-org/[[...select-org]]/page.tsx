@@ -1,15 +1,28 @@
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { OrganizationList } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
-export default function CreateOrganizationPage() {
+export default async function SelectOrgPage() {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const client = await clerkClient();
+  const memberships = await client.users.getOrganizationMembershipList({ userId });
+
+  const isAdmin = memberships.data.some(
+    (m) => m.role === "org:admin" || m.role === "admin"
+  );
+
   return (
     <OrganizationList
       hidePersonal
       afterSelectOrganizationUrl="/organization/:id"
       afterCreateOrganizationUrl="/organization/:id"
       appearance={{
-        layout: {
-          logoPlacement: "none",
-        },
+        layout: { logoPlacement: "none" },
+        elements: isAdmin
+          ? {}
+          : { organizationListCreateOrganizationBox: { display: "none" } },
       }}
     />
   );

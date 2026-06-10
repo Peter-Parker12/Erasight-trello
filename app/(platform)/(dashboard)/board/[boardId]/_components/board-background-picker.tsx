@@ -48,7 +48,7 @@ export const BoardBackgroundPicker = ({ boardId }: BoardBackgroundPickerProps) =
           <span className="sr-only">Change background</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-3 space-y-3" align="end">
+      <PopoverContent className="w-72 max-w-[calc(100vw-1.5rem)] p-3 space-y-3" align="end">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Background</p>
 
         {/* Restore photo */}

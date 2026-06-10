@@ -36,14 +36,14 @@ export const ViewToggle = () => {
           onClick={() => setView(value)}
           title={`${label} view`}
           className={cn(
-            "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-colors",
+            "flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded text-xs font-medium transition-colors",
             currentView === value
               ? "bg-white text-black shadow-sm"
               : "text-white/80 hover:text-white"
           )}
         >
           <Icon className="h-3.5 w-3.5" />
-          {label}
+          <span className="hidden sm:inline">{label}</span>
         </button>
       ))}
     </div>
