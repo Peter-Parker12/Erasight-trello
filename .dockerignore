@@ -4,6 +4,10 @@ node_modules
 .vscode
 .clerk
 
+# docker files - not needed inside the build context/image
+Dockerfile
+docker-compose.yml
+
 # env files (secrets) - pass values via build args / compose environment instead
 .env
 .env*.local
