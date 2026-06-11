@@ -98,7 +98,7 @@ export const BoardMembers = ({ boardId, compact = false }: BoardMembersProps) =>
             Failed to load members. Make sure the database schema is up to date (<code>prisma db push</code>).
           </div>
         ) : (
-          <div className="space-y-3 px-3">
+          <div className="space-y-3 px-3 max-h-[60vh] overflow-y-auto">
             {/* Access mode indicator */}
             <p className="text-xs text-muted-foreground">
               {isRestricted
