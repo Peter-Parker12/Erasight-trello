@@ -1,7 +1,7 @@
 version: '3.8'
 
 networks:
-  dev-trello-network:
+  trello-network:
     driver: bridge
 
 services:
@@ -18,9 +18,9 @@ services:
         NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: ${NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL:-/}
         NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: ${NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL:-/}
         NEXT_PUBLIC_UNSPLASH_ACCESS_KEY: ${NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}
-    container_name: dev-trello-app
+    container_name: trello-app
     ports:
-      - "9099:3000"
+      - "9090:3000"
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
@@ -37,7 +37,7 @@ services:
       migrate:
         condition: service_completed_successfully
     networks:
-      - dev-trello-network
+      - trello-network
     restart: unless-stopped
 
   migrate:
@@ -53,7 +53,7 @@ services:
         NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: ${NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL:-/}
         NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: ${NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL:-/}
         NEXT_PUBLIC_UNSPLASH_ACCESS_KEY: ${NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}
-    container_name: dev-trello-migrate
+    container_name: trello-migrate
     environment:
       - DATABASE_URL=${DATABASE_URL}
     depends_on:
@@ -61,12 +61,12 @@ services:
         condition: service_healthy
     command: npx prisma db push
     networks:
-      - dev-trello-network
+      - trello-network
     restart: "no"
 
   db:
     image: postgres:16
-    container_name: dev-trello-db
+    container_name: trello-db
     ports:
       - "9736:5432"
     environment:
@@ -74,14 +74,14 @@ services:
       - POSTGRES_USER=trello_user
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - dev_db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U trello_user -d trello_clone"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - dev-trello-network
+      - trello-network
     restart: unless-stopped
 
   prisma-studio:
@@ -97,17 +97,17 @@ services:
         NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: ${NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL:-/}
         NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: ${NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL:-/}
         NEXT_PUBLIC_UNSPLASH_ACCESS_KEY: ${NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}
-    container_name: dev-trello-prisma-studio
+    container_name: trello-prisma-studio
     ports:
-      - "5556:5555"
+      - "5555:5555"
     environment:
       - DATABASE_URL=${DATABASE_URL}
     depends_on:
       - db
     command: ["npx", "prisma", "studio", "--port", "5555", "--browser", "none"]
     networks:
-      - dev-trello-network
+      - trello-network
     restart: unless-stopped
 
 volumes:
-  dev_db_data:
+  db_data:

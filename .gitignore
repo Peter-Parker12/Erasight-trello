@@ -43,3 +43,7 @@ next-env.d.ts
 stripe
 # clerk configuration (can include secrets)
 /.clerk/
+
+# docker files (environment-specific, configured per-deployment)
+/Dockerfile
+/docker-compose.yml
