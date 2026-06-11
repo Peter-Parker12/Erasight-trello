@@ -8,6 +8,7 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "@/actions/create-board/types";
 import { CreateBoard } from "@/actions/create-board/schema";
 import { createAuditLog } from "@/lib/create-audit-log";
+import { isOrgAdmin } from "@/lib/board-access";
 import { ACTION, ENTITY_TYPE } from "@prisma/client";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
@@ -16,6 +17,13 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   if (!userId || !orgId) {
     return {
       error: "Unauthorized",
+    };
+  }
+
+  const admin = await isOrgAdmin(orgId);
+  if (!admin) {
+    return {
+      error: "Only organization admins can create boards.",
     };
   }
 

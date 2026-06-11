@@ -63,14 +63,16 @@ export const BoardList = async () => {
             )}
           </div>
         ))}
-        <FormPopover sideOffset={10} side="right">
-          <div
-            role="button"
-            className="relative aspect-video h-full w-full bg-muted rounded-sm flex flex-col gap-y-1 items-center justify-center hover:opacity-75 transition"
-          >
-            <p className="text-sm">Create new board</p>
-          </div>
-        </FormPopover>
+        {admin && (
+          <FormPopover sideOffset={10} side="right">
+            <div
+              role="button"
+              className="relative aspect-video h-full w-full bg-muted rounded-sm flex flex-col gap-y-1 items-center justify-center hover:opacity-75 transition"
+            >
+              <p className="text-sm">Create new board</p>
+            </div>
+          </FormPopover>
+        )}
       </div>
     </div>
   );
