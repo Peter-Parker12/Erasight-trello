@@ -1,37 +1,5 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
-import { auth } from "@clerk/nextjs/server";
-import { db } from "@/lib/db";
-import { createSafeAction } from "@/lib/create-safe-action";
-import { ToggleCardLabel } from "./schema";
+import { callApiAction } from "@/lib/fetch-action";
 import { InputType, ReturnType } from "./types";
 
-const handler = async (data: InputType): Promise<ReturnType> => {
-  const { userId, orgId } = await auth();
-  if (!userId || !orgId) return { error: "Unauthorized" };
-
-  const { cardId, labelId, boardId } = data;
-
-  const card = await db.card.findUnique({
-    where: { id: cardId },
-    include: { list: { include: { board: true } } },
-  });
-  if (!card || card.list.board.orgId !== orgId) return { error: "Card not found" };
-
-  const existing = await db.cardLabel.findUnique({
-    where: { cardId_labelId: { cardId, labelId } },
-  });
-
-  if (existing) {
-    await db.cardLabel.delete({ where: { cardId_labelId: { cardId, labelId } } });
-    revalidatePath(`/board/${boardId}`);
-    return { data: null };
-  } else {
-    const created = await db.cardLabel.create({ data: { cardId, labelId } });
-    revalidatePath(`/board/${boardId}`);
-    return { data: created };
-  }
-};
-
-export const toggleCardLabel = createSafeAction(ToggleCardLabel, handler);
+export const toggleCardLabel = (data: InputType): Promise<ReturnType> =>
+  callApiAction("/api/actions/toggle-card-label", data) as Promise<ReturnType>;

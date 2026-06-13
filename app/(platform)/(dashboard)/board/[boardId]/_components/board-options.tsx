@@ -2,6 +2,8 @@
 
 import { toast } from "sonner";
 import { MoreHorizontal, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +21,14 @@ type BoardOptionsProps = {
 };
 
 export const BoardOptions = ({ id }: BoardOptionsProps) => {
+  const router = useRouter();
+  const { orgId } = useAuth();
+
   const { execute, isLoading } = useAction(deleteBoard, {
+    skipRefresh: true,
+    onSuccess: () => {
+      if (orgId) router.push(`/organization/${orgId}`);
+    },
     onError: (error) => {
       toast.error(error);
     },

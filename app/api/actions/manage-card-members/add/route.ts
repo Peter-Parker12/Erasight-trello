@@ -1,0 +1,67 @@
+import { revalidatePath } from "next/cache";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { db } from "@/lib/db";
+import { createSafeAction } from "@/lib/create-safe-action";
+import { AddCardMember } from "@/actions/manage-card-members/schema";
+import type { AddInputType } from "@/actions/manage-card-members/types";
+import { ActionState } from "@/lib/create-safe-action";
+import { CardMember } from "@prisma/client";
+import { notifyCardAssigned } from "@/lib/board-telegram";
+import { createNotifications } from "@/lib/create-notification";
+import { toApiRoute } from "@/lib/api-route";
+
+const addHandler = async (data: AddInputType): Promise<ActionState<AddInputType, CardMember | null>> => {
+  const { userId, orgId } = await auth();
+  const actor = await currentUser();
+  if (!userId || !orgId || !actor) return { error: "Unauthorized" };
+
+  const { cardId, boardId, userId: memberId, userName, userImage } = data;
+
+  const [card, displayNameRecord] = await Promise.all([
+    db.card.findUnique({
+      where: { id: cardId },
+      include: { list: { include: { board: true } } },
+    }),
+    db.userDisplayName.findUnique({
+      where: { orgId_userId: { orgId, userId: memberId } },
+    }),
+  ]);
+  if (!card || card.list.board.orgId !== orgId) return { error: "Card not found" };
+
+  const resolvedName = displayNameRecord?.displayName || userName;
+
+  const existing = await db.cardMember.findUnique({ where: { cardId_userId: { cardId, userId: memberId } } });
+  if (existing) return { data: existing };
+
+  const member = await db.cardMember.create({ data: { cardId, userId: memberId, userName: resolvedName, userImage } });
+
+  await notifyCardAssigned({
+    boardId,
+    orgId,
+    cardId: card.id,
+    cardTitle: card.title,
+    assigneeUserId: memberId,
+    assigneeName: resolvedName,
+  });
+
+  // Notify assigned member (skip self-assign)
+  if (memberId !== userId) {
+    const actorName = `${actor.firstName ?? ""} ${actor.lastName ?? ""}`.trim() || "Someone";
+    await createNotifications({
+      userIds: [memberId],
+      orgId,
+      type: "CARD_ASSIGNED",
+      message: `${actorName} assigned you to "${card.title}"`,
+      cardId,
+      cardTitle: card.title,
+      boardId,
+      actorName,
+      actorImage: actor.imageUrl,
+    });
+  }
+
+  revalidatePath(`/board/${boardId}`);
+  return { data: member };
+};
+
+export const POST = toApiRoute(createSafeAction(AddCardMember, addHandler as any));

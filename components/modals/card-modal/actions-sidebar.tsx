@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, Trash, Tag, CalendarDays, Flag, CheckSquare, Paperclip, Users, Palette, Bell, BellOff, BookTemplate, X } from "lucide-react";
 import { toast } from "sonner";
@@ -67,6 +67,7 @@ const SidebarButton = ({ icon: Icon, label, popover, active, onToggle }: Sidebar
 
 export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
   const params = useParams();
+  const router = useRouter();
   const boardId = params.boardId as string;
   const cardModal = useCardModal();
   const queryClient = useQueryClient();
@@ -202,6 +203,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
     const { updateCard } = await import("@/actions/update-card");
     await updateCard({ id: data.id, boardId, coverColor: coverColor || null } as any);
     invalidate();
+    router.refresh();
     setActive(null);
   };
 

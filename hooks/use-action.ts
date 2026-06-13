@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 import { ActionState, FieldErrors } from "@/lib/create-safe-action";
 
@@ -14,12 +15,15 @@ type useActionOptions<TOutput> = {
   onComplete?: () => void;
   timeoutMs?: number;
   timeoutMessage?: string;
+  skipRefresh?: boolean;
 };
 
 export const useAction = <TInput, TOutput>(
   action: Action<TInput, TOutput>,
   options: useActionOptions<TOutput> = {}
 ) => {
+  const router = useRouter();
+
   const [fieldErrors, setFieldErrors] = useState<
     FieldErrors<TInput> | undefined
   >(undefined);
@@ -56,6 +60,9 @@ export const useAction = <TInput, TOutput>(
 
         if (result.data) {
           setData(result.data);
+          if (!options.skipRefresh) {
+            router.refresh();
+          }
           options.onSuccess?.(result.data);
         }
       } finally {
@@ -63,7 +70,7 @@ export const useAction = <TInput, TOutput>(
         options.onComplete?.();
       }
     },
-    [action, options]
+    [action, options, router]
   );
 
   return {
