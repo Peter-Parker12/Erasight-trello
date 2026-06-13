@@ -6,11 +6,12 @@ import {
   format, addMonths, subMonths,
 } from "date-fns";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 
 import { ListWithCards, CardPreview } from "@/types";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { cn } from "@/lib/utils";
+import { getEffectiveDueDate } from "@/lib/due-date";
 
 type CalendarViewProps = {
   lists: ListWithCards[];
@@ -28,9 +29,7 @@ type CalendarCardProps = { card: CardPreview };
 
 const CalendarCard = ({ card }: CalendarCardProps) => {
   const cardModal = useCardModal();
-  const now = new Date();
-  const due = card.dueDate ? new Date(card.dueDate) : null;
-  const overdue = due && !card.completed && due < now;
+  const { isReview, overdue } = getEffectiveDueDate(card);
 
   return (
     <button
@@ -48,6 +47,7 @@ const CalendarCard = ({ card }: CalendarCardProps) => {
       style={card.coverColor && !card.completed ? { backgroundColor: card.coverColor } : undefined}
       title={card.title}
     >
+      {isReview && <Eye className="h-2.5 w-2.5 shrink-0" />}
       {card.priority !== "NONE" && (
         <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", PRIORITY_DOT[card.priority])} />
       )}
@@ -59,12 +59,13 @@ const CalendarCard = ({ card }: CalendarCardProps) => {
 export const CalendarView = ({ lists }: CalendarViewProps) => {
   const [current, setCurrent] = useState(new Date());
 
-  // Map dueDate → cards
+  // Map effective due date (dueDate or reviewDeadline) → cards
   const cardsByDate = new Map<string, CardPreview[]>();
   for (const list of lists) {
     for (const card of list.cards) {
-      if (!card.dueDate) continue;
-      const key = format(new Date(card.dueDate), "yyyy-MM-dd");
+      const { date } = getEffectiveDueDate(card);
+      if (!date) continue;
+      const key = format(date, "yyyy-MM-dd");
       if (!cardsByDate.has(key)) cardsByDate.set(key, []);
       cardsByDate.get(key)!.push(card);
     }
@@ -78,7 +79,7 @@ export const CalendarView = ({ lists }: CalendarViewProps) => {
 
   const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  const noDateCards = lists.flatMap((l) => l.cards).filter((c) => !c.dueDate);
+  const noDateCards = lists.flatMap((l) => l.cards).filter((c) => !getEffectiveDueDate(c).date);
 
   return (
     <div className="flex flex-col h-full bg-white/90 rounded-lg overflow-hidden border border-white/30 shadow-sm">

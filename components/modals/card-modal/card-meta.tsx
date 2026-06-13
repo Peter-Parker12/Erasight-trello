@@ -1,11 +1,12 @@
 "use client";
 
 import { format } from "date-fns";
-import { CalendarDays, Flag } from "lucide-react";
+import { CalendarDays, Eye, Flag } from "lucide-react";
 import { Priority } from "@prisma/client";
 
 import { CardWithFullDetail } from "@/types";
 import { cn } from "@/lib/utils";
+import { getEffectiveDueDate } from "@/lib/due-date";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const PRIORITY_CONFIG: Record<Priority, { label: string; className: string }> = {
@@ -19,10 +20,7 @@ const PRIORITY_CONFIG: Record<Priority, { label: string; className: string }> = 
 type CardMetaProps = { data: CardWithFullDetail };
 
 export const CardMeta = ({ data }: CardMetaProps) => {
-  const due = data.dueDate ? new Date(data.dueDate) : null;
-  const now = new Date();
-  const dueSoon = due && !data.completed && due > now && (due.getTime() - now.getTime()) < 86400000 * 2;
-  const overdue = due && !data.completed && due < now;
+  const { date: due, isReview, overdue, dueSoon } = getEffectiveDueDate(data);
 
   const priorityCfg = PRIORITY_CONFIG[data.priority];
 
@@ -95,7 +93,8 @@ export const CardMeta = ({ data }: CardMetaProps) => {
                 dueSoon ? "bg-yellow-100 text-yellow-700" :
                 "bg-gray-100 text-gray-700"
               )}>
-                <CalendarDays className="h-3 w-3" />
+                {isReview ? <Eye className="h-3 w-3" /> : <CalendarDays className="h-3 w-3" />}
+                {isReview && "Review by "}
                 {format(due, "MMM d")}
                 {data.completed && " ✓"}
               </span>

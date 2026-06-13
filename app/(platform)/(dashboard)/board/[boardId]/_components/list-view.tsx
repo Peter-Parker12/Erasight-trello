@@ -2,11 +2,12 @@
 
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
-import { CalendarDays, CheckSquare, MessageSquare, Paperclip, ChevronDown, ChevronRight, Trash2, MoveRight } from "lucide-react";
+import { CalendarDays, CheckSquare, Eye, MessageSquare, Paperclip, ChevronDown, ChevronRight, Trash2, MoveRight } from "lucide-react";
 
 import { ListWithCards, CardPreview } from "@/types";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { cn } from "@/lib/utils";
+import { getEffectiveDueDate } from "@/lib/due-date";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -46,14 +47,7 @@ const CardRow = ({ card, listName, listColor, selected, onSelect }: CardRowProps
   const totalItems = card.checklists.reduce((s, c) => s + c.items.length, 0);
   const doneItems = card.checklists.reduce((s, c) => s + c.items.filter((i) => i.completed).length, 0);
 
-  const due = card.dueDate ? new Date(card.dueDate) : null;
-  const now = new Date();
-  const overdue = due && !card.completed && due < now;
-  const dueSoon =
-    due &&
-    !card.completed &&
-    due > now &&
-    due.getTime() - now.getTime() < 86400000 * 2;
+  const { date: due, isReview, overdue, dueSoon } = getEffectiveDueDate(card);
 
   const priorityCfg = PRIORITY_BADGE[card.priority];
 
@@ -128,7 +122,7 @@ const CardRow = ({ card, listName, listColor, selected, onSelect }: CardRowProps
             overdue ? "bg-red-100 text-red-600" :
             dueSoon ? "bg-yellow-100 text-yellow-700" : "text-muted-foreground"
           )}>
-            <CalendarDays className="h-3 w-3" />
+            {isReview ? <Eye className="h-3 w-3" /> : <CalendarDays className="h-3 w-3" />}
             {format(due, "MMM d, yyyy")}
             {card.completed && " ✓"}
           </span>

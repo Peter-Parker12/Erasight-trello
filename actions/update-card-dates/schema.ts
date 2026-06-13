@@ -5,4 +5,5 @@ export const UpdateCardDates = z.object({
   boardId: z.string(),
   startDate: z.string().nullable().optional(),
   dueDate: z.string().nullable().optional(),
+  reviewDeadline: z.string().nullable().optional(),
 });

@@ -1,13 +1,14 @@
 "use client";
 
 import { CSSProperties, useState } from "react";
-import { CalendarDays, CheckSquare, MessageSquare, Paperclip, ChevronDown, ChevronRight } from "lucide-react";
+import { CalendarDays, CheckSquare, Eye, MessageSquare, Paperclip, ChevronDown, ChevronRight } from "lucide-react";
 import { Draggable } from "@hello-pangea/dnd";
 import { format } from "date-fns";
 
 import { CardPreview } from "@/types";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { cn } from "@/lib/utils";
+import { getEffectiveDueDate } from "@/lib/due-date";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 type CardItemProps = {
@@ -39,10 +40,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
   const doneItems = data.checklists.reduce((s, c) => s + c.items.filter((i) => i.completed).length, 0);
   const hasChecklist = totalItems > 0;
 
-  const due = data.dueDate ? new Date(data.dueDate) : null;
-  const now = new Date();
-  const overdue = due && !data.completed && due < now;
-  const dueSoon = due && !data.completed && due > now && (due.getTime() - now.getTime()) < 86400000 * 2;
+  const { date: due, isReview, overdue, dueSoon } = getEffectiveDueDate(data);
 
   const priorityDot = PRIORITY_DOT[data.priority];
   const hasSubtasks = data.subtasks && data.subtasks.length > 0;
@@ -100,7 +98,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
                     overdue ? "bg-red-100 text-red-600" :
                     dueSoon ? "bg-yellow-100 text-yellow-700" : ""
                   )}>
-                    <CalendarDays className="h-3 w-3" />
+                    {isReview ? <Eye className="h-3 w-3" /> : <CalendarDays className="h-3 w-3" />}
                     {format(due, "MMM d")}
                   </span>
                 )}

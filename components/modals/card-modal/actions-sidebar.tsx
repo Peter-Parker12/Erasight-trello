@@ -86,6 +86,8 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
   // Form states
   const [startDate, setStartDate] = useState(data.startDate ? new Date(data.startDate).toISOString().slice(0, 10) : "");
   const [dueDate, setDueDate] = useState(data.dueDate ? new Date(data.dueDate).toISOString().slice(0, 10) : "");
+  const [reviewDeadline, setReviewDeadline] = useState(data.reviewDeadline ? new Date(data.reviewDeadline).toISOString().slice(0, 10) : "");
+  const isInReview = data.reviewListId !== null && data.listId === data.reviewListId;
   const [checklistTitle, setChecklistTitle] = useState("");
   const [attName, setAttName] = useState("");
   const [attUrl, setAttUrl] = useState("");
@@ -294,7 +296,14 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
             <label className="text-xs text-muted-foreground">Due date</label>
             <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="w-full border rounded p-1 text-xs mt-0.5" />
           </div>
-          <Button size="sm" className="h-7 text-xs w-full" onClick={() => execDates({ id: data.id, boardId, startDate: startDate || null, dueDate: dueDate || null })}>Save</Button>
+          {isInReview && (
+            <div>
+              <label className="text-xs text-muted-foreground">Review deadline</label>
+              <input type="date" value={reviewDeadline} onChange={(e) => setReviewDeadline(e.target.value)} className="w-full border rounded p-1 text-xs mt-0.5" />
+              <p className="text-[10px] text-muted-foreground mt-0.5">Setting this clears the due date.</p>
+            </div>
+          )}
+          <Button size="sm" className="h-7 text-xs w-full" onClick={() => execDates({ id: data.id, boardId, startDate: startDate || null, dueDate: dueDate || null, reviewDeadline: reviewDeadline || null })}>Save</Button>
         </div>
       )}
 

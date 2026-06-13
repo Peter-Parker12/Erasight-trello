@@ -14,7 +14,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = await auth();
   if (!userId || !orgId) return { error: "Unauthorized" };
 
-  const { id, boardId, startDate, dueDate } = data;
+  const { id, boardId, startDate, dueDate, reviewDeadline } = data;
 
   const card = await db.card.findUnique({
     where: { id },
@@ -26,7 +26,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     where: { id },
     data: {
       startDate: startDate ? new Date(startDate) : null,
-      dueDate: dueDate ? new Date(dueDate) : null,
+      dueDate: reviewDeadline ? null : (dueDate ? new Date(dueDate) : null),
+      reviewDeadline: reviewDeadline ? new Date(reviewDeadline) : null,
     },
   });
 

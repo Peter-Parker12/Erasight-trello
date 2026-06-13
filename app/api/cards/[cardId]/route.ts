@@ -20,7 +20,12 @@ export async function GET(
         list: { board: { orgId } },
       },
       include: {
-        list: { select: { title: true } },
+        list: {
+          select: {
+            title: true,
+            board: { select: { telegramConfig: { select: { reviewListId: true } } } },
+          },
+        },
         labels: { include: { label: true } },
         members: true,
         checklists: {
@@ -36,7 +41,13 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(card);
+    if (!card) return NextResponse.json(card);
+
+    return NextResponse.json({
+      ...card,
+      list: { title: card.list.title },
+      reviewListId: card.list.board.telegramConfig?.reviewListId ?? null,
+    });
   } catch (error) {
     console.error("[/api/cards/:id GET]", error);
     return new NextResponse("Internal Server Error", { status: 500 });

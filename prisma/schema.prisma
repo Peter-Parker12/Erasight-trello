@@ -125,6 +125,7 @@ model Card {
   priority      Priority  @default(NONE)
   startDate     DateTime?
   dueDate       DateTime?
+  reviewDeadline DateTime?
   completed     Boolean   @default(false)
   coverColor    String?
   isTemplate    Boolean   @default(false)

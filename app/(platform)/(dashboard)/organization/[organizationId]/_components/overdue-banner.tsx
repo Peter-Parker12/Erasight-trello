@@ -1,18 +1,18 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, CalendarDays, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertTriangle, CalendarDays, ChevronDown, ChevronUp, Eye } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import Link from "next/link";
 
 import { fetcher } from "@/lib/fetcher";
-import { cn } from "@/lib/utils";
 
 type OverdueCard = {
   id: string;
   title: string;
-  dueDate: string;
+  dueDate: string | null;
+  reviewDeadline: string | null;
   list: {
     title: string;
     board: { id: string; title: string };
@@ -53,18 +53,24 @@ export const OverdueBanner = () => {
       {/* Card list */}
       <div className="divide-y divide-red-100">
         {shown.map((card) => {
-          const due = new Date(card.dueDate);
+          const isReview = !card.dueDate && !!card.reviewDeadline;
+          const due = new Date(card.dueDate ?? card.reviewDeadline!);
           return (
             <Link
               key={card.id}
               href={`/board/${card.list.board.id}?card=${card.id}`}
               className="flex items-center gap-3 px-4 py-2 hover:bg-red-100/50 transition-colors cursor-pointer"
             >
-              <CalendarDays className="h-3.5 w-3.5 text-red-500 shrink-0" />
+              {isReview ? (
+                <Eye className="h-3.5 w-3.5 text-red-500 shrink-0" />
+              ) : (
+                <CalendarDays className="h-3.5 w-3.5 text-red-500 shrink-0" />
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 truncate">{card.title}</p>
                 <p className="text-xs text-muted-foreground truncate">
                   {card.list.board.title} › {card.list.title}
+                  {isReview && " · Review deadline"}
                 </p>
               </div>
               <div className="shrink-0 text-right">

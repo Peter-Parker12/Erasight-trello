@@ -15,6 +15,7 @@ export type CardPreview = Card & {
 
 export type CardWithFullDetail = Card & {
   list: List;
+  reviewListId: string | null;
   labels: (CardLabel & { label: Label })[];
   members: CardMember[];
   checklists: (Checklist & { items: ChecklistItem[] })[];
