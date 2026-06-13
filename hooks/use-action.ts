@@ -12,6 +12,8 @@ type useActionOptions<TOutput> = {
   onSuccess?: (data: TOutput) => void;
   onError?: (error: string) => void;
   onComplete?: () => void;
+  timeoutMs?: number;
+  timeoutMessage?: string;
 };
 
 export const useAction = <TInput, TOutput>(
@@ -31,7 +33,17 @@ export const useAction = <TInput, TOutput>(
       setIsLoading(true);
 
       try {
-        const result = await action(input);
+        const result = options.timeoutMs
+          ? await Promise.race([
+              action(input),
+              new Promise<ActionState<TInput, TOutput>>((resolve) =>
+                setTimeout(
+                  () => resolve({ error: options.timeoutMessage ?? "Request timed out. Please try again." }),
+                  options.timeoutMs
+                )
+              ),
+            ])
+          : await action(input);
 
         if (!result) return;
 

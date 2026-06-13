@@ -92,6 +92,8 @@ export const Attachments = ({ data }: AttachmentsProps) => {
       setUrl("");
     },
     onError: (e) => toast.error(e),
+    timeoutMs: 30000,
+    timeoutMessage: "Quá thời gian chờ. Vui lòng kiểm tra kết nối và thử lại.",
   });
 
   const { execute: execDelete } = useAction(deleteAttachment, {
