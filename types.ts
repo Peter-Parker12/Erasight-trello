@@ -3,7 +3,7 @@ import type { Card, List, Label, CardLabel, CardMember, Checklist, ChecklistItem
 export type ListWithCards = List & { cards: CardPreview[] };
 export type CardWithList = Card & { list: List };
 
-export type SubtaskPreview = Card & { members: CardMember[] };
+export type SubtaskPreview = Card & { members: CardMember[]; list: { id: string; title: string; type: ListType } };
 
 export type CardPreview = Card & {
   labels: (CardLabel & { label: Label })[];

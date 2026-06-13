@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { ListContainer } from "./_components/list-container";
 import { ListView } from "./_components/list-view";
 import { CalendarView } from "./_components/calendar-view";
+import { GanttView } from "./_components/gantt-view";
 import { CardDeepLink } from "./_components/card-deep-link";
 import { db } from "@/lib/db";
 
@@ -39,7 +40,7 @@ const BoardIdPage = async ({ params, searchParams }: BoardIdPageProps) => {
           _count: { select: { comments: true, attachments: true } },
           subtasks: {
             orderBy: { createdAt: "asc" },
-            include: { members: true },
+            include: { members: true, list: { select: { id: true, title: true, type: true } } },
           },
         },
       },
@@ -56,6 +57,8 @@ const BoardIdPage = async ({ params, searchParams }: BoardIdPageProps) => {
         <ListView lists={lists} />
       ) : view === "calendar" ? (
         <CalendarView lists={lists} />
+      ) : view === "gantt" ? (
+        <GanttView lists={lists} />
       ) : (
         <ListContainer boardId={boardId} data={lists} />
       )}

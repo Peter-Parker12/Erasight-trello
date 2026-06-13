@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { LayoutGrid, List, Calendar } from "lucide-react";
+import { LayoutGrid, List, Calendar, GanttChart } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ export const ViewToggle = () => {
 
   const currentView = searchParams.get("view") ?? "board";
 
-  const setView = (view: "board" | "list" | "calendar") => {
+  const setView = (view: "board" | "list" | "calendar" | "gantt") => {
     const params = new URLSearchParams(searchParams.toString());
     if (view === "board") {
       params.delete("view");
@@ -26,6 +26,7 @@ export const ViewToggle = () => {
     { value: "board" as const, icon: LayoutGrid, label: "Board" },
     { value: "list" as const, icon: List, label: "List" },
     { value: "calendar" as const, icon: Calendar, label: "Calendar" },
+    { value: "gantt" as const, icon: GanttChart, label: "Gantt" },
   ];
 
   return (
