@@ -24,6 +24,7 @@ const TasksPage = async ({ params }: Props) => {
     where: {
       parentCardId: null,
       list: {
+        type: "STANDARD",
         board: {
           orgId,
           ...(admin
@@ -43,8 +44,27 @@ const TasksPage = async ({ params }: Props) => {
       members: true,
       checklists: { include: { items: true } },
       _count: { select: { comments: true, attachments: true } },
-      subtasks: { orderBy: { createdAt: "asc" }, include: { members: true } },
-      list: { include: { board: { select: { id: true, title: true } } } },
+      subtasks: {
+        orderBy: { createdAt: "asc" },
+        include: {
+          members: true,
+          list: { select: { id: true, title: true, type: true } },
+        },
+      },
+      list: {
+        include: {
+          board: {
+            select: {
+              id: true,
+              title: true,
+              lists: {
+                select: { id: true, title: true, type: true, order: true },
+                orderBy: { order: "asc" },
+              },
+            },
+          },
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });

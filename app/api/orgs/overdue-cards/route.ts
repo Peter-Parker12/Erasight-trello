@@ -16,6 +16,7 @@ export async function GET() {
         completed: false,
         dueDate: { lt: now },
         list: {
+          type: "STANDARD",
           board: {
             orgId,
             ...(admin ? {} : { boardMembers: { some: { userId } } }),

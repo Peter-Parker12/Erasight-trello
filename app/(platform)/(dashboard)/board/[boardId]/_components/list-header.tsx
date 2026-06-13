@@ -97,9 +97,21 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
         ) : (
           <div
             onClick={enableEditing}
-            className="w-full text-sm px-2.5 py-1 h-7 font-medium border-transparent cursor-text"
+            className="w-full text-sm px-2.5 py-1 h-7 font-medium border-transparent cursor-text flex items-center gap-2"
           >
-            {data.title}
+            <span className="truncate">{data.title}</span>
+            {data.type !== "STANDARD" && (
+              <span
+                className={cn(
+                  "text-[10px] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wide shrink-0",
+                  data.type === "DONE" && "bg-green-100 text-green-700",
+                  data.type === "FAILED" && "bg-red-100 text-red-700",
+                  data.type === "CANCELLED" && "bg-gray-200 text-gray-600"
+                )}
+              >
+                {data.type}
+              </span>
+            )}
           </div>
         )}
 

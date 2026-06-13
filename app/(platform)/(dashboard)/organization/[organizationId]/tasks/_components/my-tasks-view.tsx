@@ -12,11 +12,13 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { TaskCard } from "@/types";
+import { TaskCard, SubtaskWithList, BoardListOption } from "@/types";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { getListColor } from "./list-color";
+import { StatusSelect } from "./status-select";
 
 const PRIORITY_BADGE: Record<string, { label: string; className: string }> = {
   NONE:   { label: "—",      className: "text-muted-foreground" },
@@ -26,13 +28,6 @@ const PRIORITY_BADGE: Record<string, { label: string; className: string }> = {
   URGENT: { label: "Urgent", className: "bg-red-100 text-red-700" },
 };
 const PRIORITY_ORDER = ["URGENT", "HIGH", "MEDIUM", "LOW", "NONE"];
-
-const LIST_COLORS = ["#6366f1","#8b5cf6","#ec4899","#f43f5e","#f97316","#eab308","#22c55e","#14b8a6","#3b82f6","#06b6d4"];
-const getListColor = (title: string): string => {
-  let h = 0;
-  for (let i = 0; i < title.length; i++) h = title.charCodeAt(i) + ((h << 5) - h);
-  return LIST_COLORS[Math.abs(h) % LIST_COLORS.length];
-};
 
 type GroupEntry = {
   card: TaskCard;
@@ -45,10 +40,12 @@ type CardRowProps = {
   entry: GroupEntry;
   selected: boolean;
   onSelect: (id: string) => void;
+  expanded: boolean;
+  onToggleExpand: (id: string) => void;
 };
 
-const CardRow = ({ entry, selected, onSelect }: CardRowProps) => {
-  const { card, listName, listColor, boardTitle } = entry;
+const CardRow = ({ entry, selected, onSelect, expanded, onToggleExpand }: CardRowProps) => {
+  const { card, boardTitle } = entry;
   const cardModal = useCardModal();
 
   const totalItems = card.checklists.reduce((s, c) => s + c.items.length, 0);
@@ -60,6 +57,7 @@ const CardRow = ({ entry, selected, onSelect }: CardRowProps) => {
   const dueSoon = due && !card.completed && due > now && due.getTime() - now.getTime() < 86400000 * 2;
 
   const priorityCfg = PRIORITY_BADGE[card.priority];
+  const hasSubtasks = card.subtasks.length > 0;
 
   return (
     <tr className={cn("border-b last:border-0 hover:bg-muted/40 transition-colors cursor-pointer group", selected && "bg-sky-50")}>
@@ -75,33 +73,50 @@ const CardRow = ({ entry, selected, onSelect }: CardRowProps) => {
       </td>
 
       {/* Title */}
-      <td className="py-2.5 px-2 max-w-[200px]" onClick={() => cardModal.onOpen(card.id)}>
-        <div className="flex items-center gap-2">
-          {card.coverColor && (
-            <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: card.coverColor }} />
+      <td className="py-2.5 px-2 max-w-[200px]">
+        <div className="flex items-center gap-1.5">
+          {hasSubtasks ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleExpand(card.id); }}
+              className="text-muted-foreground hover:text-foreground shrink-0 p-0.5 -ml-0.5"
+            >
+              {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            </button>
+          ) : (
+            <span className="w-3.5 shrink-0" />
           )}
-          <span className="truncate text-sm font-medium group-hover:text-black">{card.title}</span>
-          <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">#{card.cardNumber}</span>
+          <div className="flex items-center gap-2 min-w-0" onClick={() => cardModal.onOpen(card.id)}>
+            {card.coverColor && (
+              <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: card.coverColor }} />
+            )}
+            <span className="truncate text-sm font-medium group-hover:text-black">{card.title}</span>
+            <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">#{card.cardNumber}</span>
+            {hasSubtasks && (
+              <span className="text-[10px] text-muted-foreground shrink-0">
+                {card.subtasks.filter((s) => s.completed).length}/{card.subtasks.length}
+              </span>
+            )}
+          </div>
         </div>
       </td>
 
       {/* Project */}
-      <td className="py-2.5 px-2 max-w-[160px]">
+      <td className="py-2.5 px-2 max-w-[160px]" onClick={() => cardModal.onOpen(card.id)}>
         <span className="truncate text-xs font-medium text-muted-foreground">{boardTitle}</span>
       </td>
 
-      {/* List */}
+      {/* Status */}
       <td className="py-2.5 px-2">
-        <span
-          className="text-xs px-2 py-0.5 rounded-full font-medium text-white whitespace-nowrap"
-          style={{ backgroundColor: listColor }}
-        >
-          {listName}
-        </span>
+        <StatusSelect
+          cardId={card.id}
+          boardId={card.list.board.id}
+          currentListId={card.list.id}
+          lists={card.list.board.lists}
+        />
       </td>
 
       {/* Labels */}
-      <td className="py-2.5 px-2">
+      <td className="py-2.5 px-2" onClick={() => cardModal.onOpen(card.id)}>
         <div className="flex flex-wrap gap-1">
           {card.labels.length === 0 ? (
             <span className="text-xs text-muted-foreground">—</span>
@@ -114,7 +129,7 @@ const CardRow = ({ entry, selected, onSelect }: CardRowProps) => {
       </td>
 
       {/* Priority */}
-      <td className="py-2.5 px-2">
+      <td className="py-2.5 px-2" onClick={() => cardModal.onOpen(card.id)}>
         {card.priority === "NONE" ? (
           <span className="text-xs text-muted-foreground">—</span>
         ) : (
@@ -125,7 +140,7 @@ const CardRow = ({ entry, selected, onSelect }: CardRowProps) => {
       </td>
 
       {/* Due date */}
-      <td className="py-2.5 px-2">
+      <td className="py-2.5 px-2" onClick={() => cardModal.onOpen(card.id)}>
         {due ? (
           <span className={cn("inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded",
             card.completed ? "bg-green-100 text-green-700" :
@@ -142,7 +157,7 @@ const CardRow = ({ entry, selected, onSelect }: CardRowProps) => {
       </td>
 
       {/* Checklist */}
-      <td className="py-2.5 px-2">
+      <td className="py-2.5 px-2" onClick={() => cardModal.onOpen(card.id)}>
         {totalItems > 0 ? (
           <div className="flex items-center gap-1.5">
             <span className={cn("inline-flex items-center gap-1 text-xs", doneItems === totalItems ? "text-green-600" : "text-muted-foreground")}>
@@ -161,7 +176,7 @@ const CardRow = ({ entry, selected, onSelect }: CardRowProps) => {
       </td>
 
       {/* Activity */}
-      <td className="py-2.5 px-2">
+      <td className="py-2.5 px-2" onClick={() => cardModal.onOpen(card.id)}>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {card._count.comments > 0 && (
             <span className="flex items-center gap-0.5"><MessageSquare className="h-3 w-3" />{card._count.comments}</span>
@@ -174,7 +189,7 @@ const CardRow = ({ entry, selected, onSelect }: CardRowProps) => {
       </td>
 
       {/* Members */}
-      <td className="py-2.5 px-2">
+      <td className="py-2.5 px-2" onClick={() => cardModal.onOpen(card.id)}>
         {card.members.length > 0 ? (
           <div className="flex -space-x-1.5">
             {card.members.slice(0, 4).map((m) => (
@@ -197,15 +212,134 @@ const CardRow = ({ entry, selected, onSelect }: CardRowProps) => {
   );
 };
 
+type SubtaskRowProps = {
+  subtask: SubtaskWithList;
+  boardId: string;
+  boardLists: BoardListOption[];
+};
+
+const SubtaskRow = ({ subtask, boardId, boardLists }: SubtaskRowProps) => {
+  const cardModal = useCardModal();
+
+  const due = subtask.dueDate ? new Date(subtask.dueDate) : null;
+  const now = new Date();
+  const overdue = due && !subtask.completed && due < now;
+  const dueSoon = due && !subtask.completed && due > now && due.getTime() - now.getTime() < 86400000 * 2;
+  const priorityCfg = PRIORITY_BADGE[subtask.priority];
+
+  return (
+    <tr className="border-b last:border-0 hover:bg-muted/20 transition-colors group bg-muted/5">
+      {/* Checkbox (subtasks aren't bulk-selectable) */}
+      <td className="py-2 px-3 w-8" />
+
+      {/* Title */}
+      <td className="py-2 px-2 max-w-[200px] pl-9" onClick={() => cardModal.onOpen(subtask.id)}>
+        <div className="flex items-center gap-2 cursor-pointer min-w-0">
+          <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", subtask.completed ? "bg-green-400" : "bg-gray-300")} />
+          <span className={cn("truncate text-xs font-medium group-hover:text-black", subtask.completed && "line-through text-muted-foreground")}>
+            {subtask.title}
+          </span>
+          <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">#{subtask.cardNumber}</span>
+        </div>
+      </td>
+
+      {/* Project */}
+      <td className="py-2 px-2"><span className="text-xs text-muted-foreground">—</span></td>
+
+      {/* Status */}
+      <td className="py-2 px-2">
+        <StatusSelect cardId={subtask.id} boardId={boardId} currentListId={subtask.list.id} lists={boardLists} />
+      </td>
+
+      {/* Labels */}
+      <td className="py-2 px-2"><span className="text-xs text-muted-foreground">—</span></td>
+
+      {/* Priority */}
+      <td className="py-2 px-2">
+        {subtask.priority === "NONE" ? (
+          <span className="text-xs text-muted-foreground">—</span>
+        ) : (
+          <span className={cn("text-xs px-2 py-0.5 rounded font-semibold", priorityCfg.className)}>
+            {priorityCfg.label}
+          </span>
+        )}
+      </td>
+
+      {/* Due date */}
+      <td className="py-2 px-2">
+        {due ? (
+          <span className={cn("inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded",
+            subtask.completed ? "bg-green-100 text-green-700" :
+            overdue ? "bg-red-100 text-red-600" :
+            dueSoon ? "bg-yellow-100 text-yellow-700" : "text-muted-foreground"
+          )}>
+            <CalendarDays className="h-3 w-3" />
+            {format(due, "MMM d, yyyy")}
+            {subtask.completed && " ✓"}
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        )}
+      </td>
+
+      {/* Checklist */}
+      <td className="py-2 px-2"><span className="text-xs text-muted-foreground">—</span></td>
+
+      {/* Activity */}
+      <td className="py-2 px-2"><span className="text-xs text-muted-foreground">—</span></td>
+
+      {/* Members */}
+      <td className="py-2 px-2">
+        {subtask.members.length > 0 ? (
+          <div className="flex -space-x-1.5">
+            {subtask.members.slice(0, 4).map((m) => (
+              <Avatar key={m.id} className="h-5 w-5 border-2 border-white">
+                <AvatarImage src={m.userImage} alt={m.userName} />
+                <AvatarFallback className="text-[8px]">{m.userName.charAt(0)}</AvatarFallback>
+              </Avatar>
+            ))}
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        )}
+      </td>
+    </tr>
+  );
+};
+
+type TaskRowGroupProps = {
+  entry: GroupEntry;
+  selected: boolean;
+  onSelect: (id: string) => void;
+  expandedIds: Set<string>;
+  onToggleExpand: (id: string) => void;
+};
+
+const TaskRowGroup = ({ entry, selected, onSelect, expandedIds, onToggleExpand }: TaskRowGroupProps) => {
+  const { card } = entry;
+  const expanded = expandedIds.has(card.id);
+
+  return (
+    <>
+      <CardRow entry={entry} selected={selected} onSelect={onSelect} expanded={expanded} onToggleExpand={onToggleExpand} />
+      {expanded && card.subtasks.map((subtask) => (
+        <SubtaskRow key={subtask.id} subtask={subtask} boardId={card.list.board.id} boardLists={card.list.board.lists} />
+      ))}
+    </>
+  );
+};
+
 type GroupSectionProps = {
   label: string;
   color?: string;
   entries: GroupEntry[];
   selectedIds: Set<string>;
   onSelect: (id: string) => void;
+  expandedIds: Set<string>;
+  onToggleExpand: (id: string) => void;
 };
 
-const GroupSection = ({ label, color, entries, selectedIds, onSelect }: GroupSectionProps) => {
+const GroupSection = ({ label, color, entries, selectedIds, onSelect, expandedIds, onToggleExpand }: GroupSectionProps) => {
   const [open, setOpen] = useState(true);
   const allSel = entries.length > 0 && entries.every((e) => selectedIds.has(e.card.id));
   return (
@@ -231,7 +365,7 @@ const GroupSection = ({ label, color, entries, selectedIds, onSelect }: GroupSec
         </td>
       </tr>
       {open && entries.map((entry) => (
-        <CardRow key={entry.card.id} entry={entry} selected={selectedIds.has(entry.card.id)} onSelect={onSelect} />
+        <TaskRowGroup key={entry.card.id} entry={entry} selected={selectedIds.has(entry.card.id)} onSelect={onSelect} expandedIds={expandedIds} onToggleExpand={onToggleExpand} />
       ))}
     </>
   );
@@ -244,9 +378,11 @@ type ListSubSectionProps = {
   list: ListGroup;
   selectedIds: Set<string>;
   onSelect: (id: string) => void;
+  expandedIds: Set<string>;
+  onToggleExpand: (id: string) => void;
 };
 
-const ListSubSection = ({ list, selectedIds, onSelect }: ListSubSectionProps) => {
+const ListSubSection = ({ list, selectedIds, onSelect, expandedIds, onToggleExpand }: ListSubSectionProps) => {
   const [open, setOpen] = useState(true);
   const allSel = list.entries.length > 0 && list.entries.every((e) => selectedIds.has(e.card.id));
   return (
@@ -273,7 +409,7 @@ const ListSubSection = ({ list, selectedIds, onSelect }: ListSubSectionProps) =>
         </td>
       </tr>
       {open && list.entries.map((entry) => (
-        <CardRow key={entry.card.id} entry={entry} selected={selectedIds.has(entry.card.id)} onSelect={onSelect} />
+        <TaskRowGroup key={entry.card.id} entry={entry} selected={selectedIds.has(entry.card.id)} onSelect={onSelect} expandedIds={expandedIds} onToggleExpand={onToggleExpand} />
       ))}
     </>
   );
@@ -283,9 +419,11 @@ type ProjectListSectionProps = {
   project: ProjectGroup;
   selectedIds: Set<string>;
   onSelect: (id: string) => void;
+  expandedIds: Set<string>;
+  onToggleExpand: (id: string) => void;
 };
 
-const ProjectListSection = ({ project, selectedIds, onSelect }: ProjectListSectionProps) => {
+const ProjectListSection = ({ project, selectedIds, onSelect, expandedIds, onToggleExpand }: ProjectListSectionProps) => {
   const [open, setOpen] = useState(true);
   const allEntries = project.lists.flatMap((l) => l.entries);
   const totalCount = allEntries.length;
@@ -314,7 +452,7 @@ const ProjectListSection = ({ project, selectedIds, onSelect }: ProjectListSecti
         </td>
       </tr>
       {open && project.lists.map((list) => (
-        <ListSubSection key={list.key} list={list} selectedIds={selectedIds} onSelect={onSelect} />
+        <ListSubSection key={list.key} list={list} selectedIds={selectedIds} onSelect={onSelect} expandedIds={expandedIds} onToggleExpand={onToggleExpand} />
       ))}
     </>
   );
@@ -328,6 +466,7 @@ type MyTasksViewProps = {
 export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
   const [groupBy, setGroupBy] = useState<"project" | "list" | "priority" | "assignee">("project");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const allEntries = useMemo<GroupEntry[]>(
     () => cards.map((card) => ({
@@ -341,6 +480,9 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
 
   const toggleSelect = (id: string) =>
     setSelectedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+
+  const toggleExpand = (id: string) =>
+    setExpandedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
   // Two-level grouping used only for "list" mode: project → lists → cards
   const listGroups = useMemo<ProjectGroup[] | null>(() => {
@@ -458,7 +600,7 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
                   className="rounded border-gray-300 text-sky-600"
                 />
               </th>
-              {["Title", "Project", "List", "Labels", "Priority", "Due Date", "Checklist", "Activity", "Members"].map((h) => (
+              {["Title", "Project", "Status", "Labels", "Priority", "Due Date", "Checklist", "Activity", "Members"].map((h) => (
                 <th key={h} className="text-left py-2.5 px-2 font-medium text-muted-foreground text-xs uppercase tracking-wide whitespace-nowrap">
                   {h}
                 </th>
@@ -473,6 +615,8 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
                     project={project}
                     selectedIds={selectedIds}
                     onSelect={toggleSelect}
+                    expandedIds={expandedIds}
+                    onToggleExpand={toggleExpand}
                   />
                 ))
               : groups.map((group) => (
@@ -483,6 +627,8 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
                     entries={group.entries}
                     selectedIds={selectedIds}
                     onSelect={toggleSelect}
+                    expandedIds={expandedIds}
+                    onToggleExpand={toggleExpand}
                   />
                 ))}
           </tbody>

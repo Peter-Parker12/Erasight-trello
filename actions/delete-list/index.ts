@@ -24,6 +24,18 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   let list;
 
   try {
+    const existing = await db.list.findUnique({
+      where: { id, boardId, board: { orgId } },
+    });
+
+    if (!existing) {
+      return { error: "List not found." };
+    }
+
+    if (existing.type !== "STANDARD") {
+      return { error: "This default status column cannot be deleted." };
+    }
+
     list = await db.list.delete({
       where: {
         id,

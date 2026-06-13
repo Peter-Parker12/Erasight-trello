@@ -115,30 +115,36 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
 
         <Separator />
 
-        <form action={onDelete}>
-          <input
-            type="hidden"
-            name="id"
-            id="id"
-            value={data.id}
-            hidden
-            aria-hidden
-          />
-          <input
-            type="hidden"
-            name="boardId"
-            id="boardId"
-            value={data.boardId}
-            hidden
-            aria-hidden
-          />
-          <FormSubmit
-            className="rounded-none w-full h-auto p-2 px-5 justify-start font-normal text-sm"
-            variant="ghost"
-          >
-            Delete this list...
-          </FormSubmit>
-        </form>
+        {data.type === "STANDARD" ? (
+          <form action={onDelete}>
+            <input
+              type="hidden"
+              name="id"
+              id="id"
+              value={data.id}
+              hidden
+              aria-hidden
+            />
+            <input
+              type="hidden"
+              name="boardId"
+              id="boardId"
+              value={data.boardId}
+              hidden
+              aria-hidden
+            />
+            <FormSubmit
+              className="rounded-none w-full h-auto p-2 px-5 justify-start font-normal text-sm"
+              variant="ghost"
+            >
+              Delete this list...
+            </FormSubmit>
+          </form>
+        ) : (
+          <div className="px-5 py-2 text-xs text-muted-foreground">
+            Default status column — cannot be deleted
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );

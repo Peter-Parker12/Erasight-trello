@@ -65,6 +65,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       entityType: ENTITY_TYPE.BOARD,
       action: ACTION.CREATE,
     });
+
+    await db.list.createMany({
+      data: [
+        { boardId: board.id, title: "Done", type: "DONE", order: 100000 },
+        { boardId: board.id, title: "Failed", type: "FAILED", order: 100001 },
+        { boardId: board.id, title: "Cancelled", type: "CANCELLED", order: 100002 },
+      ],
+    });
   } catch (error) {
     return {
       error: "Failed to create",

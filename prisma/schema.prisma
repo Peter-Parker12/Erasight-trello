@@ -83,11 +83,19 @@ model BoardMember {
   @@index([userId])
 }
 
+enum ListType {
+  STANDARD
+  DONE
+  FAILED
+  CANCELLED
+}
+
 model List {
   id        String    @id  @default(uuid())
   title     String
   order     Int
   wipLimit  Int?
+  type      ListType  @default(STANDARD)
 
   boardId   String
   board     Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)

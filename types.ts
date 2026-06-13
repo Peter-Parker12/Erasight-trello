@@ -1,4 +1,4 @@
-import type { Card, List, Label, CardLabel, CardMember, Checklist, ChecklistItem, Comment, Attachment } from "@prisma/client";
+import type { Card, List, Label, CardLabel, CardMember, Checklist, ChecklistItem, Comment, Attachment, ListType } from "@prisma/client";
 
 export type ListWithCards = List & { cards: CardPreview[] };
 export type CardWithList = Card & { list: List };
@@ -23,6 +23,11 @@ export type CardWithFullDetail = Card & {
   subtasks: (Card & { members: CardMember[] })[];
 };
 
-export type TaskCard = CardPreview & {
-  list: { id: string; title: string; board: { id: string; title: string } };
+export type BoardListOption = { id: string; title: string; type: ListType; order: number };
+
+export type SubtaskWithList = Card & { members: CardMember[]; list: { id: string; title: string; type: ListType } };
+
+export type TaskCard = Omit<CardPreview, "subtasks"> & {
+  subtasks: SubtaskWithList[];
+  list: { id: string; title: string; type: ListType; board: { id: string; title: string; lists: BoardListOption[] } };
 };
