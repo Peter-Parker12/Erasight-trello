@@ -7,6 +7,7 @@ import { DragDropContext, type DropResult, Droppable } from "@hello-pangea/dnd";
 import { ListForm } from "./list-form";
 import { ListItem } from "./list-item";
 import { BoardFilterBar } from "./board-filter-bar";
+import { SubtaskGroupBoard } from "./subtask-group-board";
 import type { ListWithCards } from "@/types";
 import { useAction } from "@/hooks/use-action";
 import { updateListOrder } from "@/actions/update-list-order";
@@ -103,10 +104,15 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
       // check if cards exists on the destination list
       if (!destinationList.cards) destinationList.cards = [];
 
+      // cards with subtasks are rendered in the grouped board above, not in
+      // this column, so they must be excluded when re-indexing drag positions
+      const sourceGrouped = sourceList.cards.filter((card) => card.subtasks.length > 0);
+      const sourceStandalone = sourceList.cards.filter((card) => card.subtasks.length === 0);
+
       // moving the card in the same list
       if (source.droppableId === destination.droppableId) {
         const reorderedCards = reorder(
-          sourceList.cards,
+          sourceStandalone,
           source.index,
           destination.index
         );
@@ -115,7 +121,7 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
           card.order = i;
         });
 
-        sourceList.cards = reorderedCards;
+        sourceList.cards = [...sourceGrouped, ...reorderedCards];
         setOrderedData(newOrderedData);
 
         executeUpdateCardOrder({
@@ -125,33 +131,44 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
       }
       // user moves card to another list
       else {
+        const destinationGrouped = destinationList.cards.filter((card) => card.subtasks.length > 0);
+        const destinationStandalone = destinationList.cards.filter((card) => card.subtasks.length === 0);
+
         // remove card from the source list
-        const [movedCard] = sourceList.cards.splice(source.index, 1);
+        const [movedCard] = sourceStandalone.splice(source.index, 1);
 
         // assign the new list id to the moved card
         movedCard.listId = destination.droppableId;
 
         // add new card to the destination list
-        destinationList.cards.splice(destination.index, 0, movedCard);
+        destinationStandalone.splice(destination.index, 0, movedCard);
 
-        sourceList.cards.forEach((card, i) => {
+        sourceStandalone.forEach((card, i) => {
           card.order = i;
         });
 
         // update the order for each card in destination list
-        destinationList.cards.forEach((card, i) => {
+        destinationStandalone.forEach((card, i) => {
           card.order = i;
         });
+
+        sourceList.cards = [...sourceGrouped, ...sourceStandalone];
+        destinationList.cards = [...destinationGrouped, ...destinationStandalone];
 
         setOrderedData(newOrderedData);
 
         executeUpdateCardOrder({
           boardId: boardId,
-          items: destinationList.cards,
+          items: destinationStandalone,
         });
       }
     }
   };
+
+  const groupedParents = orderedData.flatMap((list) =>
+    list.cards.filter((card) => card.subtasks.length > 0)
+  );
+  const filteredGroupedParents = isActive ? applyFilter(groupedParents) : groupedParents;
 
   return (
     <>
@@ -162,6 +179,9 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
         reset={reset}
         isActive={isActive}
       />
+
+      <SubtaskGroupBoard lists={orderedData} parents={filteredGroupedParents} boardId={boardId} />
+
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="lists" type="list" direction="horizontal">
         {(provided) => (
@@ -173,7 +193,7 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
             {orderedData.map((list, i) => (
               <ListItem key={list.id} index={i} data={{
                 ...list,
-                cards: isActive ? applyFilter(list.cards) : list.cards,
+                cards: (isActive ? applyFilter(list.cards) : list.cards).filter((card) => card.subtasks.length === 0),
               }} />
             ))}
 
