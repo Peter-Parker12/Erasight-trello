@@ -9,6 +9,19 @@ import { createAuditLog } from "@/lib/create-audit-log";
 import { ACTION, ENTITY_TYPE } from "@prisma/client";
 import { toApiRoute } from "@/lib/api-route";
 
+const deleteCardWithSubtasks = async (cardId: string) => {
+  const subtasks = await db.card.findMany({
+    where: { parentCardId: cardId },
+    select: { id: true },
+  });
+
+  for (const subtask of subtasks) {
+    await deleteCardWithSubtasks(subtask.id);
+  }
+
+  await db.card.delete({ where: { id: cardId } });
+};
+
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = await auth();
 
@@ -23,7 +36,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   let card;
 
   try {
-    card = await db.card.delete({
+    card = await db.card.findFirst({
       where: {
         id,
         list: {
@@ -33,6 +46,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         },
       },
     });
+
+    if (!card) {
+      return {
+        error: "Not found.",
+      };
+    }
+
+    await deleteCardWithSubtasks(id);
 
     // create new activity log
     await createAuditLog({
