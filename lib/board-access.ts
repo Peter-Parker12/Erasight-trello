@@ -10,7 +10,8 @@ export const isOrgAdmin = async (orgId: string): Promise<boolean> => {
       userId: [userId],
       limit: 1,
     });
-    return result.data[0]?.role === "org:admin";
+    const role = result.data[0]?.role;
+    return role === "org:admin" || role === "admin";
   } catch {
     return false;
   }
