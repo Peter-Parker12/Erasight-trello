@@ -17,6 +17,7 @@ import { fetcher } from "@/lib/fetcher";
 import { useAction } from "@/hooks/use-action";
 import { addBoardMember, removeBoardMember } from "@/actions/manage-board-members";
 import { cn } from "@/lib/utils";
+import { isAdminRole } from "@/lib/roles";
 
 type OrgMember = {
   userId: string;
@@ -139,9 +140,9 @@ export const BoardMembers = ({ boardId, compact = false }: BoardMembersProps) =>
                       <AvatarImage src={m.userImage} />
                       <AvatarFallback>{m.userName[0]}</AvatarFallback>
                     </Avatar>
-                    <span className={cn("flex-1 text-sm truncate", m.role === "org:admin" && "text-muted-foreground italic")}>
+                    <span className={cn("flex-1 text-sm truncate", isAdminRole(m.role) && "text-muted-foreground italic")}>
                       {m.userName}
-                      {m.role === "org:admin" && " (admin)"}
+                      {isAdminRole(m.role) && " (admin)"}
                     </span>
                     <button
                       disabled={isAdding}

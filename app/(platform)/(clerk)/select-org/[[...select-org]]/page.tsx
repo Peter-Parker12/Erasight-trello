@@ -2,6 +2,8 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { OrganizationList } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
+import { isAdminRole } from "@/lib/roles";
+
 export default async function SelectOrgPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
@@ -9,9 +11,7 @@ export default async function SelectOrgPage() {
   const client = await clerkClient();
   const memberships = await client.users.getOrganizationMembershipList({ userId });
 
-  const isAdmin = memberships.data.some(
-    (m) => m.role === "org:admin" || m.role === "admin"
-  );
+  const isAdmin = memberships.data.some((m) => isAdminRole(m.role));
 
   return (
     <OrganizationList

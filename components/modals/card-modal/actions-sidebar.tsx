@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { fetcher } from "@/lib/fetcher";
+import { isAdminRole } from "@/lib/roles";
 import { Label } from "@prisma/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -117,7 +118,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
   const assignableMembers: AssignableMember[] = memberData
     ? memberData.boardMembers.length === 0
       ? memberData.orgMembers
-      : memberData.orgMembers.filter((m) => m.isBoardMember || m.role === "org:admin")
+      : memberData.orgMembers.filter((m) => m.isBoardMember || isAdminRole(m.role))
     : [];
 
   const { execute: execCopy } = useAction(copyCard, {

@@ -1,5 +1,7 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 
+import { isAdminRole } from "@/lib/roles";
+
 export const isOrgAdmin = async (orgId: string): Promise<boolean> => {
   const { userId } = await auth();
   if (!userId) return false;
@@ -10,8 +12,7 @@ export const isOrgAdmin = async (orgId: string): Promise<boolean> => {
       userId: [userId],
       limit: 1,
     });
-    const role = result.data[0]?.role;
-    return role === "org:admin" || role === "admin";
+    return isAdminRole(result.data[0]?.role);
   } catch {
     return false;
   }
