@@ -16,20 +16,20 @@ const AppSettingsLayout = async ({ children, params }: AppSettingsLayoutProps) =
   if (!userId || !orgId) redirect("/select-org");
   if (orgId !== organizationId) redirect("/select-org");
 
-  if (!(await isOrgAdmin(orgId))) {
-    redirect(`/organization/${organizationId}/settings`);
-  }
+  const isAdmin = await isOrgAdmin(orgId);
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4 max-w-3xl">
       <div>
-        <h1 className="text-xl font-semibold">App settings</h1>
+        <h1 className="text-xl font-semibold">Settings</h1>
         <p className="text-sm text-neutral-500">
-          Configure module access, CRM custom fields and API keys for your organization.
+          {isAdmin
+            ? "Configure module access, CRM custom fields, API keys and organization members."
+            : "Manage your organization membership."}
         </p>
       </div>
 
-      <SettingsTabs organizationId={organizationId} />
+      <SettingsTabs organizationId={organizationId} isAdmin={isAdmin} />
 
       {children}
     </div>

@@ -2,11 +2,21 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
+import { isOrgAdmin } from "@/lib/board-access";
 import { ApiKeysManager } from "./_components/api-keys-manager";
 
-const ApiKeysSettingsPage = async () => {
+type ApiKeysSettingsPageProps = {
+  params: Promise<{ organizationId: string }>;
+};
+
+const ApiKeysSettingsPage = async ({ params }: ApiKeysSettingsPageProps) => {
+  const { organizationId } = await params;
   const { orgId } = await auth();
   if (!orgId) redirect("/select-org");
+
+  if (!(await isOrgAdmin(orgId))) {
+    redirect(`/organization/${organizationId}/settings/app/members`);
+  }
 
   const apiKeys = await db.apiKey.findMany({
     where: { orgId },

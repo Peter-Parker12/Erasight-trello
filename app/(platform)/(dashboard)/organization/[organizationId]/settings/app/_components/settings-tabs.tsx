@@ -5,18 +5,26 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
-const TABS = [
+const ADMIN_TABS = [
   { href: "modules", label: "Modules" },
   { href: "custom-fields", label: "Custom fields" },
   { href: "api-keys", label: "API keys" },
 ];
 
-export const SettingsTabs = ({ organizationId }: { organizationId: string }) => {
+const MEMBERS_TAB = { href: "members", label: "Members" };
+
+type SettingsTabsProps = {
+  organizationId: string;
+  isAdmin: boolean;
+};
+
+export const SettingsTabs = ({ organizationId, isAdmin }: SettingsTabsProps) => {
   const pathname = usePathname();
+  const tabs = isAdmin ? [...ADMIN_TABS, MEMBERS_TAB] : [MEMBERS_TAB];
 
   return (
     <div className="flex gap-1 border-b">
-      {TABS.map((tab) => {
+      {tabs.map((tab) => {
         const href = `/organization/${organizationId}/settings/app/${tab.href}`;
         const isActive = pathname === href;
 

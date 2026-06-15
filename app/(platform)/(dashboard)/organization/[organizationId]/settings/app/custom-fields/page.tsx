@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
+import { isOrgAdmin } from "@/lib/board-access";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
 import { CustomFieldsManager } from "./_components/custom-fields-manager";
 
@@ -10,9 +11,18 @@ const ENTITY_TYPES = [
   { type: "LEAD" as const, label: "Leads" },
 ];
 
-const CustomFieldsSettingsPage = async () => {
+type CustomFieldsSettingsPageProps = {
+  params: Promise<{ organizationId: string }>;
+};
+
+const CustomFieldsSettingsPage = async ({ params }: CustomFieldsSettingsPageProps) => {
+  const { organizationId } = await params;
   const { orgId } = await auth();
   if (!orgId) redirect("/select-org");
+
+  if (!(await isOrgAdmin(orgId))) {
+    redirect(`/organization/${organizationId}/settings/app/members`);
+  }
 
   const definitions = await Promise.all(
     ENTITY_TYPES.map(async ({ type }) => ({
