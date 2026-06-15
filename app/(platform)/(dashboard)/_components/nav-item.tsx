@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Activity, Layout, ListTodo, Settings } from "lucide-react";
+import { Activity, Building2, Handshake, Layout, ListTodo, Settings, Users } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 import {
@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { cn } from "@/lib/utils";
+import { useModuleAccess } from "@/hooks/use-module-access";
+import type { ModuleKey } from "@/lib/modules";
 
 export type Organization = {
   id: string;
@@ -36,17 +38,38 @@ export const NavItem = ({
 }: NavItemProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const modules = useModuleAccess(organization.id);
 
-  const routes = [
+  const allRoutes: { label: string; icon: React.ReactNode; href: string; module?: ModuleKey }[] = [
     {
       label: "Boards",
       icon: <Layout className="h-4 w-4 mr-2" />,
       href: `/organization/${organization.id}`,
+      module: "TASKS",
     },
     {
       label: "My Tasks",
       icon: <ListTodo className="h-4 w-4 mr-2" />,
       href: `/organization/${organization.id}/tasks`,
+      module: "TASKS",
+    },
+    {
+      label: "Companies",
+      icon: <Building2 className="h-4 w-4 mr-2" />,
+      href: `/organization/${organization.id}/crm/companies`,
+      module: "CRM",
+    },
+    {
+      label: "Contacts",
+      icon: <Users className="h-4 w-4 mr-2" />,
+      href: `/organization/${organization.id}/crm/contacts`,
+      module: "CRM",
+    },
+    {
+      label: "Leads",
+      icon: <Handshake className="h-4 w-4 mr-2" />,
+      href: `/organization/${organization.id}/crm/leads`,
+      module: "CRM",
     },
     {
       label: "Activity",
@@ -59,6 +82,8 @@ export const NavItem = ({
       href: `/organization/${organization.id}/settings`,
     },
   ];
+
+  const routes = allRoutes.filter((route) => !route.module || modules[route.module]);
 
   const onClick = (href: string) => {
     router.push(href);

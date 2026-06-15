@@ -295,6 +295,9 @@ enum ENTITY_TYPE {
   COMMENT
   LABEL
   ATTACHMENT
+  COMPANY
+  CONTACT
+  LEAD
 }
 
 model AuditLog {
@@ -338,4 +341,166 @@ model Notification {
 
   @@index([userId])
   @@index([orgId])
+}
+
+// ---------------------------------------------------------------------------
+// Platform: module access (Taskify / CRM / future modules)
+// ---------------------------------------------------------------------------
+
+model ModuleAccess {
+  id     String @id @default(uuid())
+  orgId  String
+  userId String
+  module String
+
+  createdAt DateTime @default(now())
+
+  @@unique([orgId, userId, module])
+  @@index([orgId, module])
+}
+
+// ---------------------------------------------------------------------------
+// Platform: API keys for third-party access to the public API
+// ---------------------------------------------------------------------------
+
+model ApiKey {
+  id         String    @id @default(uuid())
+  orgId      String
+  name       String
+  keyPrefix  String
+  hashedKey  String    @unique
+  createdBy  String
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  createdAt  DateTime  @default(now())
+
+  @@index([orgId])
+}
+
+// ---------------------------------------------------------------------------
+// CRM module
+// ---------------------------------------------------------------------------
+
+enum CrmEntityType {
+  COMPANY
+  CONTACT
+  LEAD
+}
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  DATE
+  SELECT
+  MULTI_SELECT
+  CURRENCY
+  EMAIL
+  PHONE
+  URL
+}
+
+model CustomFieldDefinition {
+  id         String          @id @default(uuid())
+  orgId      String
+  entityType CrmEntityType
+  key        String
+  label      String
+  fieldType  CustomFieldType
+  options    Json?
+  required   Boolean         @default(false)
+  order      Int             @default(0)
+
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([orgId, entityType, key])
+  @@index([orgId, entityType])
+}
+
+model Company {
+  id           String   @id @default(uuid())
+  orgId        String
+  name         String
+  domain       String?
+  industry     String?
+  phone        String?
+  website      String?  @db.Text
+  address      String?  @db.Text
+  description  String?  @db.Text
+  customFields Json     @default("{}")
+
+  contacts     Contact[]
+  leads        Lead[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+model Contact {
+  id           String   @id @default(uuid())
+  orgId        String
+  firstName    String
+  lastName     String?
+  email        String?
+  phone        String?
+  title        String?
+  customFields Json     @default("{}")
+
+  companyId    String?
+  company      Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  leads        Lead[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([orgId])
+  @@index([companyId])
+}
+
+model PipelineStage {
+  id        String   @id @default(uuid())
+  orgId     String
+  name      String
+  order     Int
+  isWon     Boolean  @default(false)
+  isLost    Boolean  @default(false)
+
+  leads     Lead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+model Lead {
+  id           String         @id @default(uuid())
+  orgId        String
+  title        String
+  order        Int
+  value        Decimal?       @db.Decimal(14, 2)
+  ownerId      String?
+  customFields Json           @default("{}")
+
+  stageId      String
+  stage        PipelineStage  @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  companyId    String?
+  company      Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  contactId    String?
+  contact      Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([orgId])
+  @@index([stageId])
+  @@index([companyId])
+  @@index([contactId])
 }
