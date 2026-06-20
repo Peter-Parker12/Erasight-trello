@@ -29,10 +29,12 @@ type BoardSettingsSheetProps = {
 
 type RulesMap = Record<string, string[]>;
 
-const ACTION_META: Record<string, { label: string; icon: React.ReactNode; onlyFor?: string[] }> = {
-  ADD_ASSIGNEE: { label: "Require assignee", icon: <UserPlus className="h-3.5 w-3.5" /> },
-  ADD_DUE_DATE: { label: "Require due date", icon: <CalendarDays className="h-3.5 w-3.5" /> },
-  ADD_REASON:   { label: "Require reason",   icon: <MessageSquareWarning className="h-3.5 w-3.5" />, onlyFor: ["FAILED", "CANCELLED"] },
+type LucideIcon = React.ComponentType<{ className?: string }>;
+
+const ACTION_META: Record<string, { label: string; Icon: LucideIcon; onlyFor?: string[] }> = {
+  ADD_ASSIGNEE: { label: "Require assignee", Icon: UserPlus },
+  ADD_DUE_DATE: { label: "Require due date", Icon: CalendarDays },
+  ADD_REASON:   { label: "Require reason",   Icon: MessageSquareWarning, onlyFor: ["FAILED", "CANCELLED"] },
 };
 const ALL_ACTIONS = ["ADD_ASSIGNEE", "ADD_DUE_DATE", "ADD_REASON"] as const;
 
@@ -165,7 +167,7 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
                   <div className="space-y-1.5">
                     {availableActions.map((action) => {
                       const checked = listActions.includes(action);
-                      const { label, icon } = ACTION_META[action];
+                      const { label, Icon } = ACTION_META[action];
                       return (
                         <label
                           key={action}
@@ -178,7 +180,7 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
                             className="h-3.5 w-3.5 accent-sky-600"
                           />
                           <span className="flex items-center gap-1.5 text-xs text-neutral-700">
-                            {icon}
+                            <Icon className="h-3.5 w-3.5" />
                             {label}
                           </span>
                         </label>
