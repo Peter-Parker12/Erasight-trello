@@ -45,7 +45,7 @@ export const MobileSidebar = () => {
         <SheetContent side="left" className="p-2 pt-10">
           <SheetHeader>
             <SheetTitle>
-              <Logo isMobile />
+              <Logo />
             </SheetTitle>
           </SheetHeader>
           <Sidebar storageKey="t-sidebar-mobile-state" />
