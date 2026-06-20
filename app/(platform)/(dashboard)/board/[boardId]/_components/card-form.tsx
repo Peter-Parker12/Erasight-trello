@@ -15,6 +15,7 @@ import { FormSubmit } from "@/components/form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { createCard } from "@/actions/create-card";
 import { fetcher } from "@/lib/fetcher";
+import { useCardModal } from "@/hooks/use-card-modal";
 
 type CardFormProps = {
   listId: string;
@@ -29,6 +30,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
     const formRef = useRef<HTMLFormElement>(null);
     const [showTemplates, setShowTemplates] = useState(false);
     const textareaRef = ref as React.RefObject<HTMLTextAreaElement>;
+    const cardModal = useCardModal();
 
     const { data: templates } = useQuery<CardTemplate[]>({
       queryKey: ["org-templates"],
@@ -38,8 +40,9 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
 
     const { execute, fieldErrors } = useAction(createCard, {
       onSuccess: (data) => {
-        toast.success(`Card "${data.title} created."`);
+        toast.success(`Card "${data.title}" created.`);
         formRef.current?.reset();
+        cardModal.onOpen(data.id);
       },
       onError: (error) => {
         toast.error(error);

@@ -48,8 +48,20 @@ export const Description = ({ data }: DescriptionProps) => {
     }
   };
 
+  const onTextareaKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  };
+
+  const onClickOutside = () => {
+    if (isSaving) return;
+    formRef.current?.requestSubmit();
+  };
+
   useEventListener("keydown", onKeyDown);
-  useOnClickOutside(formRef as React.RefObject<HTMLElement>, disableEditing);
+  useOnClickOutside(formRef as React.RefObject<HTMLElement>, onClickOutside);
 
   const { execute, fieldErrors, isLoading: isSaving } = useAction(updateCard, {
     onSuccess: (data) => {
@@ -94,6 +106,7 @@ export const Description = ({ data }: DescriptionProps) => {
               placeholder="Add a more detailed description..."
               defaultValue={data.description || undefined}
               errors={fieldErrors}
+              onKeyDown={onTextareaKeyDown}
             />
 
             <div className="flex items-center gap-x-2">
