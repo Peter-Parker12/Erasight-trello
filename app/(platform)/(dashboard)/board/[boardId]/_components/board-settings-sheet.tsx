@@ -63,16 +63,16 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
 
   const currentLists = listsData ?? lists;
 
-  const { data: rules = {}, refetch: refetchRules } = useQuery<RulesMap>({
+  const { data: rulesData, refetch: refetchRules } = useQuery<RulesMap>({
     queryKey: ["transition-rules", boardId],
     queryFn: () => fetcher(`/api/boards/${boardId}/transition-rules`),
     enabled: open,
   });
 
-  // Sync local state from server (on initial load or after a failed upsert revert)
+  // Sync local state only when real server data arrives (rulesData is stable — no new {} each render)
   useEffect(() => {
-    setLocalRules(rules);
-  }, [rules]);
+    if (rulesData) setLocalRules(rulesData);
+  }, [rulesData]);
 
   const { execute: executeCreateList, isLoading: isCreatingList } = useAction(createList, {
     onSuccess: () => {
@@ -91,7 +91,7 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
     onError: (e) => {
       toast.error(e);
       // Revert local optimistic state to server state on failure
-      setLocalRules(rules);
+      if (rulesData) setLocalRules(rulesData);
     },
   });
 
