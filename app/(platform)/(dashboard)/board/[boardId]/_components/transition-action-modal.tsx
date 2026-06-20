@@ -54,7 +54,13 @@ export const TransitionActionModal = ({
       : memberData.orgMembers.filter((m) => m.isBoardMember)
     : [];
 
+  const isValid =
+    (!needsAssignee || selectedAssignee !== null) &&
+    (!needsDueDate || dueDate !== "") &&
+    (!needsReason || reason.trim() !== "");
+
   const handleConfirm = () => {
+    if (!isValid) return;
     onConfirm(
       needsAssignee ? selectedAssignee : null,
       needsDueDate && dueDate ? dueDate : null,
@@ -152,7 +158,7 @@ export const TransitionActionModal = ({
           <Button variant="ghost" size="sm" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button size="sm" onClick={handleConfirm}>
+          <Button size="sm" onClick={handleConfirm} disabled={!isValid}>
             Confirm
           </Button>
         </DialogFooter>
