@@ -15,6 +15,7 @@ import { updateListOrder } from "@/actions/update-list-order";
 import { updateCardOrder } from "@/actions/update-card-order";
 import { addCardMember } from "@/actions/manage-card-members";
 import { updateCardDates } from "@/actions/update-card-dates";
+import { updateCard } from "@/actions/update-card";
 import { useBoardFilter } from "@/hooks/use-board-filter";
 
 type OrgMember = { userId: string; userName: string; userImage: string; role: string; isBoardMember: boolean };
@@ -72,6 +73,10 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
   });
 
   const { execute: executeUpdateDates } = useAction(updateCardDates, {
+    onError: (e) => toast.error(e),
+  });
+
+  const { execute: executeUpdateCard } = useAction(updateCard, {
     onError: (e) => toast.error(e),
   });
 
@@ -149,7 +154,7 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
     }
   };
 
-  const onTransitionConfirm = (assignee: OrgMember | null, dueDate: string | null) => {
+  const onTransitionConfirm = (assignee: OrgMember | null, dueDate: string | null, reason: string | null) => {
     if (!pendingDrop) return;
     commitCrossListMove(pendingDrop.destinationItems, boardId);
     if (assignee) {
@@ -163,6 +168,9 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
     }
     if (dueDate) {
       executeUpdateDates({ id: pendingDrop.movedCard.id, boardId, dueDate });
+    }
+    if (reason) {
+      executeUpdateCard({ id: pendingDrop.movedCard.id, boardId, reason });
     }
     setPendingDrop(null);
   };

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { UserPlus, CalendarDays } from "lucide-react";
+import { UserPlus, CalendarDays, MessageSquareWarning } from "lucide-react";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ type TransitionActionModalProps = {
   boardId: string;
   destinationListName: string;
   actions: string[];
-  onConfirm: (assignee: OrgMember | null, dueDate: string | null) => void;
+  onConfirm: (assignee: OrgMember | null, dueDate: string | null, reason: string | null) => void;
   onCancel: () => void;
 };
 
@@ -36,9 +36,11 @@ export const TransitionActionModal = ({
 }: TransitionActionModalProps) => {
   const [selectedAssignee, setSelectedAssignee] = useState<OrgMember | null>(null);
   const [dueDate, setDueDate] = useState("");
+  const [reason, setReason] = useState("");
 
   const needsAssignee = actions.includes("ADD_ASSIGNEE");
   const needsDueDate = actions.includes("ADD_DUE_DATE");
+  const needsReason = actions.includes("ADD_REASON");
 
   const { data: memberData } = useQuery<{ boardMembers: { userId: string }[]; orgMembers: OrgMember[] }>({
     queryKey: ["board-members", boardId],
@@ -56,14 +58,17 @@ export const TransitionActionModal = ({
     onConfirm(
       needsAssignee ? selectedAssignee : null,
       needsDueDate && dueDate ? dueDate : null,
+      needsReason && reason.trim() ? reason.trim() : null,
     );
     setSelectedAssignee(null);
     setDueDate("");
+    setReason("");
   };
 
   const handleCancel = () => {
     setSelectedAssignee(null);
     setDueDate("");
+    setReason("");
     onCancel();
   };
 
@@ -125,6 +130,22 @@ export const TransitionActionModal = ({
               />
             </div>
           )}
+
+          {needsReason && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium flex items-center gap-1.5">
+                <MessageSquareWarning className="h-4 w-4" />
+                Reason
+              </p>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Why is this card being moved here?"
+                rows={3}
+                className="w-full rounded-md border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+            </div>
+          )}
         </div>
 
         <DialogFooter className="gap-2">
@@ -132,7 +153,7 @@ export const TransitionActionModal = ({
             Cancel
           </Button>
           <Button size="sm" onClick={handleConfirm}>
-            Complete transition
+            Confirm
           </Button>
         </DialogFooter>
       </DialogContent>

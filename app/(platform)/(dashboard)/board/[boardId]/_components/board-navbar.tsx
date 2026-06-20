@@ -19,7 +19,7 @@ export const BoardNavbar = async ({ data, isAdmin }: BoardNavbarProps) => {
   const lists = isAdmin
     ? await db.list.findMany({
         where: { boardId: data.id },
-        select: { id: true, title: true, order: true },
+        select: { id: true, title: true, order: true, type: true },
         orderBy: { order: "asc" },
       })
     : [];

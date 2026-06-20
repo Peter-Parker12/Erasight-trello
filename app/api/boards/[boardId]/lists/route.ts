@@ -13,7 +13,7 @@ export async function GET(
 
   const lists = await db.list.findMany({
     where: { boardId, board: { orgId } },
-    select: { id: true, title: true, order: true },
+    select: { id: true, title: true, order: true, type: true },
     orderBy: { order: "asc" },
   });
 

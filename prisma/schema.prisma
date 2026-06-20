@@ -94,6 +94,7 @@ enum ListType {
 enum TransitionActionType {
   ADD_ASSIGNEE
   ADD_DUE_DATE
+  ADD_REASON
 }
 
 model List {
@@ -144,6 +145,7 @@ model Card {
   title         String
   order         Int
   description   String?   @db.Text
+  reason        String?   @db.Text
   priority      Priority  @default(NONE)
   startDate     DateTime?
   dueDate       DateTime?

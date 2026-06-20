@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Settings, Plus, UserPlus, CalendarDays } from "lucide-react";
+import { Settings, Plus, UserPlus, CalendarDays, MessageSquareWarning } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -20,7 +20,7 @@ import { useAction } from "@/hooks/use-action";
 import { createList } from "@/actions/create-list";
 import { upsertListTransitionRule } from "@/actions/upsert-list-transition-rule";
 
-type ListOption = { id: string; title: string; order: number };
+type ListOption = { id: string; title: string; order: number; type: string };
 
 type BoardSettingsSheetProps = {
   boardId: string;
@@ -29,17 +29,28 @@ type BoardSettingsSheetProps = {
 
 type RulesMap = Record<string, string[]>;
 
-const ACTION_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
+const ACTION_META: Record<string, { label: string; icon: React.ReactNode; onlyFor?: string[] }> = {
   ADD_ASSIGNEE: { label: "Require assignee", icon: <UserPlus className="h-3.5 w-3.5" /> },
   ADD_DUE_DATE: { label: "Require due date", icon: <CalendarDays className="h-3.5 w-3.5" /> },
+  ADD_REASON:   { label: "Require reason",   icon: <MessageSquareWarning className="h-3.5 w-3.5" />, onlyFor: ["FAILED", "CANCELLED"] },
 };
-const ALL_ACTIONS = ["ADD_ASSIGNEE", "ADD_DUE_DATE"] as const;
+const ALL_ACTIONS = ["ADD_ASSIGNEE", "ADD_DUE_DATE", "ADD_REASON"] as const;
+
+type ActionKey = typeof ALL_ACTIONS[number];
+
+function actionsForListType(type: string): ActionKey[] {
+  return ALL_ACTIONS.filter((a) => {
+    const meta = ACTION_META[a];
+    return !meta.onlyFor || meta.onlyFor.includes(type);
+  });
+}
 
 export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [newListTitle, setNewListTitle] = useState("");
+  const [localRules, setLocalRules] = useState<RulesMap>({});
 
   const { data: listsData } = useQuery<ListOption[]>({
     queryKey: ["board-lists", boardId],
@@ -56,6 +67,11 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
     enabled: open,
   });
 
+  // Sync local state from server (on initial load or after a failed upsert revert)
+  useEffect(() => {
+    setLocalRules(rules);
+  }, [rules]);
+
   const { execute: executeCreateList, isLoading: isCreatingList } = useAction(createList, {
     onSuccess: () => {
       toast.success("List created.");
@@ -70,7 +86,11 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
       queryClient.invalidateQueries({ queryKey: ["transition-rules", boardId] });
       refetchRules();
     },
-    onError: (e) => toast.error(e),
+    onError: (e) => {
+      toast.error(e);
+      // Revert local optimistic state to server state on failure
+      setLocalRules(rules);
+    },
   });
 
   const onCreateList = (e: React.FormEvent) => {
@@ -79,10 +99,12 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
     executeCreateList({ title: newListTitle.trim(), boardId });
   };
 
-  const onToggleAction = (listId: string, action: string, enabled: boolean) => {
-    const current = rules[listId] ?? [];
+  const onToggleAction = (listId: string, action: ActionKey, enabled: boolean) => {
+    const current = localRules[listId] ?? [];
     const next = enabled ? [...current, action] : current.filter((a) => a !== action);
-    executeUpsert({ boardId, listId, actions: next as ("ADD_ASSIGNEE" | "ADD_DUE_DATE")[] });
+    // Optimistic local update so consecutive toggles read the correct current value
+    setLocalRules((prev) => ({ ...prev, [listId]: next }));
+    executeUpsert({ boardId, listId, actions: next as ActionKey[] });
   };
 
   return (
@@ -135,14 +157,15 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
             )}
 
             {currentLists.map((list) => {
-              const listActions = rules[list.id] ?? [];
+              const listActions = localRules[list.id] ?? [];
+              const availableActions = actionsForListType(list.type);
               return (
                 <div key={list.id} className="rounded-md border p-3 space-y-2">
                   <p className="text-sm font-medium truncate">{list.title}</p>
                   <div className="space-y-1.5">
-                    {ALL_ACTIONS.map((action) => {
+                    {availableActions.map((action) => {
                       const checked = listActions.includes(action);
-                      const { label, icon } = ACTION_LABELS[action];
+                      const { label, icon } = ACTION_META[action];
                       return (
                         <label
                           key={action}

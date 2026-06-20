@@ -18,6 +18,7 @@ import { Attachments } from "./attachments";
 import { ActionsSidebar } from "./actions-sidebar";
 import { TranslatePanel } from "./translate-panel";
 import { Subtasks } from "./subtasks";
+import { Reason } from "./reason";
 
 export const CardModal = () => {
   const id = useCardModal((state) => state.id);
@@ -58,6 +59,7 @@ export const CardModal = () => {
             <div className="md:col-span-3 md:overflow-y-auto md:pr-1 space-y-5 md:h-full md:max-h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
               {cardData ? <CardMeta data={cardData} /> : null}
               {cardData ? <TranslatePanel data={cardData} /> : null}
+              {cardData ? <Reason data={cardData} /> : null}
               {cardData ? <Description data={cardData} /> : <Description.Skeleton />}
               {cardData ? <Subtasks data={cardData} /> : null}
               {cardData ? <Checklists data={cardData} /> : null}

@@ -10,6 +10,7 @@ import { useAction } from "@/hooks/use-action";
 import { updateCardOrder } from "@/actions/update-card-order";
 import { addCardMember } from "@/actions/manage-card-members";
 import { updateCardDates } from "@/actions/update-card-dates";
+import { updateCard } from "@/actions/update-card";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { TransitionActionModal } from "./transition-action-modal";
@@ -82,6 +83,10 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
   });
 
   const { execute: executeUpdateDates } = useAction(updateCardDates, {
+    onError: (e) => toast.error(e),
+  });
+
+  const { execute: executeUpdateCard } = useAction(updateCard, {
     onError: (e) => toast.error(e),
   });
 
@@ -182,7 +187,7 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
     }
   };
 
-  const onTransitionConfirm = (assignee: OrgMember | null, dueDate: string | null) => {
+  const onTransitionConfirm = (assignee: OrgMember | null, dueDate: string | null, reason: string | null) => {
     if (!pendingDrop) return;
     executeUpdateCardOrder({
       boardId,
@@ -206,6 +211,9 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
     }
     if (dueDate) {
       executeUpdateDates({ id: pendingDrop.movedSubtask.id, boardId, dueDate });
+    }
+    if (reason) {
+      executeUpdateCard({ id: pendingDrop.movedSubtask.id, boardId, reason });
     }
     setPendingDrop(null);
   };
