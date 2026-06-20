@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { notifyCardInReview } from "@/lib/board-telegram";
 import { toApiRoute } from "@/lib/api-route";
+import { syncParentList } from "@/lib/sync-parent-list";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = await auth();
@@ -65,6 +66,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   for (const card of movedToReview) {
     await notifyCardInReview({ boardId, cardId: card.id, cardTitle: card.title });
   }
+
+  // Sync parent card list with the least-advanced subtask list.
+  const subtaskCards = await db.card.findMany({
+    where: { id: { in: items.map((i) => i.id) }, parentCardId: { not: null } },
+    select: { parentCardId: true },
+  });
+  const parentIds = [...new Set(subtaskCards.map((c) => c.parentCardId as string))];
+  await Promise.all(parentIds.map((id) => syncParentList(id, orgId)));
 
   revalidatePath(`/board/${boardId}`);
   return {

@@ -23,6 +23,7 @@ model Board {
   labels           Label[]
   boardMembers     BoardMember[]
   telegramConfig   BoardTelegramConfig?
+  transitionRules  ListTransitionRule[]
 
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -90,20 +91,41 @@ enum ListType {
   CANCELLED
 }
 
+enum TransitionActionType {
+  ADD_ASSIGNEE
+  ADD_DUE_DATE
+}
+
 model List {
-  id        String    @id  @default(uuid())
-  title     String
-  order     Int
-  wipLimit  Int?
-  type      ListType  @default(STANDARD)
+  id             String               @id  @default(uuid())
+  title          String
+  order          Int
+  wipLimit       Int?
+  type           ListType             @default(STANDARD)
 
+  boardId        String
+  board          Board                @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  cards          Card[]
+  transitionRule ListTransitionRule?
+
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([boardId])
+}
+
+model ListTransitionRule {
+  id        String   @id @default(uuid())
   boardId   String
-  board     Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  listId    String   @unique
+  actions   Json
 
-  cards     Card[]
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  list      List     @relation(fields: [listId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([boardId])
 }

@@ -8,8 +8,20 @@ import { ListWithCards, CardPreview, SubtaskPreview } from "@/types";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { useAction } from "@/hooks/use-action";
 import { updateCardOrder } from "@/actions/update-card-order";
+import { addCardMember } from "@/actions/manage-card-members";
+import { updateCardDates } from "@/actions/update-card-dates";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { TransitionActionModal } from "./transition-action-modal";
+
+type OrgMember = { userId: string; userName: string; userImage: string; role: string; isBoardMember: boolean };
+
+type PendingSubtaskDrop = {
+  movedSubtask: SubtaskPreview;
+  destinationListId: string;
+  changedItems: SubtaskPreview[];
+  snapshot: CardPreview[];
+};
 
 const PRIORITY_DOT: Record<string, string> = {
   NONE: "bg-gray-300",
@@ -46,13 +58,15 @@ type SubtaskGroupBoardProps = {
   lists: ListWithCards[];
   parents: CardPreview[];
   boardId: string;
+  transitionRules?: Record<string, string[]>;
 };
 
-export const SubtaskGroupBoard = ({ lists, parents, boardId }: SubtaskGroupBoardProps) => {
+export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {} }: SubtaskGroupBoardProps) => {
   const cardModal = useCardModal();
 
   const [orderedParents, setOrderedParents] = useState(parents);
   const [prevParents, setPrevParents] = useState(parents);
+  const [pendingDrop, setPendingDrop] = useState<PendingSubtaskDrop | null>(null);
 
   if (parents !== prevParents) {
     setPrevParents(parents);
@@ -61,6 +75,14 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId }: SubtaskGroupBoard
 
   const { execute: executeUpdateCardOrder } = useAction(updateCardOrder, {
     onError: (error) => toast.error(error),
+  });
+
+  const { execute: executeAddMember } = useAction(addCardMember, {
+    onError: (e) => toast.error(e),
+  });
+
+  const { execute: executeUpdateDates } = useAction(updateCardDates, {
+    onError: (e) => toast.error(e),
   });
 
   const listsById = new Map(lists.map((l) => [l.id, l]));
@@ -100,6 +122,7 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId }: SubtaskGroupBoard
 
     let updatedSubtasks: SubtaskPreview[];
     let changed: SubtaskPreview[];
+    let movedSubtask: SubtaskPreview | null = null;
 
     if (sourceListId === destListId) {
       const cell = cellOf(sourceListId);
@@ -113,6 +136,7 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId }: SubtaskGroupBoard
       const destCell = cellOf(destListId);
 
       const [moved] = sourceCell.splice(source.index, 1);
+      movedSubtask = moved;
       const movedUpdated: SubtaskPreview = {
         ...moved,
         listId: destListId,
@@ -130,11 +154,39 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId }: SubtaskGroupBoard
 
     const newParents = [...orderedParents];
     newParents[parentIndex] = { ...parent, subtasks: updatedSubtasks };
-    setOrderedParents(newParents);
 
+    const rules = movedSubtask ? (transitionRules[destListId] ?? []) : [];
+
+    if (movedSubtask && rules.length > 0) {
+      // Optimistic update + pending drop for modal
+      setOrderedParents(newParents);
+      setPendingDrop({
+        movedSubtask,
+        destinationListId: destListId,
+        changedItems: changed,
+        snapshot: orderedParents,
+      });
+    } else {
+      setOrderedParents(newParents);
+      executeUpdateCardOrder({
+        boardId,
+        items: changed.map((s) => ({
+          id: s.id,
+          title: s.title,
+          order: s.order,
+          listId: s.listId,
+          createdAt: s.createdAt,
+          updatedAt: s.updatedAt,
+        })),
+      });
+    }
+  };
+
+  const onTransitionConfirm = (assignee: OrgMember | null, dueDate: string | null) => {
+    if (!pendingDrop) return;
     executeUpdateCardOrder({
       boardId,
-      items: changed.map((s) => ({
+      items: pendingDrop.changedItems.map((s) => ({
         id: s.id,
         title: s.title,
         order: s.order,
@@ -143,48 +195,83 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId }: SubtaskGroupBoard
         updatedAt: s.updatedAt,
       })),
     });
+    if (assignee) {
+      executeAddMember({
+        cardId: pendingDrop.movedSubtask.id,
+        boardId,
+        userId: assignee.userId,
+        userName: assignee.userName,
+        userImage: assignee.userImage,
+      });
+    }
+    if (dueDate) {
+      executeUpdateDates({ id: pendingDrop.movedSubtask.id, boardId, dueDate });
+    }
+    setPendingDrop(null);
   };
 
+  const onTransitionCancel = () => {
+    if (!pendingDrop) return;
+    setOrderedParents(pendingDrop.snapshot);
+    setPendingDrop(null);
+  };
+
+  const destinationListName = pendingDrop
+    ? (listsById.get(pendingDrop.destinationListId)?.title ?? "")
+    : "";
+  const pendingActions = pendingDrop ? (transitionRules[pendingDrop.destinationListId] ?? []) : [];
+
   return (
-    <div className="px-2 sm:px-4 pt-3">
-      <div className="overflow-x-auto rounded-md bg-[#f2f2f4]/60 border border-black/5">
-        <DragDropContext onDragEnd={onDragEnd}>
-          <table className="border-collapse w-full">
-            <thead>
-              <tr>
-                <th className="sticky left-0 z-10 bg-[#f2f2f4] text-left text-xs font-semibold text-muted-foreground px-3 py-2 w-[260px] min-w-[260px]">
-                  Tasks
-                </th>
-                {lists.map((list) => (
-                  <th
-                    key={list.id}
-                    className="text-left text-xs font-semibold text-muted-foreground px-2 py-2 w-[272px] min-w-[272px]"
-                  >
-                    <span className="inline-flex items-center gap-1.5">
-                      {list.title}
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-200 text-gray-600 font-semibold">
-                        {columnCounts.get(list.id) ?? 0}
-                      </span>
-                    </span>
+    <>
+      <div className="px-2 sm:px-4 pt-3">
+        <div className="overflow-x-auto rounded-md bg-[#f2f2f4]/60 border border-black/5">
+          <DragDropContext onDragEnd={onDragEnd}>
+            <table className="border-collapse w-full">
+              <thead>
+                <tr>
+                  <th className="sticky left-0 z-10 bg-[#f2f2f4] text-left text-xs font-semibold text-muted-foreground px-3 py-2 w-[260px] min-w-[260px]">
+                    Tasks
                   </th>
+                  {lists.map((list) => (
+                    <th
+                      key={list.id}
+                      className="text-left text-xs font-semibold text-muted-foreground px-2 py-2 w-[272px] min-w-[272px]"
+                    >
+                      <span className="inline-flex items-center gap-1.5">
+                        {list.title}
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-200 text-gray-600 font-semibold">
+                          {columnCounts.get(list.id) ?? 0}
+                        </span>
+                      </span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {orderedParents.map((parent) => (
+                  <ParentRow
+                    key={parent.id}
+                    parent={parent}
+                    lists={lists}
+                    ownList={listsById.get(parent.listId)}
+                    onOpen={() => cardModal.onOpen(parent.id)}
+                  />
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {orderedParents.map((parent) => (
-                <ParentRow
-                  key={parent.id}
-                  parent={parent}
-                  lists={lists}
-                  ownList={listsById.get(parent.listId)}
-                  onOpen={() => cardModal.onOpen(parent.id)}
-                />
-              ))}
-            </tbody>
-          </table>
-        </DragDropContext>
+              </tbody>
+            </table>
+          </DragDropContext>
+        </div>
       </div>
-    </div>
+
+      <TransitionActionModal
+        open={!!pendingDrop}
+        boardId={boardId}
+        destinationListName={destinationListName}
+        actions={pendingActions}
+        onConfirm={onTransitionConfirm}
+        onCancel={onTransitionCancel}
+      />
+    </>
   );
 };
 
