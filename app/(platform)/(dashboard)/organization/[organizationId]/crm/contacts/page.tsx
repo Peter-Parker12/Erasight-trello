@@ -21,9 +21,8 @@ const ContactsPage = async ({ params }: ContactsPageProps) => {
 
   if (!orgId || orgId !== organizationId) redirect("/select-org");
 
-  const isAdmin = await isOrgAdmin(orgId);
-
-  const [contacts, companies, definitionRows] = await Promise.all([
+  const [isAdmin, contacts, companies, definitionRows] = await Promise.all([
+    isOrgAdmin(orgId),
     db.contact.findMany({
       where: { orgId },
       include: { company: { select: { id: true, name: true } } },

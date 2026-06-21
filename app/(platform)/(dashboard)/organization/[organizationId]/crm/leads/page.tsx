@@ -20,11 +20,10 @@ const LeadsPage = async ({ params }: LeadsPageProps) => {
 
   if (!orgId || orgId !== organizationId) redirect("/select-org");
 
-  const isAdmin = await isOrgAdmin(orgId);
-
   await ensureDefaultPipelineStages(orgId);
 
-  const [stages, companies, contacts, definitionRows] = await Promise.all([
+  const [isAdmin, stages, companies, contacts, definitionRows] = await Promise.all([
+    isOrgAdmin(orgId),
     db.pipelineStage.findMany({
       where: { orgId },
       orderBy: { order: "asc" },

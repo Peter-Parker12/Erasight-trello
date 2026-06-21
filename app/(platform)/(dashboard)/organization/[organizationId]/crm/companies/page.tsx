@@ -21,9 +21,8 @@ const CompaniesPage = async ({ params }: CompaniesPageProps) => {
 
   if (!orgId || orgId !== organizationId) redirect("/select-org");
 
-  const isAdmin = await isOrgAdmin(orgId);
-
-  const [companies, definitionRows] = await Promise.all([
+  const [isAdmin, companies, definitionRows] = await Promise.all([
+    isOrgAdmin(orgId),
     db.company.findMany({
       where: { orgId },
       orderBy: { createdAt: "desc" },
