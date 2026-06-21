@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Plus, Trash2, X, Check } from "lucide-react";
 import type { CrmEntityType, CustomFieldType } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,13 @@ export const CustomFieldsManager = ({ entityType, label, fields }: CustomFieldsM
 };
 
 const FieldRow = ({ field }: { field: CustomFieldDefinitionDTO }) => {
-  const { execute: executeUpdate } = useAction(updateCustomField, {
+  const [editing, setEditing] = useState(false);
+  const [labelValue, setLabelValue] = useState(field.label);
+  const [optionsValue, setOptionsValue] = useState(field.options?.join(", ") ?? "");
+  const [requiredValue, setRequiredValue] = useState(field.required);
+
+  const { execute: executeUpdate, isLoading: isSaving } = useAction(updateCustomField, {
+    onSuccess: () => { toast.success("Custom field updated."); setEditing(false); },
     onError: (error) => toast.error(error),
   });
 
@@ -78,12 +84,85 @@ const FieldRow = ({ field }: { field: CustomFieldDefinitionDTO }) => {
     onError: (error) => toast.error(error),
   });
 
+  const needsOptions = field.type === "SELECT" || field.type === "MULTI_SELECT";
   const { id } = field;
+
+  const onSave = () => {
+    if (!labelValue.trim()) return;
+    executeUpdate({
+      id,
+      label: labelValue.trim(),
+      required: requiredValue,
+      ...(needsOptions
+        ? { options: optionsValue.split(",").map((o) => o.trim()).filter(Boolean) }
+        : {}),
+    });
+  };
+
+  const onCancel = () => {
+    setLabelValue(field.label);
+    setOptionsValue(field.options?.join(", ") ?? "");
+    setRequiredValue(field.required);
+    setEditing(false);
+  };
 
   const onDelete = () => {
     if (!confirm(`Delete the "${field.label}" field? Existing values will remain stored but hidden.`)) return;
     executeDelete({ id });
   };
+
+  if (editing) {
+    return (
+      <div className="border border-violet-600/40 rounded-md p-3 space-y-2 bg-[#1f1f1f]">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Label</p>
+            <Input
+              value={labelValue}
+              onChange={(e) => setLabelValue(e.target.value)}
+              className="h-8 text-sm"
+              autoFocus
+            />
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Key (read-only)</p>
+            <Input value={field.key} readOnly className="h-8 text-sm font-mono opacity-50 cursor-not-allowed" />
+          </div>
+        </div>
+
+        {needsOptions && (
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Options (comma separated)</p>
+            <Input
+              value={optionsValue}
+              onChange={(e) => setOptionsValue(e.target.value)}
+              placeholder="Option A, Option B, Option C"
+              className="h-8 text-sm"
+            />
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-1.5 text-xs text-[#e5e5e5]">
+            <input
+              type="checkbox"
+              checked={requiredValue}
+              onChange={(e) => setRequiredValue(e.target.checked)}
+            />
+            Required
+          </label>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground" onClick={onCancel}>
+              <X className="h-3.5 w-3.5 mr-1" /> Cancel
+            </Button>
+            <Button size="sm" className="h-7 px-2 text-xs" disabled={isSaving || !labelValue.trim()} onClick={onSave}>
+              <Check className="h-3.5 w-3.5 mr-1" /> Save
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2 border rounded-md p-2">
@@ -97,15 +176,26 @@ const FieldRow = ({ field }: { field: CustomFieldDefinitionDTO }) => {
       <label className="flex items-center gap-1 text-xs text-[#e5e5e5] whitespace-nowrap">
         <input
           type="checkbox"
-          defaultChecked={field.required}
-          onChange={(e) => id && executeUpdate({ id, required: e.target.checked })}
+          checked={requiredValue}
+          onChange={(e) => {
+            setRequiredValue(e.target.checked);
+            id && executeUpdate({ id, required: e.target.checked });
+          }}
         />
         Required
       </label>
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
+        className="h-7 w-7 p-0 text-muted-foreground hover:text-[#e5e5e5]"
+        onClick={() => setEditing(true)}
+      >
+        <Pencil className="h-3.5 w-3.5" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-7 w-7 p-0 text-red-500 hover:text-red-400"
         disabled={isDeleting}
         onClick={onDelete}
       >
