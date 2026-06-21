@@ -1,7 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { Activity, Building2, Handshake, Layout, ListTodo, Settings, Users } from "lucide-react";
+import { useState } from "react";
+import {
+  Activity,
+  Building2,
+  ChevronRight,
+  Handshake,
+  Layout,
+  ListTodo,
+  Settings,
+  Users,
+} from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 import {
@@ -40,7 +50,10 @@ export const NavItem = ({
   const pathname = usePathname();
   const modules = useModuleAccess(organization.id);
 
-  const allRoutes: { label: string; icon: React.ReactNode; href: string; module?: ModuleKey }[] = [
+  const isCRMActive = pathname.startsWith(`/organization/${organization.id}/crm`);
+  const [crmExpanded, setCrmExpanded] = useState(() => isCRMActive);
+
+  const mainRoutes: { label: string; icon: React.ReactNode; href: string; module?: ModuleKey }[] = [
     {
       label: "Boards",
       icon: <Layout className="h-4 w-4 mr-2" />,
@@ -53,24 +66,27 @@ export const NavItem = ({
       href: `/organization/${organization.id}/tasks`,
       module: "TASKS",
     },
+  ];
+
+  const crmRoutes = [
     {
       label: "Companies",
       icon: <Building2 className="h-4 w-4 mr-2" />,
       href: `/organization/${organization.id}/crm/companies`,
-      module: "CRM",
     },
     {
       label: "Contacts",
       icon: <Users className="h-4 w-4 mr-2" />,
       href: `/organization/${organization.id}/crm/contacts`,
-      module: "CRM",
     },
     {
       label: "Leads",
       icon: <Handshake className="h-4 w-4 mr-2" />,
       href: `/organization/${organization.id}/crm/leads`,
-      module: "CRM",
     },
+  ];
+
+  const bottomRoutes = [
     {
       label: "Activity",
       icon: <Activity className="h-4 w-4 mr-2" />,
@@ -83,7 +99,8 @@ export const NavItem = ({
     },
   ];
 
-  const routes = allRoutes.filter((route) => !route.module || modules[route.module]);
+  const visibleMainRoutes = mainRoutes.filter((r) => !r.module || modules[r.module]);
+  const showCRM = modules["CRM"];
 
   const onClick = (href: string) => {
     router.push(href);
@@ -94,8 +111,8 @@ export const NavItem = ({
       <AccordionTrigger
         onClick={() => onExpand(organization.id)}
         className={cn(
-          "flex items-center gap-x-2 p-1.5 text-neutral-700 rounded-md hover:bg-neutral-500/10 transition text-start no-underline hover:no-underline",
-          isActive && !isExpanded && "bg-sky-500/10 text-sky-700"
+          "flex items-center gap-x-2 p-1.5 text-[#e5e5e5] rounded-md hover:bg-[#2a2a2a] transition text-start no-underline hover:no-underline",
+          isActive && !isExpanded && "bg-violet-600/20 text-violet-400"
         )}
       >
         <div className="flex items-center gap-x-2">
@@ -111,15 +128,77 @@ export const NavItem = ({
           <span className="font-medium text-sm">{organization.name}</span>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="pt-1 text-neutral-700">
-        {routes.map((route) => (
+
+      <AccordionContent className="pt-1">
+        {/* Boards, My Tasks */}
+        {visibleMainRoutes.map((route) => (
           <Button
             key={route.label}
             size="sm"
             onClick={() => onClick(route.href)}
             className={cn(
-              "w-full font-normal justify-start pl-10  mb-1",
-              pathname === route.href && "bg-primary/10 text-primary"
+              "w-full font-normal justify-start pl-10 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
+              pathname === route.href && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+            )}
+            variant="ghost"
+          >
+            {route.icon}
+            {route.label}
+          </Button>
+        ))}
+
+        {/* CRM collapsible group */}
+        {showCRM && (
+          <>
+            <div className="my-1.5 h-px bg-[#333]" />
+            <button
+              onClick={() => setCrmExpanded((v) => !v)}
+              className={cn(
+                "w-full flex items-center pl-10 pr-2 py-1.5 rounded-md text-[10px] font-semibold uppercase tracking-widest transition",
+                isCRMActive ? "text-violet-400" : "text-[#888]",
+                "hover:bg-[#2a2a2a] hover:text-[#e5e5e5]"
+              )}
+            >
+              <span className="flex-1 text-left">CRM</span>
+              <span className="mr-1.5 text-[8px] font-bold bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">
+                NEW
+              </span>
+              <ChevronRight
+                className={cn(
+                  "h-3 w-3 transition-transform duration-200",
+                  crmExpanded && "rotate-90"
+                )}
+              />
+            </button>
+            {crmExpanded &&
+              crmRoutes.map((route) => (
+                <Button
+                  key={route.label}
+                  size="sm"
+                  onClick={() => onClick(route.href)}
+                  className={cn(
+                    "w-full font-normal justify-start pl-14 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
+                    pathname === route.href && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+                  )}
+                  variant="ghost"
+                >
+                  {route.icon}
+                  {route.label}
+                </Button>
+              ))}
+            <div className="my-1.5 h-px bg-[#333]" />
+          </>
+        )}
+
+        {/* Activity, Settings */}
+        {bottomRoutes.map((route) => (
+          <Button
+            key={route.label}
+            size="sm"
+            onClick={() => onClick(route.href)}
+            className={cn(
+              "w-full font-normal justify-start pl-10 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
+              pathname === route.href && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
             )}
             variant="ghost"
           >
@@ -138,7 +217,6 @@ NavItem.Skeleton = function SkeletonNavItem() {
       <div className="w-10 h-10 relative shrink-0">
         <Skeleton className="h-full w-full absolute" />
       </div>
-
       <Skeleton className="h-10 w-full" />
     </div>
   );

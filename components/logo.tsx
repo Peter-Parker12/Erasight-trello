@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import localFont from "next/font/local";
 
@@ -12,17 +11,10 @@ export const Logo = () => {
   return (
     <Link href="/">
       <div className="hover:opacity-75 transition items-center gap-x-2 flex">
-        <Image
-          src="/logo.svg"
-          alt="taskify logo"
-          height={30}
-          width={30}
-          aria-hidden
-        />
-
-        <p
-          className={cn("text-lg text-neutral-700 pb-1", headingFont.className)}
-        >
+        <div className="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center shrink-0">
+          <span className="text-white text-xs font-bold">T</span>
+        </div>
+        <p className={cn("text-lg text-[#e5e5e5] pb-1", headingFont.className)}>
           Taskify
         </p>
       </div>

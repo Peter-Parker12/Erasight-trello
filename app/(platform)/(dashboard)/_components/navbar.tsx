@@ -22,7 +22,7 @@ export const Navbar = async () => {
   const admin = orgId ? await isOrgAdmin(orgId) : false;
 
   return (
-    <nav className="fixed z-50 top-0 w-full px-2 sm:px-4 h-14 border-b shadow-sm bg-white flex items-center">
+    <nav className="fixed z-50 top-0 w-full px-2 sm:px-4 h-14 border-b border-[#333] bg-[#1f1f1f] flex items-center">
       <MobileSidebar />
       <div className="flex items-center gap-x-2 sm:gap-x-4">
         <div className="hidden md:flex">

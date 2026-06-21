@@ -111,18 +111,18 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
               <button
                 type="button"
                 onClick={() => setShowTemplates((v) => !v)}
-                className="flex items-center gap-1 text-xs text-sky-600 hover:underline"
+                className="flex items-center gap-1 text-xs text-violet-400 hover:underline"
               >
                 <LayoutTemplate className="h-3 w-3" /> Dùng template
               </button>
               {showTemplates && (
-                <div className="absolute z-50 bottom-full mb-1 bg-white border rounded shadow-md w-56 max-h-48 overflow-y-auto text-sm">
+                <div className="absolute z-50 bottom-full mb-1 bg-[#1f1f1f] border border-[#333] rounded w-56 max-h-48 overflow-y-auto text-sm">
                   {templates.map((t) => (
                     <button
                       key={t.id}
                       type="button"
                       onClick={() => applyTemplate(t)}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b last:border-b-0 truncate"
+                      className="w-full text-left px-3 py-2 hover:bg-[#2a2a2a] border-b border-[#333] last:border-b-0 truncate text-[#e5e5e5]"
                     >
                       {t.title}
                     </button>

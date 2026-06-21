@@ -90,7 +90,7 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
               id="title"
               placeholder="Enter list title.."
               defaultValue={title}
-              className="text-sm px-[7px] py-1 h-7 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+              className="text-sm px-[7px] py-1 h-7 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-[#2a2a2a]"
             />
             <button type="button" hidden aria-disabled />
           </form>
@@ -104,9 +104,9 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
               <span
                 className={cn(
                   "text-[10px] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wide shrink-0",
-                  data.type === "DONE" && "bg-green-100 text-green-700",
-                  data.type === "FAILED" && "bg-red-100 text-red-700",
-                  data.type === "CANCELLED" && "bg-gray-200 text-gray-600"
+                  data.type === "DONE" && "bg-green-500/20 text-green-400",
+                  data.type === "FAILED" && "bg-red-500/20 text-red-400",
+                  data.type === "CANCELLED" && "bg-[#333] text-[#888]"
                 )}
               >
                 {data.type}
@@ -129,11 +129,11 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
               value={wipInput}
               onChange={(e) => setWipInput(e.target.value)}
               placeholder="No limit"
-              className="w-20 text-xs border rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-sky-400"
+              className="w-20 text-xs border border-[#333] rounded px-1.5 py-0.5 bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1 focus:ring-violet-500"
               onKeyDown={(e) => { if (e.key === "Enter") saveWip(); if (e.key === "Escape") setWipEditing(false); }}
               autoFocus
             />
-            <button onClick={saveWip} className="text-xs text-sky-600 hover:underline">Save</button>
+            <button onClick={saveWip} className="text-xs text-violet-400 hover:underline">Save</button>
             <button onClick={() => setWipEditing(false)} className="text-xs text-muted-foreground hover:underline">✕</button>
           </div>
         ) : (
@@ -144,7 +144,7 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
               data.wipLimit == null
                 ? "text-muted-foreground hover:bg-muted"
                 : wipExceeded
-                ? "bg-red-100 text-red-700 animate-pulse"
+                ? "bg-red-500/20 text-red-400 animate-pulse"
                 : "bg-muted text-muted-foreground hover:bg-muted/80"
             )}
           >
