@@ -48,7 +48,7 @@ export const BoardList = async () => {
             <Link
               href={`/board/${board.id}`}
               style={{ backgroundImage: `url(${board.imageThumbUrl})` }}
-              className="absolute inset-0 bg-no-repeat bg-center bg-cover bg-sky-700 rounded-sm p-2 overflow-hidden"
+              className="absolute inset-0 bg-no-repeat bg-center bg-cover bg-violet-700 rounded-sm p-2 overflow-hidden"
             >
               <div
                 aria-hidden

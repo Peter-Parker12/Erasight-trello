@@ -85,7 +85,7 @@ export const TransitionActionModal = ({
           <DialogTitle className="text-base">
             Moving to &ldquo;{destinationListName}&rdquo;
           </DialogTitle>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-muted-foreground">
             This list requires additional info before the card can be moved.
           </p>
         </DialogHeader>
@@ -104,8 +104,8 @@ export const TransitionActionModal = ({
                     onClick={() => setSelectedAssignee(selectedAssignee?.userId === m.userId ? null : m)}
                     className={`flex items-center gap-2 rounded px-2 py-1.5 text-sm text-left transition ${
                       selectedAssignee?.userId === m.userId
-                        ? "bg-sky-100 text-sky-800"
-                        : "hover:bg-neutral-100"
+                        ? "bg-violet-600/20 text-violet-300"
+                        : "hover:bg-[#2a2a2a]"
                     }`}
                   >
                     <Avatar className="h-6 w-6">
@@ -116,7 +116,7 @@ export const TransitionActionModal = ({
                   </button>
                 ))}
                 {assignableMembers.length === 0 && (
-                  <p className="text-xs text-neutral-400 px-2 py-1">No members found.</p>
+                  <p className="text-xs text-muted-foreground px-2 py-1">No members found.</p>
                 )}
               </div>
             </div>
@@ -132,7 +132,7 @@ export const TransitionActionModal = ({
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full rounded-md border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full rounded-md border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
           )}

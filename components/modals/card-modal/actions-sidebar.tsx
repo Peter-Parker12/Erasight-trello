@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 
 const PRESET_COLORS = ["#ef4444","#f97316","#eab308","#22c55e","#06b6d4","#3b82f6","#8b5cf6","#ec4899","#6b7280"];
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
-  { value: "NONE", label: "None", color: "text-gray-500" },
+  { value: "NONE", label: "None", color: "text-muted-foreground" },
   { value: "LOW", label: "Low", color: "text-blue-600" },
   { value: "MEDIUM", label: "Medium", color: "text-yellow-600" },
   { value: "HIGH", label: "High", color: "text-orange-600" },
@@ -56,7 +56,7 @@ const SidebarButton = ({ icon: Icon, label, popover, active, onToggle }: Sidebar
   <div className="relative">
     <Button
       variant="gray"
-      className={cn("w-full justify-start", active === popover && "bg-gray-300")}
+      className={cn("w-full justify-start", active === popover && "bg-[#333]")}
       size="inline"
       onClick={() => onToggle(popover)}
     >
@@ -214,7 +214,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 
       <SidebarButton icon={Users} label="Members" popover="members" active={active} onToggle={toggle} />
       {active === "members" && (
-        <div className="p-2 border rounded bg-white text-sm space-y-1 max-h-72 overflow-y-auto">
+        <div className="p-2 border border-[#333] rounded bg-[#1f1f1f] text-sm space-y-1 max-h-72 overflow-y-auto">
           {data.members.length > 0 && (
             <div className="space-y-1 mb-2">
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Assigned</p>
@@ -237,7 +237,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
             .map((m) => (
               <button
                 key={m.userId}
-                className="flex items-center gap-2 w-full p-1 rounded hover:bg-gray-50 text-left"
+                className="flex items-center gap-2 w-full p-1 rounded hover:bg-[#2a2a2a] text-left"
                 onClick={() => execAddMember({ cardId: data.id, boardId, userId: m.userId, userName: m.userName, userImage: m.userImage } as any)}
               >
                 <Avatar className="h-6 w-6"><AvatarImage src={m.userImage} /><AvatarFallback>{m.userName[0]}</AvatarFallback></Avatar>
@@ -250,14 +250,14 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 
       <SidebarButton icon={Tag} label="Labels" popover="labels" active={active} onToggle={toggle} />
       {active === "labels" && (
-        <div className="p-2 border rounded bg-white text-sm space-y-1">
+        <div className="p-2 border border-[#333] rounded bg-[#1f1f1f] text-sm space-y-1">
           {(boardLabels ?? []).map((label) => (
             <div
               key={label.id}
-              className={cn("flex items-center gap-2 p-1 rounded", assignedLabelIds.has(label.id) && "bg-gray-100")}
+              className={cn("flex items-center gap-2 p-1 rounded", assignedLabelIds.has(label.id) && "bg-[#2a2a2a]")}
             >
               <div
-                className="flex items-center gap-2 flex-1 cursor-pointer hover:bg-gray-50 rounded"
+                className="flex items-center gap-2 flex-1 cursor-pointer hover:bg-[#2a2a2a] rounded"
                 onClick={() => execToggleLabel({ cardId: data.id, labelId: label.id, boardId })}
               >
                 <div className="w-8 h-4 rounded" style={{ backgroundColor: label.color }} />
@@ -267,7 +267,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
               {assignedLabelIds.has(label.id) && (
                 <button
                   onClick={() => execToggleLabel({ cardId: data.id, labelId: label.id, boardId })}
-                  className="shrink-0 text-gray-300 hover:text-red-500 transition-colors"
+                  className="shrink-0 text-[#888] hover:text-red-400 transition-colors"
                   title="Remove label"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -277,10 +277,10 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
           ))}
           <div className="border-t pt-2 mt-1 space-y-1">
             <p className="text-xs font-medium">Create label</p>
-            <input className="w-full border rounded p-1 text-xs" placeholder="Name" value={newLabelName} onChange={(e) => setNewLabelName(e.target.value)} />
+            <input className="w-full border border-[#333] rounded p-1 text-xs bg-[#2a2a2a] text-[#e5e5e5]" placeholder="Name" value={newLabelName} onChange={(e) => setNewLabelName(e.target.value)} />
             <div className="flex flex-wrap gap-1">
               {PRESET_COLORS.map((c) => (
-                <button key={c} onClick={() => setNewLabelColor(c)} className={cn("w-5 h-5 rounded-full border-2", newLabelColor === c ? "border-gray-800" : "border-transparent")} style={{ backgroundColor: c }} />
+                <button key={c} onClick={() => setNewLabelColor(c)} className={cn("w-5 h-5 rounded-full border-2", newLabelColor === c ? "border-white" : "border-transparent")} style={{ backgroundColor: c }} />
               ))}
             </div>
             <Button size="sm" className="h-6 text-xs w-full" onClick={() => { if (newLabelName.trim()) execCreateLabel({ boardId, name: newLabelName.trim(), color: newLabelColor }); }}>Create</Button>
@@ -290,19 +290,19 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 
       <SidebarButton icon={CalendarDays} label="Dates" popover="dates" active={active} onToggle={toggle} />
       {active === "dates" && (
-        <div className="p-2 border rounded bg-white text-sm space-y-2">
+        <div className="p-2 border border-[#333] rounded bg-[#1f1f1f] text-sm space-y-2">
           <div>
             <label className="text-xs text-muted-foreground">Start date</label>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full border rounded p-1 text-xs mt-0.5" />
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] rounded p-1 text-xs mt-0.5" />
           </div>
           <div>
             <label className="text-xs text-muted-foreground">Due date</label>
-            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="w-full border rounded p-1 text-xs mt-0.5" />
+            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="w-full border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] rounded p-1 text-xs mt-0.5" />
           </div>
           {isInReview && (
             <div>
               <label className="text-xs text-muted-foreground">Review deadline</label>
-              <input type="date" value={reviewDeadline} onChange={(e) => setReviewDeadline(e.target.value)} className="w-full border rounded p-1 text-xs mt-0.5" />
+              <input type="date" value={reviewDeadline} onChange={(e) => setReviewDeadline(e.target.value)} className="w-full border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] rounded p-1 text-xs mt-0.5" />
               <p className="text-[10px] text-muted-foreground mt-0.5">Setting this clears the due date.</p>
             </div>
           )}
@@ -312,11 +312,11 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 
       <SidebarButton icon={Flag} label="Priority" popover="priority" active={active} onToggle={toggle} />
       {active === "priority" && (
-        <div className="p-2 border rounded bg-white text-sm space-y-1">
+        <div className="p-2 border border-[#333] rounded bg-[#1f1f1f] text-sm space-y-1">
           {PRIORITY_OPTIONS.map((opt) => (
             <button
               key={opt.value}
-              className={cn("w-full text-left px-2 py-1 rounded text-xs hover:bg-gray-50 flex items-center gap-2", opt.color, data.priority === opt.value && "bg-gray-100 font-semibold")}
+              className={cn("w-full text-left px-2 py-1 rounded text-xs hover:bg-[#2a2a2a] flex items-center gap-2", opt.color, data.priority === opt.value && "bg-[#2a2a2a] font-semibold")}
               onClick={() => execPriority({ id: data.id, boardId, priority: opt.value })}
             >
               <Flag className="h-3 w-3" /> {opt.label}
@@ -328,22 +328,22 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 
       <SidebarButton icon={Paperclip} label="Attachment" popover="attachment" active={active} onToggle={toggle} />
       {active === "attachment" && (
-        <div className="p-2 border rounded bg-white text-sm space-y-2">
-          <input className="w-full border rounded p-1 text-xs" placeholder="Display name" value={attName} onChange={(e) => setAttName(e.target.value)} />
-          <input className="w-full border rounded p-1 text-xs" placeholder="https://..." value={attUrl} onChange={(e) => setAttUrl(e.target.value)} />
+        <div className="p-2 border border-[#333] rounded bg-[#1f1f1f] text-sm space-y-2">
+          <input className="w-full border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] rounded p-1 text-xs" placeholder="Display name" value={attName} onChange={(e) => setAttName(e.target.value)} />
+          <input className="w-full border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] rounded p-1 text-xs" placeholder="https://..." value={attUrl} onChange={(e) => setAttUrl(e.target.value)} />
           <Button size="sm" className="h-7 text-xs w-full" onClick={() => { if (attName.trim() && attUrl.trim()) execAttachment({ cardId: data.id, boardId, name: attName.trim(), url: attUrl.trim() }); }}>Attach</Button>
         </div>
       )}
 
       <SidebarButton icon={Palette} label="Cover" popover="cover" active={active} onToggle={toggle} />
       {active === "cover" && (
-        <div className="p-2 border rounded bg-white text-sm space-y-2">
+        <div className="p-2 border border-[#333] rounded bg-[#1f1f1f] text-sm space-y-2">
           <p className="text-xs text-muted-foreground">Choose a color</p>
           <div className="flex flex-wrap gap-1">
             {PRESET_COLORS.map((c) => (
-              <button key={c} onClick={() => setCoverColor(c)} className={cn("w-7 h-7 rounded border-2", coverColor === c ? "border-gray-800" : "border-transparent")} style={{ backgroundColor: c }} />
+              <button key={c} onClick={() => setCoverColor(c)} className={cn("w-7 h-7 rounded border-2", coverColor === c ? "border-white" : "border-transparent")} style={{ backgroundColor: c }} />
             ))}
-            <button onClick={() => setCoverColor("")} className={cn("w-7 h-7 rounded border-2 bg-gray-100 text-xs", !coverColor ? "border-gray-800" : "border-transparent")}>✕</button>
+            <button onClick={() => setCoverColor("")} className={cn("w-7 h-7 rounded border-2 bg-[#2a2a2a] text-[#888] text-xs", !coverColor ? "border-white" : "border-transparent")}>✕</button>
           </div>
           <Button size="sm" className="h-7 text-xs w-full" onClick={saveCoverColor}>Save</Button>
         </div>
@@ -354,13 +354,13 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
         <Button
           onClick={() => execToggleWatch({ cardId: data.id, boardId })}
           variant="gray"
-          className={cn("w-full justify-start", isWatching && "bg-sky-100 text-sky-700")}
+          className={cn("w-full justify-start", isWatching && "bg-violet-600/20 text-violet-400")}
           size="inline"
         >
           {isWatching ? <BellOff className="h-4 w-4 mr-2" /> : <Bell className="h-4 w-4 mr-2" />}
           {isWatching ? "Unwatch" : "Watch"}
           {(watchData?.count ?? 0) > 0 && (
-            <span className="ml-auto text-xs bg-sky-200 text-sky-800 px-1.5 py-0.5 rounded-full">
+            <span className="ml-auto text-xs bg-violet-600/30 text-violet-300 px-1.5 py-0.5 rounded-full">
               {watchData?.count}
             </span>
           )}
@@ -386,7 +386,7 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
             <DialogHeader>
               <DialogTitle className="text-red-600">Delete this card?</DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-[#e5e5e5]">
               This card has{" "}
               <span className="font-bold text-red-600">{data.subtasks?.length ?? 0} subtask{(data.subtasks?.length ?? 0) !== 1 ? "s" : ""}</span>.{" "}
               Deleting it will also permanently delete all subtasks.
@@ -412,8 +412,8 @@ export const ActionsSidebar = ({ data }: ActionsSidebarProps) => {
 ActionsSidebar.Skeleton = function ActionsSidebarSkeleton() {
   return (
     <div className="space-y-2 mt-2">
-      <Skeleton className="w-20 h-4 bg-neutral-200" />
-      {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="w-full h-8 bg-neutral-200" />)}
+      <Skeleton className="w-20 h-4" />
+      {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="w-full h-8" />)}
     </div>
   );
 };

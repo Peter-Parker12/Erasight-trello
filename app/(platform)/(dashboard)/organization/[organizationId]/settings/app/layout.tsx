@@ -22,7 +22,7 @@ const AppSettingsLayout = async ({ children, params }: AppSettingsLayoutProps) =
     <div className="w-full p-4 md:p-6 space-y-4 max-w-3xl">
       <div>
         <h1 className="text-xl font-semibold">Settings</h1>
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-muted-foreground">
           {isAdmin
             ? "Configure module access, CRM custom fields, API keys and organization members."
             : "Manage your organization membership."}

@@ -80,7 +80,7 @@ const StageRow = ({ stage, canDelete }: { stage: PipelineStage; canDelete: boole
           }
         }}
       />
-      <label className="flex items-center gap-1 text-xs text-neutral-600 whitespace-nowrap">
+      <label className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
         <input
           type="checkbox"
           defaultChecked={stage.isWon}
@@ -88,7 +88,7 @@ const StageRow = ({ stage, canDelete }: { stage: PipelineStage; canDelete: boole
         />
         Won
       </label>
-      <label className="flex items-center gap-1 text-xs text-neutral-600 whitespace-nowrap">
+      <label className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
         <input
           type="checkbox"
           defaultChecked={stage.isLost}

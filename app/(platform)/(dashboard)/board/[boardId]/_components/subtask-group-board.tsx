@@ -25,7 +25,7 @@ type PendingSubtaskDrop = {
 };
 
 const PRIORITY_DOT: Record<string, string> = {
-  NONE: "bg-gray-300",
+  NONE: "bg-[#555]",
   LOW: "bg-blue-400",
   MEDIUM: "bg-yellow-400",
   HIGH: "bg-orange-400",
@@ -33,10 +33,10 @@ const PRIORITY_DOT: Record<string, string> = {
 };
 
 const LIST_TYPE_BADGE: Record<string, string> = {
-  STANDARD: "bg-gray-200 text-gray-700",
-  DONE: "bg-green-100 text-green-700",
-  FAILED: "bg-red-100 text-red-700",
-  CANCELLED: "bg-gray-200 text-gray-500",
+  STANDARD: "bg-[#2a2a2a] text-[#888]",
+  DONE: "bg-green-500/20 text-green-400",
+  FAILED: "bg-red-500/20 text-red-400",
+  CANCELLED: "bg-[#2a2a2a] text-[#555]",
 };
 
 const CELL_SEP = "::";
@@ -247,7 +247,7 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
                     >
                       <span className="inline-flex items-center gap-1.5">
                         {list.title}
-                        <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-200 text-gray-600 font-semibold">
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-[#333] text-[#888] font-semibold">
                           {columnCounts.get(list.id) ?? 0}
                         </span>
                       </span>
@@ -313,7 +313,7 @@ const ParentRow = ({ parent, lists, ownList, onOpen }: ParentRowProps) => {
             <span
               className={cn(
                 "ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-semibold",
-                doneSubtasks === totalSubtasks ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
+                doneSubtasks === totalSubtasks ? "bg-green-500/20 text-green-400" : "bg-[#333] text-[#888]"
               )}
             >
               {doneSubtasks}/{totalSubtasks}
@@ -368,7 +368,7 @@ type SubtaskCellCardProps = {
 
 const SubtaskCellCard = ({ sub, index }: SubtaskCellCardProps) => {
   const cardModal = useCardModal();
-  const dotColor = sub.completed ? "bg-green-400" : PRIORITY_DOT[sub.priority] ?? "bg-gray-300";
+  const dotColor = sub.completed ? "bg-green-400" : PRIORITY_DOT[sub.priority] ?? "bg-[#555]";
 
   return (
     <Draggable draggableId={sub.id} index={index}>
@@ -378,7 +378,7 @@ const SubtaskCellCard = ({ sub, index }: SubtaskCellCardProps) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => cardModal.onOpen(sub.id)}
-          className="border-2 border-transparent hover:border-black bg-white rounded-md shadow-sm px-2.5 py-1.5 text-xs cursor-pointer"
+          className="border-2 border-transparent hover:border-violet-600/60 bg-[#2a2a2a] rounded-md shadow-sm px-2.5 py-1.5 text-xs cursor-pointer"
           style={provided.draggableProps.style as CSSProperties | undefined}
         >
           <div className="flex items-center gap-1.5">

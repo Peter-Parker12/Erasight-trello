@@ -124,10 +124,10 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
         <div className="mt-6 space-y-6">
           {/* Add list */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-700">Lists</h3>
+            <h3 className="text-sm font-semibold text-[#e5e5e5]">Lists</h3>
             <ul className="space-y-1">
               {currentLists.map((list) => (
-                <li key={list.id} className="text-sm px-2 py-1 rounded bg-neutral-100 text-neutral-700 truncate">
+                <li key={list.id} className="text-sm px-2 py-1 rounded bg-[#2a2a2a] text-[#e5e5e5] truncate">
                   {list.title}
                 </li>
               ))}
@@ -148,14 +148,14 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
           {/* Transition rules */}
           <section className="space-y-3">
             <div>
-              <h3 className="text-sm font-semibold text-neutral-700">Transition rules</h3>
-              <p className="text-xs text-neutral-500 mt-0.5">
+              <h3 className="text-sm font-semibold text-[#e5e5e5]">Transition rules</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Prompt users for extra info when a card is dropped into a list.
               </p>
             </div>
 
             {currentLists.length === 0 && (
-              <p className="text-xs text-neutral-400">No lists yet.</p>
+              <p className="text-xs text-muted-foreground">No lists yet.</p>
             )}
 
             {currentLists.map((list) => {
@@ -177,9 +177,9 @@ export const BoardSettingsSheet = ({ boardId, lists }: BoardSettingsSheetProps) 
                             type="checkbox"
                             checked={checked}
                             onChange={(e) => onToggleAction(list.id, action, e.target.checked)}
-                            className="h-3.5 w-3.5 accent-sky-600"
+                            className="h-3.5 w-3.5 accent-violet-600"
                           />
-                          <span className="flex items-center gap-1.5 text-xs text-neutral-700">
+                          <span className="flex items-center gap-1.5 text-xs text-[#e5e5e5]">
                             <Icon className="h-3.5 w-3.5" />
                             {label}
                           </span>

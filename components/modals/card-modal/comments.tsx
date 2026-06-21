@@ -156,9 +156,9 @@ export const Comments = ({ cardId }: CommentsProps) => {
       )}
 
       <div className="flex items-start gap-x-3 w-full">
-        <MessageSquare className="h-5 w-5 mt-0.5 text-neutral-700 shrink-0" />
+        <MessageSquare className="h-5 w-5 mt-0.5 text-[#e5e5e5] shrink-0" />
         <div className="w-full">
-          <p className="font-semibold text-neutral-700 mb-3">Comments</p>
+          <p className="font-semibold text-[#e5e5e5] mb-3">Comments</p>
 
           <div className="mb-4 relative">
             <textarea
@@ -167,7 +167,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               placeholder="Write a comment... (@name to mention, Ctrl+Enter to submit)"
-              className="w-full text-sm border rounded-md p-3 resize-none focus:outline-none focus:ring-1 focus:ring-sky-500 min-h-[60px]"
+              className="w-full text-sm border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] rounded-md p-3 resize-none focus:outline-none focus:ring-1 focus:ring-violet-500 min-h-[60px]"
               rows={2}
             />
 
@@ -179,9 +179,9 @@ export const Comments = ({ cardId }: CommentsProps) => {
                 <button
                   type="button"
                   onClick={() => setImagePreview(null)}
-                  className="absolute -top-1.5 -right-1.5 bg-white border rounded-full p-0.5 shadow hover:bg-red-50"
+                  className="absolute -top-1.5 -right-1.5 bg-[#1f1f1f] border border-[#333] rounded-full p-0.5 hover:bg-red-900/30"
                 >
-                  <X className="h-3 w-3 text-gray-600" />
+                  <X className="h-3 w-3 text-[#888]" />
                 </button>
               </div>
             )}
@@ -189,7 +189,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
             {mentionQuery !== null && mentionSuggestions.length > 0 && (
               <div
                 ref={dropdownRef}
-                className="absolute z-50 bg-white border rounded-lg shadow-lg w-56 overflow-hidden bottom-full mb-1"
+                className="absolute z-50 bg-[#1f1f1f] border border-[#333] rounded-lg w-56 overflow-hidden bottom-full mb-1"
               >
                 {mentionSuggestions.map((m, i) => (
                   <button
@@ -197,7 +197,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
                     onMouseDown={(e) => { e.preventDefault(); insertMention(m); }}
                     className={cn(
                       "w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition",
-                      i === mentionIndex && "bg-sky-50"
+                      i === mentionIndex && "bg-violet-600/20"
                     )}
                   >
                     <Avatar className="h-6 w-6 shrink-0">
@@ -231,7 +231,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-sky-600 transition px-1 py-0.5 rounded hover:bg-sky-50"
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-violet-400 transition px-1 py-0.5 rounded hover:bg-[#2a2a2a]"
                 >
                   <ImageIcon className="h-3.5 w-3.5" />
                   Attach image
@@ -245,7 +245,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-sky-600 transition px-1 py-0.5 rounded hover:bg-sky-50"
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-violet-400 transition px-1 py-0.5 rounded hover:bg-[#2a2a2a]"
                 >
                   <ImageIcon className="h-3.5 w-3.5" />
                   {imagePreview ? "Change image" : "Attach image"}
@@ -281,9 +281,9 @@ export const Comments = ({ cardId }: CommentsProps) => {
                         {format(new Date(comment.createdAt), "MMM d 'at' h:mm a")}
                       </span>
                     </div>
-                    <div className="mt-0.5 text-sm bg-gray-100 rounded-md px-3 py-2">
+                    <div className="mt-0.5 text-sm bg-[#2a2a2a] rounded-md px-3 py-2">
                       {comment.content && (
-                        <div className="prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded [&_strong]:text-sky-700">
+                        <div className="prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-code:bg-[#333] prose-code:px-1 prose-code:rounded [&_strong]:text-violet-400 prose-invert">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {renderWithMentions(comment.content)}
                           </ReactMarkdown>

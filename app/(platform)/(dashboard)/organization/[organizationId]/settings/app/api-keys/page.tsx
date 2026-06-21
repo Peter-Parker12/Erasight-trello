@@ -26,7 +26,7 @@ const ApiKeysSettingsPage = async ({ params }: ApiKeysSettingsPageProps) => {
   return (
     <div className="space-y-4 py-4">
       <div className="rounded-md border p-4 space-y-1">
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-[#e5e5e5]">
           API keys grant third-party apps access to the public CRM API for this organization. Treat
           them like passwords — anyone with a key can read and write Companies, Contacts and Leads.
         </p>

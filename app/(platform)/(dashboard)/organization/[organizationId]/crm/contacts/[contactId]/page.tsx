@@ -42,7 +42,7 @@ const ContactDetailPage = async ({ params }: ContactDetailPageProps) => {
     <div className="w-full p-4 md:p-6 space-y-6 max-w-4xl">
       <Link
         href={`/organization/${organizationId}/crm/contacts`}
-        className="inline-flex items-center text-sm text-neutral-500 hover:text-neutral-700"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-[#e5e5e5]"
       >
         <ArrowLeft className="h-4 w-4 mr-1" />
         Back to contacts
@@ -53,7 +53,7 @@ const ContactDetailPage = async ({ params }: ContactDetailPageProps) => {
           <h1 className="text-2xl font-semibold">
             {contact.firstName} {contact.lastName ?? ""}
           </h1>
-          {contact.title && <p className="text-sm text-neutral-500">{contact.title}</p>}
+          {contact.title && <p className="text-sm text-muted-foreground">{contact.title}</p>}
         </div>
         <ContactFormDialog
           contact={contact}
@@ -72,7 +72,7 @@ const ContactDetailPage = async ({ params }: ContactDetailPageProps) => {
         <DetailField label="Email" value={contact.email} />
         <DetailField label="Phone" value={contact.phone} />
         <div className="space-y-1">
-          <p className="text-xs font-semibold text-neutral-500">Company</p>
+          <p className="text-xs font-semibold text-muted-foreground">Company</p>
           {contact.company ? (
             <Link
               href={`/organization/${organizationId}/crm/companies/${contact.company.id}`}
@@ -110,7 +110,7 @@ const ContactDetailPage = async ({ params }: ContactDetailPageProps) => {
       <div className="space-y-2">
         <h2 className="text-sm font-semibold">Leads</h2>
         {contact.leads.length === 0 ? (
-          <p className="text-sm text-neutral-500">No leads linked to this contact yet.</p>
+          <p className="text-sm text-muted-foreground">No leads linked to this contact yet.</p>
         ) : (
           <ul className="divide-y rounded-md border">
             {contact.leads.map((lead) => (
@@ -121,7 +121,7 @@ const ContactDetailPage = async ({ params }: ContactDetailPageProps) => {
                 >
                   {lead.title}
                 </Link>
-                <span className="text-neutral-500">{lead.stage.name}</span>
+                <span className="text-muted-foreground">{lead.stage.name}</span>
               </li>
             ))}
           </ul>
@@ -133,7 +133,7 @@ const ContactDetailPage = async ({ params }: ContactDetailPageProps) => {
 
 const DetailField = ({ label, value }: { label: string; value: string | null | undefined }) => (
   <div className="space-y-1">
-    <p className="text-xs font-semibold text-neutral-500">{label}</p>
+    <p className="text-xs font-semibold text-muted-foreground">{label}</p>
     <p className="text-sm">{value || "—"}</p>
   </div>
 );

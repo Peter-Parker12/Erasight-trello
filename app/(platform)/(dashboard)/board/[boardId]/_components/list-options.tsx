@@ -70,12 +70,12 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
       </PopoverTrigger>
 
       <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">
-        <div className="text-sm font-medium text-center text-neutral-600">
+        <div className="text-sm font-medium text-center text-[#e5e5e5]">
           List actions
         </div>
         <PopoverClose ref={closeRef} asChild>
           <Button
-            className="h-auto w-auto p-2 absolute top-2 right-2 text-neutral-600"
+            className="h-auto w-auto p-2 absolute top-2 right-2 text-[#e5e5e5]"
             variant="ghost"
           >
             <X className="h-4 w-4" />

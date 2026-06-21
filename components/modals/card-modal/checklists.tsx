@@ -67,9 +67,9 @@ export const Checklists = ({ data }: ChecklistsProps) => {
         return (
           <div key={checklist.id}>
             <div className="flex items-center gap-x-3 mb-2">
-              <CheckSquare className="h-5 w-5 text-neutral-700 shrink-0" />
+              <CheckSquare className="h-5 w-5 text-[#e5e5e5] shrink-0" />
               <div className="flex-1 flex items-center justify-between">
-                <p className="font-semibold text-neutral-700">{checklist.title}</p>
+                <p className="font-semibold text-[#e5e5e5]">{checklist.title}</p>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -84,9 +84,9 @@ export const Checklists = ({ data }: ChecklistsProps) => {
             {/* Progress bar */}
             <div className="flex items-center gap-2 ml-8 mb-2">
               <span className="text-xs text-muted-foreground w-8">{percent}%</span>
-              <div className="flex-1 bg-gray-200 rounded-full h-2">
+              <div className="flex-1 bg-[#444] rounded-full h-2">
                 <div
-                  className={cn("h-2 rounded-full transition-all", percent === 100 ? "bg-green-500" : "bg-sky-600")}
+                  className={cn("h-2 rounded-full transition-all", percent === 100 ? "bg-green-500" : "bg-violet-500")}
                   style={{ width: `${percent}%` }}
                 />
               </div>
@@ -142,7 +142,7 @@ export const Checklists = ({ data }: ChecklistsProps) => {
               ) : (
                 <button
                   onClick={() => setAddingId(checklist.id)}
-                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-neutral-700 mt-1 py-0.5"
+                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-[#e5e5e5] mt-1 py-0.5"
                 >
                   <Plus className="h-3.5 w-3.5" /> Add an item
                 </button>
@@ -155,7 +155,7 @@ export const Checklists = ({ data }: ChecklistsProps) => {
       {/* Add new checklist */}
       {showNewChecklist ? (
         <div className="flex items-start gap-x-3">
-          <CheckSquare className="h-5 w-5 mt-1 text-neutral-700 shrink-0" />
+          <CheckSquare className="h-5 w-5 mt-1 text-[#e5e5e5] shrink-0" />
           <div className="flex-1 space-y-2">
             <input
               autoFocus

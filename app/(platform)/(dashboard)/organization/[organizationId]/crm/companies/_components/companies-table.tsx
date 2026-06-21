@@ -30,7 +30,7 @@ export const CompaniesTable = ({ companies, definitions, organizationId }: Compa
 
   if (companies.length === 0) {
     return (
-      <div className="rounded-md border border-dashed p-8 text-center text-sm text-neutral-500">
+      <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-muted-foreground">
         No companies yet. Create your first one to get started.
       </div>
     );
@@ -39,7 +39,7 @@ export const CompaniesTable = ({ companies, definitions, organizationId }: Compa
   return (
     <div className="overflow-x-auto rounded-md border">
       <table className="w-full text-sm">
-        <thead className="bg-neutral-50 text-left text-xs font-semibold uppercase text-neutral-500">
+        <thead className="bg-[#2a2a2a] text-left text-xs font-semibold uppercase text-muted-foreground">
           <tr>
             <th className="px-4 py-2">Name</th>
             <th className="px-4 py-2">Domain</th>
@@ -50,7 +50,7 @@ export const CompaniesTable = ({ companies, definitions, organizationId }: Compa
         </thead>
         <tbody className="divide-y">
           {companies.map((company) => (
-            <tr key={company.id} className="hover:bg-neutral-50">
+            <tr key={company.id} className="hover:bg-[#2a2a2a]">
               <td className="px-4 py-2 font-medium">
                 <Link
                   href={`/organization/${organizationId}/crm/companies/${company.id}`}
@@ -59,9 +59,9 @@ export const CompaniesTable = ({ companies, definitions, organizationId }: Compa
                   {company.name}
                 </Link>
               </td>
-              <td className="px-4 py-2 text-neutral-600">{company.domain || "—"}</td>
-              <td className="px-4 py-2 text-neutral-600">{company.industry || "—"}</td>
-              <td className="px-4 py-2 text-neutral-600">{company.phone || "—"}</td>
+              <td className="px-4 py-2 text-muted-foreground">{company.domain || "—"}</td>
+              <td className="px-4 py-2 text-muted-foreground">{company.industry || "—"}</td>
+              <td className="px-4 py-2 text-muted-foreground">{company.phone || "—"}</td>
               <td className="px-4 py-2">
                 <div className="flex items-center gap-1">
                   <CompanyFormDialog

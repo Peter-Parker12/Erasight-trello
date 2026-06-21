@@ -82,17 +82,17 @@ export const ApiKeysManager = ({ apiKeys }: ApiKeysManagerProps) => {
       </form>
 
       {apiKeys.length === 0 ? (
-        <p className="text-sm text-neutral-500">No API keys yet.</p>
+        <p className="text-sm text-muted-foreground">No API keys yet.</p>
       ) : (
         <div className="rounded-md border divide-y">
           {apiKeys.map((apiKey) => (
             <div key={apiKey.id} className="flex items-center gap-3 p-3">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{apiKey.name}</p>
-                <p className="text-xs text-neutral-500 font-mono">
+                <p className="text-xs text-muted-foreground font-mono">
                   {apiKey.keyPrefix}••••••••••••••••
                 </p>
-                <p className="text-xs text-neutral-400">
+                <p className="text-xs text-muted-foreground">
                   Created {apiKey.createdAt.toLocaleDateString()}
                   {apiKey.lastUsedAt
                     ? ` · Last used ${apiKey.lastUsedAt.toLocaleDateString()}`

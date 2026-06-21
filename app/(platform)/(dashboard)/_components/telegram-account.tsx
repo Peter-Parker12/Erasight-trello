@@ -66,11 +66,11 @@ export const TelegramAccount = () => {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 max-w-[calc(100vw-1.5rem)] pt-3 pb-3 px-0" side="bottom" align="end">
-        <div className="text-sm font-medium text-center text-neutral-600 pb-2 px-3">
+        <div className="text-sm font-medium text-center text-[#e5e5e5] pb-2 px-3">
           My Telegram
         </div>
         <PopoverClose asChild>
-          <Button className="h-auto w-auto p-2 absolute top-2 right-2 text-neutral-600" variant="ghost">
+          <Button className="h-auto w-auto p-2 absolute top-2 right-2 text-[#e5e5e5]" variant="ghost">
             <X className="h-4 w-4" />
           </Button>
         </PopoverClose>

@@ -69,23 +69,23 @@ export const LeadsBoard = ({
             });
           }}
           renderColumn={(column, itemsNode) => (
-            <div className="bg-neutral-100 rounded-md w-[272px] shrink-0 flex flex-col max-h-full">
+            <div className="bg-[#1f1f1f] border border-[#333] rounded-md w-[272px] shrink-0 flex flex-col max-h-full">
               <div className="px-3 py-2 flex items-center justify-between">
-                <h3 className="font-semibold text-sm">
+                <h3 className="font-semibold text-sm text-[#e5e5e5]">
                   {column.name}
                   {(column.isWon || column.isLost) && (
                     <span
                       className={
                         column.isWon
-                          ? "ml-2 text-xs text-emerald-600"
-                          : "ml-2 text-xs text-red-500"
+                          ? "ml-2 text-xs text-emerald-400"
+                          : "ml-2 text-xs text-red-400"
                       }
                     >
                       {column.isWon ? "Won" : "Lost"}
                     </span>
                   )}
                 </h3>
-                <span className="text-xs text-neutral-500">{column.items.length}</span>
+                <span className="text-xs text-muted-foreground">{column.items.length}</span>
               </div>
 
               <div className="px-2 overflow-y-auto flex-1">{itemsNode}</div>
@@ -98,7 +98,7 @@ export const LeadsBoard = ({
                   companies={companies}
                   contacts={contacts}
                   trigger={
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-neutral-500">
+                    <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground hover:text-[#e5e5e5]">
                       <Plus className="h-4 w-4 mr-2" />
                       Add lead
                     </Button>

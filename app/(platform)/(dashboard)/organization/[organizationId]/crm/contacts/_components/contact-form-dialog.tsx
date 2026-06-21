@@ -126,7 +126,7 @@ export const ContactFormDialog = ({
           />
 
           <div className="space-y-1">
-            <Label htmlFor="companyId" className="text-xs font-semibold text-neutral-700">
+            <Label htmlFor="companyId" className="text-xs font-semibold text-[#e5e5e5]">
               Company
             </Label>
             <select

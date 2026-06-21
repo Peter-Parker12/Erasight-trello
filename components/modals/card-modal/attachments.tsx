@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef } from "react";
 import { useParams } from "next/navigation";
@@ -35,7 +35,7 @@ function AttachmentPreview({ url, name }: { url: string; name: string }) {
   const type = getAttachmentType(url, name);
   if (type === "image") {
     return (
-      <div className="w-14 h-10 rounded overflow-hidden border bg-gray-100 shrink-0">
+      <div className="w-14 h-10 rounded overflow-hidden border border-[#333] bg-[#2a2a2a] shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={url} alt={name} className="w-full h-full object-cover" />
       </div>
@@ -43,14 +43,14 @@ function AttachmentPreview({ url, name }: { url: string; name: string }) {
   }
   if (type === "video") {
     return (
-      <div className="w-14 h-10 bg-gray-900 rounded flex items-center justify-center shrink-0 border">
-        <Film className="h-5 w-5 text-gray-300" />
+      <div className="w-14 h-10 bg-[#171717] rounded flex items-center justify-center shrink-0 border border-[#333]">
+        <Film className="h-5 w-5 text-[#888]" />
       </div>
     );
   }
   return (
-    <div className="w-14 h-10 bg-gray-100 rounded flex items-center justify-center shrink-0 border">
-      <FileText className="h-5 w-5 text-gray-400" />
+    <div className="w-14 h-10 bg-[#2a2a2a] rounded flex items-center justify-center shrink-0 border border-[#333]">
+      <FileText className="h-5 w-5 text-[#555]" />
     </div>
   );
 }
@@ -144,9 +144,9 @@ export const Attachments = ({ data }: AttachmentsProps) => {
 
   return (
     <div className="flex items-start gap-x-3 w-full">
-      <Paperclip className="h-5 w-5 mt-0.5 text-neutral-700 shrink-0" />
+      <Paperclip className="h-5 w-5 mt-0.5 text-[#e5e5e5] shrink-0" />
       <div className="w-full">
-        <p className="font-semibold text-neutral-700 mb-2">Tệp đính kèm</p>
+        <p className="font-semibold text-[#e5e5e5] mb-2">Tệp đính kèm</p>
 
         <div className="space-y-1.5 mb-3">
           {data.attachments.map((att) => {
@@ -168,25 +168,25 @@ export const Attachments = ({ data }: AttachmentsProps) => {
             }
 
             return (
-              <div key={att.id} className="rounded-lg border border-transparent hover:border-gray-200 overflow-hidden transition">
+              <div key={att.id} className="rounded-lg border border-transparent hover:border-[#333] overflow-hidden transition">
                 {/* Row */}
                 <div
                   className={cn(
-                    "flex items-center gap-3 group p-2 rounded-lg cursor-pointer hover:bg-gray-50 transition",
-                    isSelected && "bg-sky-50 border-sky-200"
+                    "flex items-center gap-3 group p-2 rounded-lg cursor-pointer hover:bg-[#2a2a2a] transition",
+                    isSelected && "bg-violet-600/10 border-violet-600/30"
                   )}
                   onClick={() => setSelectedAttId(isSelected ? null : att.id)}
                 >
                   <AttachmentPreview url={att.url} name={att.name} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate flex items-center gap-1">
-                      {attType === "image" ? <ImageIcon className="h-3 w-3 shrink-0 text-gray-400" /> : attType === "video" ? <Film className="h-3 w-3 shrink-0 text-gray-400" /> : <FileText className="h-3 w-3 shrink-0 text-gray-400" />}
+                    <p className="text-sm font-medium text-[#e5e5e5] truncate flex items-center gap-1">
+                      {attType === "image" ? <ImageIcon className="h-3 w-3 shrink-0 text-[#555]" /> : attType === "video" ? <Film className="h-3 w-3 shrink-0 text-[#555]" /> : <FileText className="h-3 w-3 shrink-0 text-[#555]" />}
                       {att.name}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {format(new Date(att.createdAt), "dd/MM/yyyy")}
-                      {isBase64 && sizeLabel && <span className="ml-2 text-[10px] bg-gray-100 px-1 py-0.5 rounded text-gray-500">{sizeLabel}</span>}
-                      {isBase64 && <span className="ml-1 text-[10px] bg-gray-100 px-1 py-0.5 rounded text-gray-500">File nội bộ</span>}
+                      {isBase64 && sizeLabel && <span className="ml-2 text-[10px] bg-[#333] px-1 py-0.5 rounded text-[#888]">{sizeLabel}</span>}
+                      {isBase64 && <span className="ml-1 text-[10px] bg-[#333] px-1 py-0.5 rounded text-[#888]">File nội bộ</span>}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
@@ -205,47 +205,47 @@ export const Attachments = ({ data }: AttachmentsProps) => {
 
                 {/* Detail panel */}
                 {isSelected && (
-                  <div className="border-t bg-white px-3 py-3 space-y-3">
+                  <div className="border-t border-[#333] bg-[#1f1f1f] px-3 py-3 space-y-3">
                     <div className="flex items-start gap-3">
                       {/* Large preview */}
                       <div className="shrink-0">
                         {attType === "image" ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={att.url} alt={att.name} className="max-h-36 max-w-[180px] rounded-md border object-contain bg-gray-50 shadow-sm" />
+                          <img src={att.url} alt={att.name} className="max-h-36 max-w-[180px] rounded-md border border-[#333] object-contain bg-[#2a2a2a] shadow-sm" />
                         ) : attType === "video" ? (
-                          <video src={att.url} className="max-h-36 max-w-[180px] rounded-md border shadow-sm" controls />
+                          <video src={att.url} className="max-h-36 max-w-[180px] rounded-md border border-[#333] shadow-sm" controls />
                         ) : (
-                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex flex-col items-center justify-center border shadow-sm gap-1">
-                            <FileText className="h-7 w-7 text-gray-400" />
-                            <span className="text-[9px] font-bold text-gray-500 uppercase">{ext}</span>
+                          <div className="w-16 h-16 bg-[#2a2a2a] rounded-lg flex flex-col items-center justify-center border border-[#333] shadow-sm gap-1">
+                            <FileText className="h-7 w-7 text-[#555]" />
+                            <span className="text-[9px] font-bold text-[#888] uppercase">{ext}</span>
                           </div>
                         )}
                       </div>
 
                       {/* Info */}
                       <div className="flex-1 min-w-0 space-y-1.5">
-                        <p className="text-sm font-semibold text-gray-800 truncate">{att.name}</p>
+                        <p className="text-sm font-semibold text-[#e5e5e5] truncate">{att.name}</p>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                           <div>
                             <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Loại</p>
-                            <p className="text-xs font-medium capitalize text-gray-700">
+                            <p className="text-xs font-medium capitalize text-[#e5e5e5]">
                               {attType === "image" ? "Hình ảnh" : attType === "video" ? "Video" : "Tài liệu"} {!isBase64 && "(URL)"}
                             </p>
                           </div>
                           {sizeLabel && (
                             <div>
                               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Kích thước</p>
-                              <p className="text-xs font-medium text-gray-700">{sizeLabel}</p>
+                              <p className="text-xs font-medium text-[#e5e5e5]">{sizeLabel}</p>
                             </div>
                           )}
                           <div>
                             <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Thêm lúc</p>
-                            <p className="text-xs font-medium text-gray-700">{format(new Date(att.createdAt), "HH:mm dd/MM/yyyy")}</p>
+                            <p className="text-xs font-medium text-[#e5e5e5]">{format(new Date(att.createdAt), "HH:mm dd/MM/yyyy")}</p>
                           </div>
                           {!isBase64 && (
                             <div className="col-span-2">
                               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">URL</p>
-                              <p className="text-xs text-sky-700 truncate">{att.url}</p>
+                              <p className="text-xs text-violet-400 truncate">{att.url}</p>
                             </div>
                           )}
                         </div>
@@ -254,7 +254,7 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                         <div className="flex items-center gap-2 pt-1">
                           <button
                             onClick={() => downloadAttachment(att)}
-                            className="inline-flex items-center gap-1 text-xs bg-gray-900 text-white px-2.5 py-1 rounded-md hover:bg-gray-700 transition font-medium"
+                            className="inline-flex items-center gap-1 text-xs bg-[#e5e5e5] text-[#171717] px-2.5 py-1 rounded-md hover:bg-[#ccc] transition font-medium"
                           >
                             <Download className="h-3.5 w-3.5" />
                             Tải xuống
@@ -265,7 +265,7 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                                 href={att.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-xs bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-1 rounded-md hover:bg-sky-100 transition font-medium"
+                                className="inline-flex items-center gap-1 text-xs bg-violet-600/10 text-violet-400 border border-violet-600/30 px-2.5 py-1 rounded-md hover:bg-violet-600/20 transition font-medium"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <ExternalLink className="h-3.5 w-3.5" />
@@ -273,7 +273,7 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                               </a>
                               <button
                                 onClick={(e) => { e.stopPropagation(); copyUrl(att.url); }}
-                                className="inline-flex items-center gap-1 text-xs bg-gray-50 text-gray-700 border border-gray-200 px-2.5 py-1 rounded-md hover:bg-gray-100 transition font-medium"
+                                className="inline-flex items-center gap-1 text-xs bg-[#2a2a2a] text-[#e5e5e5] border border-[#333] px-2.5 py-1 rounded-md hover:bg-[#333] transition font-medium"
                               >
                                 <Copy className="h-3.5 w-3.5" />
                                 Sao chép
@@ -282,7 +282,7 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                           )}
                           <button
                             onClick={(e) => { e.stopPropagation(); setSelectedAttId(null); }}
-                            className="ml-auto text-muted-foreground hover:text-gray-700"
+                            className="ml-auto text-muted-foreground hover:text-[#e5e5e5]"
                             title="Đóng"
                           >
                             <X className="h-4 w-4" />
@@ -298,18 +298,18 @@ export const Attachments = ({ data }: AttachmentsProps) => {
         </div>
 
         {showForm ? (
-          <div className="border rounded-lg bg-gray-50 overflow-hidden">
-            <div className="flex border-b bg-white">
+          <div className="border border-[#333] rounded-lg bg-[#1f1f1f] overflow-hidden">
+            <div className="flex border-b border-[#333] bg-[#171717]">
               <button
                 onClick={() => { setTab("url"); setName(""); setUrl(""); }}
-                className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors", tab === "url" ? "text-sky-600 border-b-2 border-sky-500 bg-sky-50" : "text-muted-foreground hover:text-gray-700")}
+                className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors", tab === "url" ? "text-violet-400 border-b-2 border-violet-500 bg-violet-600/10" : "text-muted-foreground hover:text-[#e5e5e5]")}
               >
                 <Link2 className="h-3.5 w-3.5" />
                 Nhập URL
               </button>
               <button
                 onClick={() => { setTab("file"); setName(""); setUrl(""); }}
-                className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors", tab === "file" ? "text-sky-600 border-b-2 border-sky-500 bg-sky-50" : "text-muted-foreground hover:text-gray-700")}
+                className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors", tab === "file" ? "text-violet-400 border-b-2 border-violet-500 bg-violet-600/10" : "text-muted-foreground hover:text-[#e5e5e5]")}
               >
                 <Upload className="h-3.5 w-3.5" />
                 Tải file lên
@@ -319,12 +319,12 @@ export const Attachments = ({ data }: AttachmentsProps) => {
             <div className="p-3 space-y-2">
               {tab === "url" ? (
                 <>
-                  <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên hiển thị..." className="w-full text-sm border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white" />
-                  <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="w-full text-sm border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white" />
+                  <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên hiển thị..." className="w-full text-sm border border-[#333] rounded-md p-2 bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1 focus:ring-violet-500" />
+                  <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="w-full text-sm border border-[#333] rounded-md p-2 bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1 focus:ring-violet-500" />
                 </>
               ) : (
                 <>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-sky-400 hover:bg-sky-50 transition-colors" onClick={() => fileInputRef.current?.click()}>
+                  <div className="border-2 border-dashed border-[#333] rounded-lg p-4 text-center cursor-pointer hover:border-violet-500 hover:bg-violet-600/10 transition-colors" onClick={() => fileInputRef.current?.click()}>
                     {url ? (
                       <div className="flex flex-col items-center gap-1">
                         {url.startsWith("data:image/") ? (
@@ -332,13 +332,13 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                           <img src={url} alt="preview" className="max-h-24 rounded shadow-sm" />
                         ) : url.startsWith("data:video/") ? (
                           <div className="flex flex-col items-center gap-1">
-                            <Film className="h-8 w-8 text-sky-400" />
-                            <span className="text-[10px] bg-sky-100 text-sky-600 px-1.5 py-0.5 rounded">Video</span>
+                            <Film className="h-8 w-8 text-violet-400" />
+                            <span className="text-[10px] bg-violet-600/20 text-violet-400 px-1.5 py-0.5 rounded">Video</span>
                           </div>
                         ) : (
-                          <FileText className="h-8 w-8 text-sky-400" />
+                          <FileText className="h-8 w-8 text-violet-400" />
                         )}
-                        <p className="text-xs font-medium text-gray-700 truncate max-w-full">{name}</p>
+                        <p className="text-xs font-medium text-[#e5e5e5] truncate max-w-full">{name}</p>
                         <p className="text-[10px] text-muted-foreground">Nhấn để đổi file</p>
                       </div>
                     ) : (
@@ -351,7 +351,7 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                     <input ref={fileInputRef} type="file" className="hidden" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,video/mp4,video/quicktime,video/x-msvideo,video/webm,.mov" onChange={handleFileChange} />
                   </div>
                   {name && (
-                    <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên file..." className="w-full text-sm border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white" />
+                    <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên file..." className="w-full text-sm border border-[#333] rounded-md p-2 bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1 focus:ring-violet-500" />
                   )}
                 </>
               )}

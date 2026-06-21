@@ -18,7 +18,7 @@ type CalendarViewProps = {
 };
 
 const PRIORITY_DOT: Record<string, string> = {
-  NONE: "bg-gray-300",
+  NONE: "bg-[#555]",
   LOW: "bg-blue-400",
   MEDIUM: "bg-yellow-400",
   HIGH: "bg-orange-400",
@@ -37,12 +37,12 @@ const CalendarCard = ({ card }: CalendarCardProps) => {
       className={cn(
         "w-full text-left text-[11px] px-1.5 py-0.5 rounded truncate flex items-center gap-1 leading-tight",
         card.completed
-          ? "bg-green-100 text-green-700 line-through"
+          ? "bg-green-500/20 text-green-400 line-through"
           : overdue
-          ? "bg-red-100 text-red-700 font-medium"
+          ? "bg-red-500/20 text-red-400 font-medium"
           : card.coverColor
           ? "text-white font-medium"
-          : "bg-white border border-gray-200 text-gray-700 hover:border-gray-400"
+          : "bg-[#2a2a2a] border border-[#333] text-muted-foreground hover:border-[#888]"
       )}
       style={card.coverColor && !card.completed ? { backgroundColor: card.coverColor } : undefined}
       title={card.title}
@@ -82,26 +82,26 @@ export const CalendarView = ({ lists }: CalendarViewProps) => {
   const noDateCards = lists.flatMap((l) => l.cards).filter((c) => !getEffectiveDueDate(c).date);
 
   return (
-    <div className="flex flex-col h-full bg-white/90 rounded-lg overflow-hidden border border-white/30 shadow-sm">
+    <div className="flex flex-col h-full bg-[#171717]/90 rounded-lg overflow-hidden border border-[#333] shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-black/20 text-white">
         <button
           onClick={() => setCurrent((d) => subMonths(d, 1))}
-          className="p-1 rounded hover:bg-white/20 transition-colors"
+          className="p-1 rounded hover:bg-white/10 transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
         <h2 className="text-sm font-semibold">{format(current, "MMMM yyyy")}</h2>
         <button
           onClick={() => setCurrent((d) => addMonths(d, 1))}
-          className="p-1 rounded hover:bg-white/20 transition-colors"
+          className="p-1 rounded hover:bg-white/10 transition-colors"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
 
       {/* Day name headers */}
-      <div className="grid grid-cols-7 bg-gray-50 border-b">
+      <div className="grid grid-cols-7 bg-[#2a2a2a] border-b">
         {DAY_NAMES.map((d) => (
           <div key={d} className="py-1.5 text-center text-xs font-medium text-muted-foreground">
             {d}
@@ -123,13 +123,13 @@ export const CalendarView = ({ lists }: CalendarViewProps) => {
               key={key}
               className={cn(
                 "min-h-[80px] p-1 border-b border-r border-gray-100",
-                !inMonth && "bg-gray-50 opacity-50"
+                !inMonth && "bg-[#1a1a1a] opacity-60"
               )}
             >
               {/* Day number */}
               <div className={cn(
                 "text-xs font-medium w-5 h-5 flex items-center justify-center rounded-full mb-1",
-                today ? "bg-sky-500 text-white" : "text-gray-500"
+                today ? "bg-violet-500 text-white" : "text-muted-foreground"
               )}>
                 {format(day, "d")}
               </div>
@@ -152,7 +152,7 @@ export const CalendarView = ({ lists }: CalendarViewProps) => {
 
       {/* No date cards footer */}
       {noDateCards.length > 0 && (
-        <div className="border-t bg-gray-50 px-4 py-2">
+        <div className="border-t bg-[#1f1f1f] px-4 py-2">
           <p className="text-xs text-muted-foreground mb-1.5 font-medium">
             {noDateCards.length} card{noDateCards.length > 1 ? "s" : ""} with no due date
           </p>

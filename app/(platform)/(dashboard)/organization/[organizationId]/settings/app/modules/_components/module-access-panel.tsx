@@ -76,8 +76,8 @@ export const ModuleAccessPanel = ({
       >
         <div>
           <p className="font-medium text-sm">{label}</p>
-          <p className="text-xs text-neutral-500">{description}</p>
-          <p className="text-xs text-neutral-400 mt-1">
+          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className="text-xs text-muted-foreground mt-1">
             {open && data
               ? isRestricted
                 ? "Restricted — only assigned members can access this module."
@@ -93,7 +93,7 @@ export const ModuleAccessPanel = ({
       {open && (
         <div className="border-t p-4 space-y-1">
           {isLoading ? (
-            <p className="text-sm text-neutral-500">Loading members...</p>
+            <p className="text-sm text-muted-foreground">Loading members...</p>
           ) : isError ? (
             <p className="text-sm text-red-500">
               Failed to load members. Make sure the database schema is up to date (
@@ -125,7 +125,7 @@ export const ModuleAccessPanel = ({
           )}
 
           {data?.orgMembers.length === 0 && (
-            <p className="text-sm text-neutral-500 text-center py-2">No org members found.</p>
+            <p className="text-sm text-muted-foreground text-center py-2">No org members found.</p>
           )}
         </div>
       )}

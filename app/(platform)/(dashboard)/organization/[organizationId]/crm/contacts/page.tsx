@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { Plus } from "lucide-react";
+import { Plus, Users, Building2, Mail } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
+import { KpiCard } from "@/components/crm/kpi-card";
 import { ContactsTable } from "./_components/contacts-table";
 import { ContactFormDialog } from "./_components/contact-form-dialog";
 
@@ -33,14 +34,16 @@ const ContactsPage = async ({ params }: ContactsPageProps) => {
   ]);
 
   const definitions = definitionRows.map(toFieldDefinitionDTO);
+  const linkedToCompany = contacts.filter((c) => c.company).length;
+  const withEmail = contacts.filter((c) => c.email).length;
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold">Contacts</h1>
-          <p className="text-sm text-neutral-500">
-            People you're in touch with, optionally linked to a company.
+          <p className="text-sm text-muted-foreground">
+            People you&apos;re in touch with, optionally linked to a company.
           </p>
         </div>
         <ContactFormDialog
@@ -53,6 +56,12 @@ const ContactsPage = async ({ params }: ContactsPageProps) => {
             </Button>
           }
         />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <KpiCard label="Total contacts" value={contacts.length} icon={Users} />
+        <KpiCard label="Linked to company" value={linkedToCompany} icon={Building2} iconColor="text-emerald-400" />
+        <KpiCard label="With email" value={withEmail} icon={Mail} iconColor="text-amber-400" />
       </div>
 
       <ContactsTable

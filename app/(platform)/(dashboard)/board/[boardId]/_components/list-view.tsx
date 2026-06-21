@@ -13,10 +13,10 @@ import { Button } from "@/components/ui/button";
 
 const PRIORITY_BADGE: Record<string, { label: string; className: string }> = {
   NONE:   { label: "—",      className: "text-muted-foreground" },
-  LOW:    { label: "Low",    className: "bg-blue-100 text-blue-700" },
-  MEDIUM: { label: "Medium", className: "bg-yellow-100 text-yellow-700" },
-  HIGH:   { label: "High",   className: "bg-orange-100 text-orange-700" },
-  URGENT: { label: "Urgent", className: "bg-red-100 text-red-700" },
+  LOW:    { label: "Low",    className: "bg-blue-500/20 text-blue-400" },
+  MEDIUM: { label: "Medium", className: "bg-yellow-500/20 text-yellow-400" },
+  HIGH:   { label: "High",   className: "bg-orange-500/20 text-orange-400" },
+  URGENT: { label: "Urgent", className: "bg-red-500/20 text-red-400" },
 };
 const PRIORITY_ORDER = ["URGENT", "HIGH", "MEDIUM", "LOW", "NONE"];
 
@@ -55,7 +55,7 @@ const CardRow = ({ card, listName, listColor, selected, onSelect }: CardRowProps
     <tr
       className={cn(
         "border-b last:border-0 hover:bg-muted/40 transition-colors cursor-pointer group",
-        selected && "bg-sky-50"
+        selected && "bg-violet-600/10"
       )}
     >
       {/* Checkbox */}
@@ -65,7 +65,7 @@ const CardRow = ({ card, listName, listColor, selected, onSelect }: CardRowProps
           checked={selected}
           onChange={() => onSelect(card.id)}
           onClick={(e) => e.stopPropagation()}
-          className="rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+          className="rounded border-gray-300 text-violet-500 focus:ring-violet-500 accent-violet-600"
         />
       </td>
 
@@ -75,7 +75,7 @@ const CardRow = ({ card, listName, listColor, selected, onSelect }: CardRowProps
           {card.coverColor && (
             <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: card.coverColor }} />
           )}
-          <span className="truncate text-sm font-medium group-hover:text-black">{card.title}</span>
+          <span className="truncate text-sm font-medium group-hover:text-white">{card.title}</span>
           <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">#{card.cardNumber}</span>
         </div>
       </td>
@@ -118,9 +118,9 @@ const CardRow = ({ card, listName, listColor, selected, onSelect }: CardRowProps
       <td className="py-2.5 px-2">
         {due ? (
           <span className={cn("inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded",
-            card.completed ? "bg-green-100 text-green-700" :
-            overdue ? "bg-red-100 text-red-600" :
-            dueSoon ? "bg-yellow-100 text-yellow-700" : "text-muted-foreground"
+            card.completed ? "bg-green-500/20 text-green-400" :
+            overdue ? "bg-red-500/20 text-red-400" :
+            dueSoon ? "bg-yellow-500/20 text-yellow-400" : "text-muted-foreground"
           )}>
             {isReview ? <Eye className="h-3 w-3" /> : <CalendarDays className="h-3 w-3" />}
             {format(due, "MMM d, yyyy")}
@@ -138,9 +138,9 @@ const CardRow = ({ card, listName, listColor, selected, onSelect }: CardRowProps
             <span className={cn("inline-flex items-center gap-1 text-xs", doneItems === totalItems ? "text-green-600" : "text-muted-foreground")}>
               <CheckSquare className="h-3 w-3" /> {doneItems}/{totalItems}
             </span>
-            <div className="h-1 w-12 bg-gray-200 rounded-full">
+            <div className="h-1 w-12 bg-[#444] rounded-full">
               <div
-                className={cn("h-1 rounded-full", doneItems === totalItems ? "bg-green-500" : "bg-sky-500")}
+                className={cn("h-1 rounded-full", doneItems === totalItems ? "bg-green-500" : "bg-violet-500")}
                 style={{ width: `${Math.round((doneItems / totalItems) * 100)}%` }}
               />
             </div>
@@ -204,7 +204,7 @@ const GroupSection = ({ label, color, cards, selectedIds, onSelect }: GroupSecti
         <td className="py-1.5 px-3">
           <input type="checkbox" checked={allSel}
             onChange={() => cards.forEach((c) => onSelect(c.card.id))}
-            className="rounded border-gray-300 text-sky-600" />
+            className="rounded border-gray-300 text-violet-500 accent-violet-600" />
         </td>
         <td colSpan={8} className="py-1.5 px-2">
           <button
@@ -277,15 +277,15 @@ export const ListView = ({ lists }: ListViewProps) => {
         {(["list", "priority", "assignee"] as const).map((g) => (
           <button key={g} onClick={() => setGroupBy(g)}
             className={cn("text-xs px-3 py-1 rounded-full border transition",
-              groupBy === g ? "bg-gray-900 text-white border-gray-900" : "bg-white text-muted-foreground border-gray-200 hover:border-gray-400"
+              groupBy === g ? "bg-violet-600 text-white border-violet-600" : "bg-[#2a2a2a] text-muted-foreground border-[#333] hover:border-[#888]"
             )}>
             {g === "list" ? "List" : g === "priority" ? "Priority" : "Assignee"}
           </button>
         ))}
-        {selectedIds.size > 0 && <span className="ml-2 text-xs text-sky-600 font-medium">{selectedIds.size} selected</span>}
+        {selectedIds.size > 0 && <span className="ml-2 text-xs text-violet-400 font-medium">{selectedIds.size} selected</span>}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-lg border border-[#333] bg-[#1f1f1f]">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/50">
@@ -293,7 +293,7 @@ export const ListView = ({ lists }: ListViewProps) => {
                 <input type="checkbox"
                   onChange={(e) => setSelectedIds(e.target.checked ? new Set(allCards.map((c) => c.card.id)) : new Set())}
                   checked={selectedIds.size === allCards.length && allCards.length > 0}
-                  className="rounded border-gray-300 text-sky-600" />
+                  className="rounded border-gray-300 text-violet-500 accent-violet-600" />
               </th>
               {["Title","List","Labels","Priority","Due Date","Checklist","Activity","Members"].map((h) => (
                 <th key={h} className="text-left py-2.5 px-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">{h}</th>
@@ -309,10 +309,10 @@ export const ListView = ({ lists }: ListViewProps) => {
       </div>
 
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-xl shadow-2xl">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-[#1f1f1f] border border-[#333] text-[#e5e5e5] px-4 py-2.5 rounded-xl shadow-2xl">
           <span className="text-sm font-medium">{selectedIds.size} card{selectedIds.size > 1 ? "s" : ""} selected</span>
-          <div className="w-px h-4 bg-white/20 mx-1" />
-          <Button size="sm" variant="ghost" className="h-7 text-xs text-red-400 hover:bg-white/10 gap-1" onClick={() => setSelectedIds(new Set())}>
+          <div className="w-px h-4 bg-[#333] mx-1" />
+          <Button size="sm" variant="ghost" className="h-7 text-xs text-red-400 hover:bg-[#333] gap-1" onClick={() => setSelectedIds(new Set())}>
             <Trash2 className="h-3.5 w-3.5" /> Clear selection
           </Button>
           <button onClick={() => setSelectedIds(new Set())} className="text-xs text-white/50 hover:text-white ml-1">x</button>

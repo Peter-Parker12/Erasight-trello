@@ -94,9 +94,9 @@ export const Description = ({ data }: DescriptionProps) => {
 
   return (
     <div className="flex items-start gap-x-3 w-full">
-      <AlignLeft className="h-5 w-5 mt-0.5 text-neutral-700" />
+      <AlignLeft className="h-5 w-5 mt-0.5 text-[#e5e5e5]" />
       <div className="w-full">
-        <p className="font-semibold text-neutral-700 mb-2">Description</p>
+        <p className="font-semibold text-[#e5e5e5] mb-2">Description</p>
         {isEditing ? (
           <form ref={formRef} action={onSubmit} className="space-y-2">
             <FormTextarea
@@ -130,10 +130,10 @@ export const Description = ({ data }: DescriptionProps) => {
           <div
             onClick={enableEditing}
             role="button"
-            className="min-h-[78px] bg-neutral-200 text-sm font-medium py-3 px-3.5 rounded-md"
+            className="min-h-[78px] bg-[#2a2a2a] text-sm font-medium py-3 px-3.5 rounded-md"
           >
             {data.description ? (
-              <div className="prose prose-sm max-w-none prose-p:my-0.5 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0 prose-headings:my-1 prose-code:bg-gray-300 prose-code:px-1 prose-code:rounded">
+              <div className="prose prose-sm max-w-none prose-p:my-0.5 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0 prose-headings:my-1 prose-code:bg-[#333] prose-code:px-1 prose-code:rounded">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.description}</ReactMarkdown>
               </div>
             ) : (
@@ -149,10 +149,10 @@ export const Description = ({ data }: DescriptionProps) => {
 Description.Skeleton = function DescriptionSkeleton() {
   return (
     <div className="flex items-start gap-x-3 w-full">
-      <Skeleton className="h-6 w-6 bg-neutral-200" />
+      <Skeleton className="h-6 w-6 bg-[#2a2a2a]" />
       <div className="w-full">
-        <Skeleton className="h-6 w-24 mb-2 bg-neutral-200" />
-        <Skeleton className="h-[78px] w-full mb-2 bg-neutral-200" />
+        <Skeleton className="h-6 w-24 mb-2 bg-[#2a2a2a]" />
+        <Skeleton className="h-[78px] w-full mb-2 bg-[#2a2a2a]" />
       </div>
     </div>
   );

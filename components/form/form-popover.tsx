@@ -62,14 +62,14 @@ export const FormPopover = ({
         side={side}
         sideOffset={sideOffset}
       >
-        <div className="text-sm font-medium text-center text-neutral-600 pb-4">
+        <div className="text-sm font-medium text-center text-[#e5e5e5] pb-4">
           Create board
         </div>
 
         <PopoverClose ref={closeRef} asChild>
           <Button
             variant="ghost"
-            className="h-auto w-auto p-2 absolute top-2 right-2 text-neutral-600"
+            className="h-auto w-auto p-2 absolute top-2 right-2 text-[#e5e5e5]"
           >
             <X className="h-4 w-4" />
           </Button>

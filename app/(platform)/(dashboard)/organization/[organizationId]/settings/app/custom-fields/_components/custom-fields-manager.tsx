@@ -44,7 +44,7 @@ export const CustomFieldsManager = ({ entityType, label, fields }: CustomFieldsM
       >
         <div>
           <p className="font-medium text-sm">{label}</p>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-muted-foreground">
             {fields.length} custom field{fields.length === 1 ? "" : "s"}
           </p>
         </div>
@@ -54,7 +54,7 @@ export const CustomFieldsManager = ({ entityType, label, fields }: CustomFieldsM
       {open && (
         <div className="border-t p-4 space-y-3">
           {fields.length === 0 && (
-            <p className="text-sm text-neutral-500">No custom fields defined yet.</p>
+            <p className="text-sm text-muted-foreground">No custom fields defined yet.</p>
           )}
 
           {fields.map((field) => (
@@ -89,12 +89,12 @@ const FieldRow = ({ field }: { field: CustomFieldDefinitionDTO }) => {
     <div className="flex items-center gap-2 border rounded-md p-2">
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{field.label}</p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-muted-foreground">
           {field.key} · {field.type}
           {field.options?.length ? ` · ${field.options.join(", ")}` : ""}
         </p>
       </div>
-      <label className="flex items-center gap-1 text-xs text-neutral-600 whitespace-nowrap">
+      <label className="flex items-center gap-1 text-xs text-[#e5e5e5] whitespace-nowrap">
         <input
           type="checkbox"
           defaultChecked={field.required}
@@ -213,7 +213,7 @@ const AddFieldRow = ({
             className="h-8 text-sm"
           />
         ) : (
-          <label className="flex items-center gap-1 text-xs text-neutral-600">
+          <label className="flex items-center gap-1 text-xs text-[#e5e5e5]">
             <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} />
             Required
           </label>
@@ -221,7 +221,7 @@ const AddFieldRow = ({
       </div>
 
       {needsOptions && (
-        <label className="flex items-center gap-1 text-xs text-neutral-600">
+        <label className="flex items-center gap-1 text-xs text-[#e5e5e5]">
           <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} />
           Required
         </label>

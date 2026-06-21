@@ -22,7 +22,7 @@ export const CustomFieldsFields = ({
 
   return (
     <div className="space-y-3 border-t pt-3">
-      <p className="text-xs font-semibold text-neutral-500">Custom fields</p>
+      <p className="text-xs font-semibold text-muted-foreground">Custom fields</p>
 
       {definitions.map((def) => {
         const name = `cf_${def.key}`;
@@ -30,7 +30,7 @@ export const CustomFieldsFields = ({
 
         return (
           <div key={def.key} className="space-y-1">
-            <Label htmlFor={name} className="text-xs font-semibold text-neutral-700">
+            <Label htmlFor={name} className="text-xs font-semibold text-[#e5e5e5]">
               {def.label}
               {def.required && <span className="text-red-500"> *</span>}
             </Label>

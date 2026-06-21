@@ -36,9 +36,9 @@ export const LeadCard = ({ lead, stages, definitions, companies, contacts }: Lea
   };
 
   return (
-    <div className="bg-white rounded-md shadow-sm border p-3 mb-2 space-y-1.5 text-sm">
+    <div className="bg-[#2a2a2a] rounded-md border border-[#333] hover:border-violet-600/40 p-3 mb-2 space-y-1.5 text-sm transition">
       <div className="flex items-start justify-between gap-2">
-        <p className="font-medium leading-snug">{lead.title}</p>
+        <p className="font-medium leading-snug text-[#e5e5e5]">{lead.title}</p>
         <div className="flex items-center gap-0.5 shrink-0">
           <LeadFormDialog
             lead={lead}
@@ -55,7 +55,7 @@ export const LeadCard = ({ lead, stages, definitions, companies, contacts }: Lea
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
+            className="h-6 w-6 p-0 text-red-500 hover:text-red-400"
             disabled={isLoading}
             onClick={onDelete}
           >
@@ -65,13 +65,13 @@ export const LeadCard = ({ lead, stages, definitions, companies, contacts }: Lea
       </div>
 
       {lead.value != null && (
-        <p className="text-xs text-neutral-600">${Number(lead.value).toLocaleString()}</p>
+        <p className="text-xs text-violet-400 font-medium">${Number(lead.value).toLocaleString()}</p>
       )}
 
-      {lead.company && <p className="text-xs text-neutral-500">{lead.company.name}</p>}
+      {lead.company && <p className="text-xs text-muted-foreground">{lead.company.name}</p>}
 
       {lead.contact && (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-muted-foreground">
           {lead.contact.firstName} {lead.contact.lastName ?? ""}
         </p>
       )}

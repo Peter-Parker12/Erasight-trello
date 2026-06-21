@@ -37,7 +37,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
     <div className="w-full p-4 md:p-6 space-y-6 max-w-4xl">
       <Link
         href={`/organization/${organizationId}/crm/companies`}
-        className="inline-flex items-center text-sm text-neutral-500 hover:text-neutral-700"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-[#e5e5e5]"
       >
         <ArrowLeft className="h-4 w-4 mr-1" />
         Back to companies
@@ -46,7 +46,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{company.name}</h1>
-          {company.industry && <p className="text-sm text-neutral-500">{company.industry}</p>}
+          {company.industry && <p className="text-sm text-muted-foreground">{company.industry}</p>}
         </div>
         <CompanyFormDialog
           company={company}
@@ -67,7 +67,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
         <DetailField label="Address" value={company.address} />
         {company.description && (
           <div className="md:col-span-2 space-y-1">
-            <p className="text-xs font-semibold text-neutral-500">Description</p>
+            <p className="text-xs font-semibold text-muted-foreground">Description</p>
             <p className="text-sm whitespace-pre-wrap">{company.description}</p>
           </div>
         )}
@@ -97,7 +97,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
       <div className="space-y-2">
         <h2 className="text-sm font-semibold">Contacts</h2>
         {company.contacts.length === 0 ? (
-          <p className="text-sm text-neutral-500">No contacts linked to this company yet.</p>
+          <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p>
         ) : (
           <ul className="divide-y rounded-md border">
             {company.contacts.map((contact) => (
@@ -109,7 +109,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
                   {contact.firstName} {contact.lastName ?? ""}
                 </Link>
                 {contact.email && (
-                  <span className="text-neutral-500"> · {contact.email}</span>
+                  <span className="text-muted-foreground"> · {contact.email}</span>
                 )}
               </li>
             ))}
@@ -120,7 +120,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
       <div className="space-y-2">
         <h2 className="text-sm font-semibold">Leads</h2>
         {company.leads.length === 0 ? (
-          <p className="text-sm text-neutral-500">No leads linked to this company yet.</p>
+          <p className="text-sm text-muted-foreground">No leads linked to this company yet.</p>
         ) : (
           <ul className="divide-y rounded-md border">
             {company.leads.map((lead) => (
@@ -131,7 +131,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
                 >
                   {lead.title}
                 </Link>
-                <span className="text-neutral-500">{lead.stage.name}</span>
+                <span className="text-muted-foreground">{lead.stage.name}</span>
               </li>
             ))}
           </ul>
@@ -143,7 +143,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
 
 const DetailField = ({ label, value }: { label: string; value: string | null | undefined }) => (
   <div className="space-y-1">
-    <p className="text-xs font-semibold text-neutral-500">{label}</p>
+    <p className="text-xs font-semibold text-muted-foreground">{label}</p>
     <p className="text-sm">{value || "—"}</p>
   </div>
 );
