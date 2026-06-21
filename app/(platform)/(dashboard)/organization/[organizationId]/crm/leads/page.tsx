@@ -3,9 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { TrendingUp, Trophy, XCircle, DollarSign } from "lucide-react";
 
 import { db } from "@/lib/db";
+import { isOrgAdmin } from "@/lib/board-access";
 import { ensureDefaultPipelineStages } from "@/lib/pipeline-stages";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
 import { KpiCard } from "@/components/crm/kpi-card";
+import { CustomFieldsManager } from "@/app/(platform)/(dashboard)/organization/[organizationId]/settings/app/custom-fields/_components/custom-fields-manager";
 import { LeadsBoard } from "./_components/leads-board";
 
 type LeadsPageProps = {
@@ -17,6 +19,8 @@ const LeadsPage = async ({ params }: LeadsPageProps) => {
   const { orgId } = await auth();
 
   if (!orgId || orgId !== organizationId) redirect("/select-org");
+
+  const isAdmin = await isOrgAdmin(orgId);
 
   await ensureDefaultPipelineStages(orgId);
 
@@ -68,6 +72,10 @@ const LeadsPage = async ({ params }: LeadsPageProps) => {
         <KpiCard label="Lost" value={lostLeads.length} icon={XCircle} iconColor="text-red-400" />
         <KpiCard label="Pipeline value" value={`$${totalValue.toLocaleString()}`} icon={DollarSign} iconColor="text-amber-400" />
       </div>
+
+      {isAdmin && (
+        <CustomFieldsManager entityType="LEAD" label="Custom fields" fields={definitions} />
+      )}
 
       <LeadsBoard
         stages={stages}

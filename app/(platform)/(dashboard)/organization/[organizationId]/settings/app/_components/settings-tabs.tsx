@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 
 const ADMIN_TABS = [
   { href: "modules", label: "Modules" },
-  { href: "custom-fields", label: "Custom fields" },
   { href: "api-keys", label: "API keys" },
 ];
 

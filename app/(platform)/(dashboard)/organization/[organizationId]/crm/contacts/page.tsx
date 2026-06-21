@@ -3,9 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { Plus, Users, Building2, Mail } from "lucide-react";
 
 import { db } from "@/lib/db";
+import { isOrgAdmin } from "@/lib/board-access";
 import { Button } from "@/components/ui/button";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
 import { KpiCard } from "@/components/crm/kpi-card";
+import { CustomFieldsManager } from "@/app/(platform)/(dashboard)/organization/[organizationId]/settings/app/custom-fields/_components/custom-fields-manager";
 import { ContactsTable } from "./_components/contacts-table";
 import { ContactFormDialog } from "./_components/contact-form-dialog";
 
@@ -18,6 +20,8 @@ const ContactsPage = async ({ params }: ContactsPageProps) => {
   const { orgId } = await auth();
 
   if (!orgId || orgId !== organizationId) redirect("/select-org");
+
+  const isAdmin = await isOrgAdmin(orgId);
 
   const [contacts, companies, definitionRows] = await Promise.all([
     db.contact.findMany({
@@ -63,6 +67,10 @@ const ContactsPage = async ({ params }: ContactsPageProps) => {
         <KpiCard label="Linked to company" value={linkedToCompany} icon={Building2} iconColor="text-emerald-400" />
         <KpiCard label="With email" value={withEmail} icon={Mail} iconColor="text-amber-400" />
       </div>
+
+      {isAdmin && (
+        <CustomFieldsManager entityType="CONTACT" label="Custom fields" fields={definitions} />
+      )}
 
       <ContactsTable
         contacts={contacts}
