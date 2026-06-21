@@ -57,32 +57,46 @@ export const Navbar = async () => {
             afterLeaveOrganizationUrl="/select-org"
             afterSelectOrganizationUrl="/organization/:id"
             appearance={{
+              variables: {
+                colorBackground: "#1f1f1f",
+                colorText: "#e5e5e5",
+                colorTextSecondary: "#888888",
+                colorPrimary: "#7c3aed",
+                colorInputBackground: "#2a2a2a",
+                colorInputText: "#e5e5e5",
+                colorNeutral: "#888888",
+              },
               elements: {
-                rootBox: {
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                },
+                rootBox: { display: "flex", justifyContent: "center", alignItems: "center" },
+                organizationSwitcherPopoverCard: { backgroundColor: "#1f1f1f", border: "1px solid #333", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" },
+                organizationSwitcherPopoverActionButton: { color: "#e5e5e5" },
                 ...(admin
                   ? {}
                   : {
-                      organizationSwitcherPopoverActionButton__createOrganization: {
-                        display: "none",
-                      },
+                      organizationSwitcherPopoverActionButton__createOrganization: { display: "none" },
                     }),
               },
             }}
           />
           <UserButton
             appearance={{
+              variables: {
+                colorBackground: "#1f1f1f",
+                colorText: "#e5e5e5",
+                colorTextSecondary: "#888888",
+                colorPrimary: "#7c3aed",
+                colorInputBackground: "#2a2a2a",
+                colorInputText: "#e5e5e5",
+                colorNeutral: "#888888",
+              },
               elements: {
-                avatarBox: {
-                  height: 30,
-                  width: 30,
-                },
-                loaderIcon: {
-                  display: "block",
-                },
+                avatarBox: { height: 30, width: 30 },
+                loaderIcon: { display: "block" },
+                userButtonPopoverCard: { backgroundColor: "#1f1f1f", border: "1px solid #333", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" },
+                userButtonPopoverActionButton: { color: "#e5e5e5" },
+                userButtonPopoverActionButtonText: { color: "#e5e5e5" },
+                userPreviewSecondaryIdentifier: { color: "#888" },
+                userPreviewMainIdentifier: { color: "#e5e5e5" },
               },
             }}
           />

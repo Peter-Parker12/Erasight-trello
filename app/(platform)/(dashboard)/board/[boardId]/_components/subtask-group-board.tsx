@@ -232,12 +232,12 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
   return (
     <>
       <div className="px-2 sm:px-4 pt-3">
-        <div className="overflow-x-auto rounded-md bg-[#f2f2f4]/60 border border-black/5">
+        <div className="overflow-x-auto rounded-md bg-[#1f1f1f]/90 border border-[#333]">
           <DragDropContext onDragEnd={onDragEnd}>
             <table className="border-collapse w-full">
               <thead>
                 <tr>
-                  <th className="sticky left-0 z-10 bg-[#f2f2f4] text-left text-xs font-semibold text-muted-foreground px-3 py-2 w-[260px] min-w-[260px]">
+                  <th className="sticky left-0 z-10 bg-[#1f1f1f] text-left text-xs font-semibold text-muted-foreground px-3 py-2 w-[260px] min-w-[260px]">
                     Tasks
                   </th>
                   {lists.map((list) => (
@@ -296,8 +296,8 @@ const ParentRow = ({ parent, lists, ownList, onOpen }: ParentRowProps) => {
   const priorityDot = PRIORITY_DOT[parent.priority];
 
   return (
-    <tr className="border-t border-black/5 align-top">
-      <td className="sticky left-0 z-10 bg-[#f2f2f4] px-3 py-2 w-[260px] min-w-[260px] align-top">
+    <tr className="border-t border-[#333] align-top">
+      <td className="sticky left-0 z-10 bg-[#1f1f1f] px-3 py-2 w-[260px] min-w-[260px] align-top">
         <div role="button" onClick={onOpen} className="cursor-pointer group">
           <div className="flex items-center gap-1.5 mb-1">
             {ownList && (
@@ -328,7 +328,7 @@ const ParentRow = ({ parent, lists, ownList, onOpen }: ParentRowProps) => {
             {parent.members.length > 0 && (
               <div className="flex -space-x-1">
                 {parent.members.slice(0, 3).map((m) => (
-                  <Avatar key={m.id} className="h-5 w-5 border border-white">
+                  <Avatar key={m.id} className="h-5 w-5 border border-[#1f1f1f]">
                     <AvatarImage src={m.userImage} alt={m.userName} />
                     <AvatarFallback className="text-[9px]">{m.userName.charAt(0)}</AvatarFallback>
                   </Avatar>
@@ -392,7 +392,7 @@ const SubtaskCellCard = ({ sub, index }: SubtaskCellCardProps) => {
             {sub.members.length > 0 && (
               <div className="flex -space-x-1">
                 {sub.members.slice(0, 2).map((m) => (
-                  <Avatar key={m.id} className="h-4 w-4 border border-white">
+                  <Avatar key={m.id} className="h-4 w-4 border border-[#2a2a2a]">
                     <AvatarImage src={m.userImage} alt={m.userName} />
                     <AvatarFallback className="text-[8px]">{m.userName.charAt(0)}</AvatarFallback>
                   </Avatar>

@@ -66,7 +66,7 @@ const BoardIdLayout = async ({
       className="relative h-full bg-no-repeat bg-cover bg-center"
     >
       <BoardNavbar data={board} isAdmin={admin} />
-      <div aria-hidden className="absolute inset-0 bg-black/10" />
+      <div aria-hidden className="absolute inset-0 bg-black/50" />
       <main className="relative pt-28 h-full">{children}</main>
     </div>
   );
