@@ -130,14 +130,14 @@ export const Description = ({ data }: DescriptionProps) => {
           <div
             onClick={enableEditing}
             role="button"
-            className="min-h-[78px] bg-[#2a2a2a] text-sm font-medium py-3 px-3.5 rounded-md"
+            className="min-h-[78px] bg-[#2a2a2a] text-[#e5e5e5] text-sm font-medium py-3 px-3.5 rounded-md"
           >
             {data.description ? (
-              <div className="prose prose-sm max-w-none prose-p:my-0.5 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0 prose-headings:my-1 prose-code:bg-[#333] prose-code:px-1 prose-code:rounded">
+              <div className="prose prose-sm prose-invert max-w-none prose-p:my-0.5 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0 prose-headings:my-1 prose-code:bg-[#333] prose-code:px-1 prose-code:rounded">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.description}</ReactMarkdown>
               </div>
             ) : (
-              "Add a more detailed description..."
+              <span className="text-[#666]">Add a more detailed description...</span>
             )}
           </div>
         )}

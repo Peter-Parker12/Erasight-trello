@@ -60,8 +60,32 @@ export const Navbar = async () => {
               variables: { colorBackground: "#1f1f1f", colorPrimary: "#7c3aed" },
               elements: {
                 rootBox: { display: "flex", justifyContent: "center", alignItems: "center" },
+                // Trigger button — org name + avatar visible on dark navbar
+                organizationSwitcherTrigger: { color: "#e5e5e5" },
+                organizationPreviewMainIdentifier: { color: "#e5e5e5" },
+                organizationPreviewSecondaryIdentifier: { color: "#888" },
+                organizationSwitcherTriggerIcon: { color: "#888" },
+                // Popover card
                 organizationSwitcherPopoverCard: { backgroundColor: "#1f1f1f", border: "1px solid #333", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" },
+                organizationSwitcherPopoverHeader: { borderBottom: "1px solid #333" },
+                organizationSwitcherPopoverOrganizationName: { color: "#e5e5e5" },
+                organizationSwitcherPopoverInvitationActions: { color: "#e5e5e5" },
                 organizationSwitcherPopoverActionButton: { color: "#e5e5e5" },
+                organizationSwitcherPopoverActionButtonText: { color: "#e5e5e5" },
+                organizationSwitcherPopoverActionButtonIcon: { color: "#888" },
+                organizationSwitcherPreviewButton: { color: "#e5e5e5" },
+                // "Manage organization" modal opened from the popup
+                organizationProfileCard: { backgroundColor: "#1f1f1f", border: "1px solid #333", boxShadow: "none" },
+                organizationProfileNavbarItem: { color: "#888" },
+                organizationProfilePage: { backgroundColor: "#1f1f1f" },
+                organizationProfilePageScrollBox: { backgroundColor: "#1f1f1f" },
+                formFieldInput: { backgroundColor: "#2a2a2a", borderColor: "#333", color: "#e5e5e5" },
+                formFieldLabel: { color: "#888" },
+                headerTitle: { color: "#e5e5e5" },
+                headerSubtitle: { color: "#888" },
+                dividerLine: { backgroundColor: "#333" },
+                tableHead: { backgroundColor: "#2a2a2a" },
+                badge: { backgroundColor: "#333", color: "#888" },
                 ...(admin
                   ? {}
                   : {

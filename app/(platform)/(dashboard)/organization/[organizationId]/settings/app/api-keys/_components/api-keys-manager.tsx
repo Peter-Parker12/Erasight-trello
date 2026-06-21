@@ -51,7 +51,7 @@ export const ApiKeysManager = ({ apiKeys }: ApiKeysManagerProps) => {
   return (
     <div className="space-y-4">
       {createdKey && (
-        <div className="rounded-md border border-amber-300 bg-amber-50 p-4 space-y-2">
+        <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-4 space-y-2">
           <p className="text-sm font-medium">
             Your new API key — copy it now, you won&apos;t be able to see it again.
           </p>

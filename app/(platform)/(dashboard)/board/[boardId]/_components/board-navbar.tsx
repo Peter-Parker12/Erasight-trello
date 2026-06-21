@@ -16,13 +16,11 @@ type BoardNavbarProps = {
 };
 
 export const BoardNavbar = async ({ data, isAdmin }: BoardNavbarProps) => {
-  const lists = isAdmin
-    ? await db.list.findMany({
-        where: { boardId: data.id },
-        select: { id: true, title: true, order: true, type: true },
-        orderBy: { order: "asc" },
-      })
-    : [];
+  const lists = await db.list.findMany({
+    where: { boardId: data.id },
+    select: { id: true, title: true, order: true, type: true },
+    orderBy: { order: "asc" },
+  });
 
   return (
     <div className="w-full h-14 z-[40] bg-black/50 fixed top-14 flex items-center px-3 sm:px-6 gap-x-2 sm:gap-x-4 text-white">
@@ -36,7 +34,7 @@ export const BoardNavbar = async ({ data, isAdmin }: BoardNavbarProps) => {
         {isAdmin && <BoardMembers boardId={data.id} />}
         {isAdmin && <TelegramSettings boardId={data.id} />}
         {isAdmin && <BoardSettingsSheet boardId={data.id} lists={lists} />}
-        <BoardOptions id={data.id} />
+        <BoardOptions id={data.id} lists={lists} />
       </div>
     </div>
   );
