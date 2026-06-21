@@ -7,6 +7,7 @@ declare global {
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 
-export const db = globalThis.prisma || new PrismaClient({ adapter });
+export const db = globalThis.prisma ?? new PrismaClient({ adapter });
 
-if (process.env.NODE_ENV !== "production") globalThis.prisma = db;
+// Always cache — without this, production creates a new connection pool on every request
+globalThis.prisma = db;

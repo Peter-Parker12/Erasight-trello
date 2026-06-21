@@ -1,25 +1,9 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { getAuth, isOrgAdmin } from "@/lib/auth-cache";
 
-import { isAdminRole } from "@/lib/roles";
-
-export const isOrgAdmin = async (orgId: string): Promise<boolean> => {
-  const { userId } = await auth();
-  if (!userId) return false;
-  try {
-    const client = await clerkClient();
-    const result = await client.organizations.getOrganizationMembershipList({
-      organizationId: orgId,
-      userId: [userId],
-      limit: 1,
-    });
-    return isAdminRole(result.data[0]?.role);
-  } catch {
-    return false;
-  }
-};
+export { isOrgAdmin };
 
 export const canAccessBoard = async (boardId: string, orgId: string): Promise<boolean> => {
-  const { userId } = await auth();
+  const { userId } = await getAuth();
   if (!userId) return false;
 
   const admin = await isOrgAdmin(orgId);

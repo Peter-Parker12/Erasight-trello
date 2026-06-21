@@ -73,7 +73,7 @@ export const CompanyFormDialog = ({ trigger, definitions, company }: CompanyForm
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit company" : "New company"}</DialogTitle>
         </DialogHeader>
