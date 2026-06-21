@@ -19,7 +19,6 @@ export default async function SelectOrgPage() {
       afterSelectOrganizationUrl="/organization/:id"
       afterCreateOrganizationUrl="/organization/:id"
       appearance={{
-        layout: { logoPlacement: "none" },
         elements: isAdmin
           ? {}
           : { organizationListCreateOrganizationBox: { display: "none" } },

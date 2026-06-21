@@ -9,9 +9,6 @@ const PlatformLayout = ({ children }: PropsWithChildren) => {
   return (
     <ClerkProvider
       appearance={{
-        layout: {
-          logoImageUrl: "/logo.svg",
-        },
         variables: {
           colorPrimary: "#171717",
         },

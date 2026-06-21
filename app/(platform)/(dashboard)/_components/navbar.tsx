@@ -57,15 +57,7 @@ export const Navbar = async () => {
             afterLeaveOrganizationUrl="/select-org"
             afterSelectOrganizationUrl="/organization/:id"
             appearance={{
-              variables: {
-                colorBackground: "#1f1f1f",
-                colorText: "#e5e5e5",
-                colorTextSecondary: "#888888",
-                colorPrimary: "#7c3aed",
-                colorInputBackground: "#2a2a2a",
-                colorInputText: "#e5e5e5",
-                colorNeutral: "#888888",
-              },
+              variables: { colorBackground: "#1f1f1f", colorPrimary: "#7c3aed" },
               elements: {
                 rootBox: { display: "flex", justifyContent: "center", alignItems: "center" },
                 organizationSwitcherPopoverCard: { backgroundColor: "#1f1f1f", border: "1px solid #333", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" },
@@ -80,15 +72,7 @@ export const Navbar = async () => {
           />
           <UserButton
             appearance={{
-              variables: {
-                colorBackground: "#1f1f1f",
-                colorText: "#e5e5e5",
-                colorTextSecondary: "#888888",
-                colorPrimary: "#7c3aed",
-                colorInputBackground: "#2a2a2a",
-                colorInputText: "#e5e5e5",
-                colorNeutral: "#888888",
-              },
+              variables: { colorBackground: "#1f1f1f", colorPrimary: "#7c3aed" },
               elements: {
                 avatarBox: { height: 30, width: 30 },
                 loaderIcon: { display: "block" },
