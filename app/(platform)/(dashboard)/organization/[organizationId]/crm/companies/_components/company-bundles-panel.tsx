@@ -17,6 +17,7 @@ type CompanyBundlesPanelProps = {
   assignedBundles: BundleWithItems[];
   allBundles: BundleWithItems[];
   organizationId: string;
+  onAssign?: () => void;
 };
 
 function formatVnd(n: number | string) {
@@ -36,6 +37,7 @@ export const CompanyBundlesPanel = ({
   assignedBundles,
   allBundles,
   organizationId,
+  onAssign,
 }: CompanyBundlesPanelProps) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -56,7 +58,11 @@ export const CompanyBundlesPanel = ({
         return;
       }
 
-      router.refresh();
+      if (onAssign) {
+        onAssign();
+      } else {
+        router.refresh();
+      }
       if (add) {
         setSelectedBundleId("");
         toast.success("Bundle assigned.");

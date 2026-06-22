@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { toast } from "sonner";
 import type { Company } from "@prisma/client";
 import { Pencil, Trash2 } from "lucide-react";
@@ -10,14 +9,19 @@ import { useAction } from "@/hooks/use-action";
 import { deleteCompany } from "@/actions/delete-company";
 import type { CustomFieldDefinitionDTO } from "@/lib/custom-fields";
 import { CompanyFormDialog } from "./company-form-dialog";
+import { CompanyDetailDialog } from "./company-detail-dialog";
+
+type CompanyRow = Company & { bundles: { bundleId: string }[] };
+type BundleOption = { id: string; name: string };
 
 type CompaniesTableProps = {
-  companies: Company[];
+  companies: CompanyRow[];
   definitions: CustomFieldDefinitionDTO[];
+  allBundles: BundleOption[];
   organizationId: string;
 };
 
-export const CompaniesTable = ({ companies, definitions, organizationId }: CompaniesTableProps) => {
+export const CompaniesTable = ({ companies, definitions, allBundles, organizationId }: CompaniesTableProps) => {
   const { execute, isLoading } = useAction(deleteCompany, {
     onSuccess: () => toast.success("Company deleted."),
     onError: (error) => toast.error(error),
@@ -52,12 +56,15 @@ export const CompaniesTable = ({ companies, definitions, organizationId }: Compa
           {companies.map((company) => (
             <tr key={company.id} className="hover:bg-[#2a2a2a]">
               <td className="px-4 py-2 font-medium">
-                <Link
-                  href={`/organization/${organizationId}/crm/companies/${company.id}`}
-                  className="hover:underline"
+                <CompanyDetailDialog
+                  companyId={company.id}
+                  companyName={company.name}
+                  organizationId={organizationId}
                 >
-                  {company.name}
-                </Link>
+                  <span className="hover:underline hover:text-violet-400 cursor-pointer transition-colors">
+                    {company.name}
+                  </span>
+                </CompanyDetailDialog>
               </td>
               <td className="px-4 py-2 text-muted-foreground">{company.domain || "—"}</td>
               <td className="px-4 py-2 text-muted-foreground">{company.industry || "—"}</td>
@@ -67,6 +74,7 @@ export const CompaniesTable = ({ companies, definitions, organizationId }: Compa
                   <CompanyFormDialog
                     company={company}
                     definitions={definitions}
+                    allBundles={allBundles}
                     trigger={
                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                         <Pencil className="h-3.5 w-3.5" />

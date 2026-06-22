@@ -21,11 +21,17 @@ const CompaniesPage = async ({ params }: CompaniesPageProps) => {
 
   if (!orgId || orgId !== organizationId) redirect("/select-org");
 
-  const [isAdmin, companies, definitionRows] = await Promise.all([
+  const [isAdmin, companies, allBundles, definitionRows] = await Promise.all([
     isOrgAdmin(orgId),
     db.company.findMany({
       where: { orgId },
       orderBy: { createdAt: "desc" },
+      include: { bundles: { select: { bundleId: true } } },
+    }),
+    db.productBundle.findMany({
+      where: { orgId },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
     }),
     getFieldDefinitions(orgId, "COMPANY"),
   ]);
@@ -45,6 +51,7 @@ const CompaniesPage = async ({ params }: CompaniesPageProps) => {
         </div>
         <CompanyFormDialog
           definitions={definitions}
+          allBundles={allBundles}
           trigger={
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
@@ -67,6 +74,7 @@ const CompaniesPage = async ({ params }: CompaniesPageProps) => {
       <CompaniesTable
         companies={companies}
         definitions={definitions}
+        allBundles={allBundles}
         organizationId={organizationId}
       />
     </div>

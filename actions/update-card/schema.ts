@@ -9,6 +9,9 @@ export const UpdateCard = z.object({
       })
       .min(3, {
         message: "Description is too short.",
+      })
+      .max(5000, {
+        message: "Description is too long.",
       }),
   ),
   title: z.optional(
@@ -18,6 +21,9 @@ export const UpdateCard = z.object({
       })
       .min(3, {
         message: "Title is too short.",
+      })
+      .max(200, {
+        message: "Title is too long.",
       }),
   ),
   id: z.string(),
