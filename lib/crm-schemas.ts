@@ -39,5 +39,31 @@ export const leadBaseFields = {
   stageId: z.string(),
   companyId: z.string().optional().nullable(),
   contactId: z.string().optional().nullable(),
+  productIds: z.array(z.string()).optional(),
   customFields: customFieldsSchema,
+};
+
+export const productBaseFields = {
+  name: z.string().min(1, "Name is required."),
+  description: z.string().trim().optional().nullable(),
+  category: z.string().trim().optional().nullable(),
+  unitPrice: z.number().min(0, "Price must be 0 or more."),
+  unit: z.string().default("item"),
+  status: z.enum(["ACTIVE", "INACTIVE"]).default("ACTIVE"),
+  customFields: customFieldsSchema,
+};
+
+export const bundleItemSchema = z.object({
+  productId: z.string(),
+  quantity: z.number().int().min(1).default(1),
+  unitPrice: z.number().min(0),
+});
+
+export const bundleBaseFields = {
+  name: z.string().min(1, "Name is required."),
+  description: z.string().trim().optional().nullable(),
+  pricingMode: z.enum(["SUM", "DISCOUNT_PERCENT", "DISCOUNT_FLAT", "FIXED"]).default("SUM"),
+  discount: z.number().optional().nullable(),
+  finalPrice: z.number().optional().nullable(),
+  items: z.array(bundleItemSchema).min(1, "Add at least one product."),
 };

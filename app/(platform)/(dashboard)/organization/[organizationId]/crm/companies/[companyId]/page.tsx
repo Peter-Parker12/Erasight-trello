@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
 import { CompanyFormDialog } from "../_components/company-form-dialog";
+import { CompanyBundlesPanel } from "../_components/company-bundles-panel";
 
 type CompanyDetailPageProps = {
   params: Promise<{ organizationId: string; companyId: string }>;
@@ -18,20 +19,33 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
 
   if (!orgId || orgId !== organizationId) redirect("/select-org");
 
-  const [company, definitionRows] = await Promise.all([
+  const [company, definitionRows, allBundles] = await Promise.all([
     db.company.findUnique({
       where: { id: companyId, orgId },
       include: {
         contacts: { orderBy: { createdAt: "desc" } },
         leads: { include: { stage: true }, orderBy: { createdAt: "desc" } },
+        bundles: {
+          include: {
+            bundle: {
+              include: { items: { include: { product: true } } },
+            },
+          },
+        },
       },
     }),
     getFieldDefinitions(orgId, "COMPANY"),
+    db.productBundle.findMany({
+      where: { orgId },
+      include: { items: { include: { product: true } } },
+      orderBy: { name: "asc" },
+    }),
   ]);
 
   if (!company) notFound();
 
   const definitions = definitionRows.map(toFieldDefinitionDTO);
+  const assignedBundles = company.bundles.map((cb) => cb.bundle);
 
   return (
     <div className="w-full p-4 md:p-6 space-y-6 max-w-4xl">
@@ -137,6 +151,13 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
           </ul>
         )}
       </div>
+
+      <CompanyBundlesPanel
+        companyId={company.id}
+        assignedBundles={assignedBundles}
+        allBundles={allBundles}
+        organizationId={organizationId}
+      />
     </div>
   );
 };

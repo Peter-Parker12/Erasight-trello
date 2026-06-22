@@ -322,6 +322,8 @@ enum ENTITY_TYPE {
   COMPANY
   CONTACT
   LEAD
+  PRODUCT
+  PRODUCT_BUNDLE
 }
 
 model AuditLog {
@@ -410,6 +412,7 @@ enum CrmEntityType {
   COMPANY
   CONTACT
   LEAD
+  PRODUCT
 }
 
 enum CustomFieldType {
@@ -457,6 +460,7 @@ model Company {
 
   contacts     Contact[]
   leads        Lead[]
+  bundles      CompanyBundle[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -520,6 +524,8 @@ model Lead {
   contactId    String?
   contact      Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
+  products     LeadProduct[]
+
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
@@ -527,4 +533,99 @@ model Lead {
   @@index([stageId])
   @@index([companyId])
   @@index([contactId])
+}
+
+// ---------------------------------------------------------------------------
+// CRM: Products & Bundles
+// ---------------------------------------------------------------------------
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum BundlePricingMode {
+  SUM
+  DISCOUNT_PERCENT
+  DISCOUNT_FLAT
+  FIXED
+}
+
+model Product {
+  id           String        @id @default(uuid())
+  orgId        String
+  name         String
+  description  String?       @db.Text
+  category     String?
+  unitPrice    Decimal       @db.Decimal(15, 0)
+  unit         String        @default("item")
+  status       ProductStatus @default(ACTIVE)
+  customFields Json          @default("{}")
+
+  bundleItems  ProductBundleItem[]
+  leads        LeadProduct[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([orgId])
+}
+
+model ProductBundle {
+  id          String            @id @default(uuid())
+  orgId       String
+  name        String
+  description String?           @db.Text
+  pricingMode BundlePricingMode @default(SUM)
+  discount    Decimal?          @db.Decimal(15, 0)
+  finalPrice  Decimal?          @db.Decimal(15, 0)
+
+  items       ProductBundleItem[]
+  companies   CompanyBundle[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+model ProductBundleItem {
+  id        String        @id @default(uuid())
+  bundleId  String
+  productId String
+  quantity  Int           @default(1)
+  unitPrice Decimal       @db.Decimal(15, 0)
+
+  bundle    ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleId, productId])
+  @@index([bundleId])
+  @@index([productId])
+}
+
+model CompanyBundle {
+  companyId  String
+  bundleId   String
+  assignedAt DateTime @default(now())
+
+  company    Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  bundle     ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, bundleId])
+  @@index([companyId])
+  @@index([bundleId])
+}
+
+model LeadProduct {
+  leadId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  lead    Lead    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([leadId, productId])
+  @@index([leadId])
+  @@index([productId])
 }

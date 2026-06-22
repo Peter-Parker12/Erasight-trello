@@ -9,6 +9,7 @@ import {
   Handshake,
   Layout,
   ListTodo,
+  Package,
   Settings,
   Users,
 } from "lucide-react";
@@ -83,6 +84,11 @@ export const NavItem = ({
       label: "Leads",
       icon: <Handshake className="h-4 w-4 mr-2" />,
       href: `/organization/${organization.id}/crm/leads`,
+    },
+    {
+      label: "Products",
+      icon: <Package className="h-4 w-4 mr-2" />,
+      href: `/organization/${organization.id}/crm/products`,
     },
   ];
 

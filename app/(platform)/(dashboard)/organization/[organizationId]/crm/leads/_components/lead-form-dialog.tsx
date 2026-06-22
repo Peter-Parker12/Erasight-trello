@@ -2,6 +2,7 @@
 
 import { useState, type ElementRef, useRef } from "react";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 import type { Lead, PipelineStage } from "@prisma/client";
 
 import {
@@ -29,7 +30,8 @@ type LeadFormDialogProps = {
   definitions: CustomFieldDefinitionDTO[];
   companies: { id: string; name: string }[];
   contacts: { id: string; firstName: string; lastName: string | null }[];
-  lead?: Lead;
+  products?: { id: string; name: string; unitPrice: unknown; unit: string }[];
+  lead?: Lead & { products?: { product: { id: string; name: string } }[] };
 };
 
 export const LeadFormDialog = ({
@@ -39,14 +41,36 @@ export const LeadFormDialog = ({
   definitions,
   companies,
   contacts,
+  products = [],
   lead,
 }: LeadFormDialogProps) => {
   const [open, setOpen] = useState(false);
   const closeRef = useRef<ElementRef<"button">>(null);
   const isEdit = !!lead;
 
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>(
+    lead?.products?.map((lp) => lp.product.id) ?? []
+  );
+
+  const toggleProduct = (productId: string) => {
+    setSelectedProductIds((prev) =>
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
+    );
+
+  };
+
+  const saveProductLinks = async (leadId: string) => {
+    if (products.length === 0) return;
+    await fetch("/api/actions/update-lead-products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leadId, productIds: selectedProductIds }),
+    });
+  };
+
   const { execute: executeCreate, fieldErrors: createErrors } = useAction(createLead, {
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      await saveProductLinks(data.id);
       toast.success("Lead created.");
       closeRef.current?.click();
     },
@@ -54,7 +78,8 @@ export const LeadFormDialog = ({
   });
 
   const { execute: executeUpdate, fieldErrors: updateErrors } = useAction(updateLead, {
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      await saveProductLinks(data.id);
       toast.success("Lead updated.");
       closeRef.current?.click();
     },
@@ -177,6 +202,32 @@ export const LeadFormDialog = ({
             defaultValues={(lead?.customFields as Record<string, unknown>) ?? {}}
             errors={fieldErrors}
           />
+
+          {products.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-[#e5e5e5]">Products / Services</Label>
+              <div className="flex flex-wrap gap-2">
+                {products.map((product) => {
+                  const selected = selectedProductIds.includes(product.id);
+                  return (
+                    <button
+                      key={product.id}
+                      type="button"
+                      onClick={() => toggleProduct(product.id)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition ${
+                        selected
+                          ? "bg-violet-600/20 border-violet-600/60 text-violet-400"
+                          : "bg-[#2a2a2a] border-[#333] text-muted-foreground hover:border-violet-600/40"
+                      }`}
+                    >
+                      {product.name}
+                      {selected && <X className="h-3 w-3" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end">
             <FormSubmit>{isEdit ? "Save changes" : "Create lead"}</FormSubmit>

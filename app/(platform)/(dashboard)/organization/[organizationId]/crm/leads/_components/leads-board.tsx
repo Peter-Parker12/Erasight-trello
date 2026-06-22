@@ -19,6 +19,7 @@ type LeadsBoardProps = {
   stages: (PipelineStage & { leads: LeadWithRelations[] })[];
   companies: { id: string; name: string }[];
   contacts: { id: string; firstName: string; lastName: string | null }[];
+  products: { id: string; name: string; unitPrice: unknown; unit: string }[];
   definitions: CustomFieldDefinitionDTO[];
   organizationId: string;
 };
@@ -27,6 +28,7 @@ export const LeadsBoard = ({
   stages,
   companies,
   contacts,
+  products,
   definitions,
 }: LeadsBoardProps) => {
   const { execute: executeMove } = useAction(moveLead, {
@@ -47,6 +49,7 @@ export const LeadsBoard = ({
           definitions={definitions}
           companies={companies}
           contacts={contacts}
+          products={products}
           trigger={
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
@@ -97,6 +100,7 @@ export const LeadsBoard = ({
                   definitions={definitions}
                   companies={companies}
                   contacts={contacts}
+                  products={products}
                   trigger={
                     <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground hover:text-[#e5e5e5]">
                       <Plus className="h-4 w-4 mr-2" />
@@ -114,6 +118,7 @@ export const LeadsBoard = ({
               definitions={definitions}
               companies={companies}
               contacts={contacts}
+              products={products}
             />
           )}
         />

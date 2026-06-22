@@ -6,4 +6,5 @@ export const ENTITY_TYPE_PATHS: Record<CrmEntityType, string> = {
   COMPANY: "companies",
   CONTACT: "contacts",
   LEAD: "leads",
+  PRODUCT: "products",
 };

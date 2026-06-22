@@ -13,6 +13,7 @@ import { LeadFormDialog } from "./lead-form-dialog";
 export type LeadWithRelations = Lead & {
   company: { id: string; name: string } | null;
   contact: { id: string; firstName: string; lastName: string | null } | null;
+  products?: { product: { id: string; name: string } }[];
 };
 
 type LeadCardProps = {
@@ -21,9 +22,10 @@ type LeadCardProps = {
   definitions: CustomFieldDefinitionDTO[];
   companies: { id: string; name: string }[];
   contacts: { id: string; firstName: string; lastName: string | null }[];
+  products?: { id: string; name: string; unitPrice: unknown; unit: string }[];
 };
 
-export const LeadCard = ({ lead, stages, definitions, companies, contacts }: LeadCardProps) => {
+export const LeadCard = ({ lead, stages, definitions, companies, contacts, products = [] }: LeadCardProps) => {
   const { execute, isLoading } = useAction(deleteLead, {
     onSuccess: () => toast.success("Lead deleted."),
     onError: (error) => toast.error(error),
@@ -46,6 +48,7 @@ export const LeadCard = ({ lead, stages, definitions, companies, contacts }: Lea
             definitions={definitions}
             companies={companies}
             contacts={contacts}
+            products={products}
             trigger={
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                 <Pencil className="h-3 w-3" />

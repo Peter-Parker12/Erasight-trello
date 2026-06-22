@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const CreateCustomField = z.object({
-  entityType: z.enum(["COMPANY", "CONTACT", "LEAD"]),
+  entityType: z.enum(["COMPANY", "CONTACT", "LEAD", "PRODUCT"]),
   key: z
     .string()
     .min(1, "Key is required.")

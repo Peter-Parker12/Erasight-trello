@@ -22,7 +22,7 @@ const LeadsPage = async ({ params }: LeadsPageProps) => {
 
   await ensureDefaultPipelineStages(orgId);
 
-  const [isAdmin, stages, companies, contacts, definitionRows] = await Promise.all([
+  const [isAdmin, stages, companies, contacts, products, definitionRows] = await Promise.all([
     isOrgAdmin(orgId),
     db.pipelineStage.findMany({
       where: { orgId },
@@ -33,6 +33,7 @@ const LeadsPage = async ({ params }: LeadsPageProps) => {
           include: {
             company: { select: { id: true, name: true } },
             contact: { select: { id: true, firstName: true, lastName: true } },
+            products: { include: { product: { select: { id: true, name: true } } } },
           },
         },
       },
@@ -46,6 +47,11 @@ const LeadsPage = async ({ params }: LeadsPageProps) => {
       where: { orgId },
       select: { id: true, firstName: true, lastName: true },
       orderBy: { firstName: "asc" },
+    }),
+    db.product.findMany({
+      where: { orgId, status: "ACTIVE" },
+      select: { id: true, name: true, unitPrice: true, unit: true },
+      orderBy: { name: "asc" },
     }),
     getFieldDefinitions(orgId, "LEAD"),
   ]);
@@ -80,6 +86,7 @@ const LeadsPage = async ({ params }: LeadsPageProps) => {
         stages={stages}
         companies={companies}
         contacts={contacts}
+        products={products}
         definitions={definitions}
         organizationId={organizationId}
       />
