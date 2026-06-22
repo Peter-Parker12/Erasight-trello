@@ -27,9 +27,12 @@ type BundleItem = { productId: string; quantity: number; unitPrice: number };
 type BundleWithItems = ProductBundle & { items: (ProductBundleItem & { product: Product })[] };
 
 type BundleFormDialogProps = {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
   products: Product[];
   bundle?: BundleWithItems;
+  open?: boolean;
+  onOpenChange?: (v: boolean) => void;
+  onCreated?: (bundle: { id: string; name: string }) => void;
 };
 
 const PRICING_MODES = [
@@ -51,8 +54,10 @@ function calcTotal(items: BundleItem[], pricingMode: string, discount: number, f
   return sum;
 }
 
-export const BundleFormDialog = ({ trigger, products, bundle }: BundleFormDialogProps) => {
-  const [open, setOpen] = useState(false);
+export const BundleFormDialog = ({ trigger, products, bundle, open: controlledOpen, onOpenChange: controlledOnOpenChange, onCreated }: BundleFormDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = controlledOnOpenChange ?? setInternalOpen;
   const closeRef = useRef<ElementRef<"button">>(null);
   const isEdit = !!bundle;
 
@@ -95,7 +100,11 @@ export const BundleFormDialog = ({ trigger, products, bundle }: BundleFormDialog
   const total = calcTotal(items, pricingMode, discount, finalPrice);
 
   const { execute: executeCreate } = useAction(createBundle, {
-    onSuccess: () => { toast.success("Bundle created."); closeRef.current?.click(); },
+    onSuccess: (data) => {
+      toast.success("Bundle created.");
+      closeRef.current?.click();
+      onCreated?.({ id: data.id, name: data.name });
+    },
     onError: (error) => toast.error(error),
   });
 
@@ -135,8 +144,8 @@ export const BundleFormDialog = ({ trigger, products, bundle }: BundleFormDialog
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit bundle" : "New bundle"}</DialogTitle>

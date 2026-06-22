@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, type ElementRef, useRef } from "react";
+import { useState, useCallback, type ElementRef, useRef } from "react";
 import { toast } from "sonner";
 import { X } from "lucide-react";
-import type { Company } from "@prisma/client";
+import type { Company, Product } from "@prisma/client";
 
 import {
   Dialog,
@@ -23,6 +23,7 @@ import { createCompany } from "@/actions/create-company";
 import { updateCompany } from "@/actions/update-company";
 import { extractCustomFieldsFromFormData } from "@/lib/custom-fields-form";
 import type { CustomFieldDefinitionDTO } from "@/lib/custom-fields";
+import { BundleFormDialog } from "../../products/_components/bundle-form-dialog";
 
 type BundleOption = { id: string; name: string };
 
@@ -62,6 +63,19 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
 
   const currentBundleIds = company?.bundles?.map((b) => b.bundleId) ?? [];
   const [selectedBundleIds, setSelectedBundleIds] = useState<string[]>(currentBundleIds);
+  const [localBundles, setLocalBundles] = useState<BundleOption[]>(allBundles);
+  const [products, setProducts] = useState<Product[] | null>(null);
+  const [newBundleOpen, setNewBundleOpen] = useState(false);
+
+  const fetchProducts = useCallback(async () => {
+    if (products !== null) return;
+    try {
+      const res = await fetch("/api/crm/products");
+      if (res.ok) setProducts(await res.json());
+    } catch {
+      setProducts([]);
+    }
+  }, [products]);
 
   const toggleBundle = (id: string) =>
     setSelectedBundleIds((prev) =>
@@ -70,7 +84,11 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
 
   const onOpenChange = (v: boolean) => {
     setOpen(v);
-    if (!v) setSelectedBundleIds(currentBundleIds);
+    if (v) fetchProducts();
+    if (!v) {
+      setSelectedBundleIds(currentBundleIds);
+      setLocalBundles(allBundles);
+    }
   };
 
   const { execute: executeCreate, fieldErrors: createErrors } = useAction(createCompany, {
@@ -182,33 +200,66 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
             errors={fieldErrors}
           />
 
-          {allBundles.length > 0 && (
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold text-[#e5e5e5]">
-                Bundles
-              </Label>
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-[#e5e5e5]">Bundles</Label>
+
+            {selectedBundleIds.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {allBundles.map((bundle) => {
-                  const selected = selectedBundleIds.includes(bundle.id);
-                  return (
+                {selectedBundleIds.map((id) => {
+                  const bundle = localBundles.find((b) => b.id === id);
+                  return bundle ? (
                     <button
-                      key={bundle.id}
+                      key={id}
                       type="button"
-                      onClick={() => toggleBundle(bundle.id)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition ${
-                        selected
-                          ? "bg-violet-600/20 border-violet-600/60 text-violet-400"
-                          : "bg-[#2a2a2a] border-[#333] text-muted-foreground hover:border-violet-600/40"
-                      }`}
+                      onClick={() => toggleBundle(id)}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-violet-600/20 border-violet-600/60 text-violet-400 transition hover:border-violet-400"
                     >
                       {bundle.name}
-                      {selected && <X className="h-3 w-3" />}
+                      <X className="h-3 w-3" />
                     </button>
-                  );
+                  ) : null;
                 })}
               </div>
-            </div>
-          )}
+            )}
+
+            <select
+              value=""
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "__new__") {
+                  setNewBundleOpen(true);
+                } else if (val) {
+                  toggleBundle(val);
+                }
+                e.target.value = "";
+              }}
+              className="w-full text-sm px-2 py-1 h-8 border rounded-md bg-[#2a2a2a] border-[#333] text-[#e5e5e5]"
+            >
+              <option value="" disabled>
+                {localBundles.filter((b) => !selectedBundleIds.includes(b.id)).length === 0
+                  ? "All bundles selected"
+                  : "Add a bundle..."}
+              </option>
+              {localBundles
+                .filter((b) => !selectedBundleIds.includes(b.id))
+                .map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              <option value="__new__">+ Create new bundle</option>
+            </select>
+
+            {products !== null && (
+              <BundleFormDialog
+                products={products}
+                open={newBundleOpen}
+                onOpenChange={setNewBundleOpen}
+                onCreated={(bundle) => {
+                  setLocalBundles((prev) => [...prev, bundle]);
+                  setSelectedBundleIds((prev) => [...prev, bundle.id]);
+                }}
+              />
+            )}
+          </div>
 
           <div className="flex justify-end">
             <FormSubmit>{isEdit ? "Save changes" : "Create company"}</FormSubmit>
