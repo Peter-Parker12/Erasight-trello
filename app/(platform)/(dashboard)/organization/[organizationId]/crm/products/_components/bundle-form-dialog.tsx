@@ -68,7 +68,7 @@ export const BundleFormDialog = ({ trigger, products, bundle }: BundleFormDialog
   const [finalPrice, setFinalPrice] = useState(Number(bundle?.finalPrice ?? 0));
   const [addProductId, setAddProductId] = useState(products[0]?.id ?? "");
 
-  const availableToAdd = products.filter((p) => !items.find((i) => i.productId === p.id));
+  const availableToAdd = products.filter((p) => p.status === "ACTIVE" && !items.find((i) => i.productId === p.id));
 
   const addItem = () => {
     if (!addProductId) return;

@@ -27,14 +27,20 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   let product;
   try {
-    product = await db.product.update({
-      where: { id, orgId },
-      data: {
-        ...fields,
-        unitPrice: new Prisma.Decimal(unitPrice),
-        customFields: validation.data as Prisma.InputJsonObject,
-      },
-    });
+    [product] = await db.$transaction([
+      db.product.update({
+        where: { id, orgId },
+        data: {
+          ...fields,
+          unitPrice: new Prisma.Decimal(unitPrice),
+          customFields: validation.data as Prisma.InputJsonObject,
+        },
+      }),
+      db.productBundleItem.updateMany({
+        where: { productId: id },
+        data: { active: fields.status === "ACTIVE" },
+      }),
+    ]);
 
     await createAuditLog({
       entityId: product.id,

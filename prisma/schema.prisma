@@ -595,6 +595,7 @@ model ProductBundleItem {
   productId String
   quantity  Int           @default(1)
   unitPrice Decimal       @db.Decimal(15, 0)
+  active    Boolean       @default(true)
 
   bundle    ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
   product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)

@@ -26,7 +26,7 @@ export async function GET(
           leads: { include: { stage: true }, orderBy: { createdAt: "desc" } },
           bundles: {
             include: {
-              bundle: { include: { items: { include: { product: true } } } },
+              bundle: { include: { items: { where: { active: true }, include: { product: true } } } },
             },
           },
         },
@@ -34,7 +34,7 @@ export async function GET(
       getFieldDefinitions(orgId, "COMPANY"),
       db.productBundle.findMany({
         where: { orgId },
-        include: { items: { include: { product: true } } },
+        include: { items: { where: { active: true }, include: { product: true } } },
         orderBy: { name: "asc" },
       }),
     ]);
