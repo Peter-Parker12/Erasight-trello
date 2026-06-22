@@ -166,10 +166,19 @@ export const Comments = ({ cardId }: CommentsProps) => {
               value={content}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              placeholder="Write a comment... (@name to mention, Ctrl+Enter to submit)"
-              className="w-full text-sm border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] rounded-md p-3 resize-none focus:outline-none focus:ring-1 focus:ring-violet-500 min-h-[60px]"
+              placeholder="Write a comment… (@name to mention, Ctrl+Enter to submit)"
+              maxLength={10000}
+              className="w-full text-sm border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] rounded-md p-3 resize-none focus:outline-none focus:ring-1 focus:ring-violet-500 transition-[min-height] duration-150 min-h-[42px] focus:min-h-[120px]"
               rows={2}
             />
+            <div className="flex justify-end mt-0.5">
+              <span className={cn(
+                "text-[11px] tabular-nums",
+                content.length > 9000 ? "text-red-400" : content.length > 8000 ? "text-amber-400" : "text-muted-foreground"
+              )}>
+                {content.length.toLocaleString()} / 10,000
+              </span>
+            </div>
 
             {/* Image preview in form */}
             {imagePreview && (
