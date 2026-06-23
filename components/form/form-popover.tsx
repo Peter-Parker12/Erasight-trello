@@ -49,8 +49,9 @@ export const FormPopover = ({
   const onSubmit = (formData: FormData) => {
     const title = formData.get("title") as string;
     const image = formData.get("image") as string;
+    const workflowType = formData.get("workflowType") as string;
 
-    execute({ title, image });
+    execute({ title, image, workflowType });
   };
 
   return (
@@ -84,6 +85,22 @@ export const FormPopover = ({
               type="text"
               errors={fieldErrors}
             />
+
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-neutral-400">Board Template / Workflow</label>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="flex flex-col items-center justify-between p-3 rounded-lg border border-[#333] bg-[#2a2a2a] hover:bg-[#333] cursor-pointer [&:has(input:checked)]:border-violet-500 [&:has(input:checked)]:bg-violet-600/10 transition">
+                  <input type="radio" name="workflowType" value="DEFAULT" defaultChecked className="sr-only" />
+                  <span className="text-xs font-medium text-white">Default</span>
+                  <span className="text-[10px] text-neutral-400 text-center mt-1">Done, Failed, Cancelled lists</span>
+                </label>
+                <label className="flex flex-col items-center justify-between p-3 rounded-lg border border-[#333] bg-[#2a2a2a] hover:bg-[#333] cursor-pointer [&:has(input:checked)]:border-violet-500 [&:has(input:checked)]:bg-violet-600/10 transition">
+                  <input type="radio" name="workflowType" value="KANBAN" className="sr-only" />
+                  <span className="text-xs font-medium text-white">Kanban</span>
+                  <span className="text-[10px] text-neutral-400 text-center mt-1">Full workflow with rules pre-configured</span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <FormSubmit className="w-full">Create</FormSubmit>

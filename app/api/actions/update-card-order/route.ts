@@ -39,8 +39,17 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       }
     }
 
-    const transaction = items.map((card) =>
-      db.card.update({
+    const boardLists = await db.list.findMany({
+      where: { boardId },
+      select: { id: true, type: true },
+    });
+
+    const listTypeMap = new Map(boardLists.map((l) => [l.id, l.type]));
+
+    const transaction = items.map((card) => {
+      const listType = listTypeMap.get(card.listId);
+      const completed = listType === "DONE";
+      return db.card.update({
         where: {
           id: card.id,
           list: {
@@ -52,9 +61,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         data: {
           order: card.order,
           listId: card.listId,
+          completed,
         },
-      })
-    );
+      });
+    });
 
     updatedCards = await db.$transaction(transaction);
   } catch (error) {

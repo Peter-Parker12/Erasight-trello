@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const ADMIN_TABS = [
   { href: "modules", label: "Modules" },
   { href: "api-keys", label: "API keys" },
+  { href: "api-docs", label: "API Docs" },
 ];
 
 const MEMBERS_TAB = { href: "members", label: "Members" };

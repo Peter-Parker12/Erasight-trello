@@ -35,5 +35,31 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json({ totalBoards: boards.length, boardsUpdated });
+  // Backfill card completed field based on their current list type
+  const updatedDoneCards = await db.card.updateMany({
+    where: {
+      list: { type: "DONE" },
+      completed: false,
+    },
+    data: {
+      completed: true,
+    },
+  });
+
+  const updatedNonDoneCards = await db.card.updateMany({
+    where: {
+      list: { type: { not: "DONE" } },
+      completed: true,
+    },
+    data: {
+      completed: false,
+    },
+  });
+
+  return NextResponse.json({
+    totalBoards: boards.length,
+    boardsUpdated,
+    backfilledCompletedCards: updatedDoneCards.count,
+    backfilledIncompleteCards: updatedNonDoneCards.count,
+  });
 }
