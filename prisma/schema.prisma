@@ -428,6 +428,13 @@ enum CustomFieldType {
   URL
 }
 
+enum EnrichmentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  NOT_FOUND
+}
+
 model CustomFieldDefinition {
   id         String          @id @default(uuid())
   orgId      String
@@ -456,6 +463,19 @@ model Company {
   website      String?  @db.Text
   address      String?  @db.Text
   description  String?  @db.Text
+
+  // Enrichment target fields
+  logoUrl       String?
+  companySize   String?
+  revenueRange  String?
+  linkedinUrl   String?
+
+  // Enrichment audit fields
+  enrichmentStatus    EnrichmentStatus?
+  enrichmentSource    String?
+  enrichmentLastRunAt DateTime?
+  enrichmentRaw       Json?
+
   customFields Json     @default("{}")
 
   contacts     Contact[]

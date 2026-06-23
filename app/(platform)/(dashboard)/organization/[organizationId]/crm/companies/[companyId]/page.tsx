@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
 import { CompanyFormDialog } from "../_components/company-form-dialog";
+import { EnrichCompanyDialog } from "../_components/enrich-company-dialog";
 import { CompanyBundlesPanel } from "../_components/company-bundles-panel";
 
 type CompanyDetailPageProps = {
@@ -58,20 +59,33 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
       </Link>
 
       <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{company.name}</h1>
-          {company.industry && <p className="text-sm text-muted-foreground">{company.industry}</p>}
+        <div className="flex items-start gap-3">
+          {company.logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={company.logoUrl}
+              alt={company.name}
+              className="h-12 w-12 rounded-md object-contain border"
+            />
+          )}
+          <div>
+            <h1 className="text-2xl font-semibold">{company.name}</h1>
+            {company.industry && <p className="text-sm text-muted-foreground">{company.industry}</p>}
+          </div>
         </div>
-        <CompanyFormDialog
-          company={company}
-          definitions={definitions}
-          trigger={
-            <Button size="sm" variant="outline">
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-          }
-        />
+        <div className="flex items-center gap-2">
+          <EnrichCompanyDialog company={company} />
+          <CompanyFormDialog
+            company={company}
+            definitions={definitions}
+            trigger={
+              <Button size="sm" variant="outline">
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            }
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border p-4">
@@ -79,6 +93,14 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
         <DetailField label="Phone" value={company.phone} />
         <DetailField label="Website" value={company.website} />
         <DetailField label="Address" value={company.address} />
+        <DetailField label="Industry" value={company.industry} />
+        <DetailField label="Company size" value={company.companySize} />
+        <DetailField label="Revenue range" value={company.revenueRange} />
+        <DetailLink
+          label="LinkedIn"
+          href={company.linkedinUrl}
+          text={company.linkedinUrl}
+        />
         {company.description && (
           <div className="md:col-span-2 space-y-1">
             <p className="text-xs font-semibold text-muted-foreground">Description</p>
@@ -166,6 +188,32 @@ const DetailField = ({ label, value }: { label: string; value: string | null | u
   <div className="space-y-1">
     <p className="text-xs font-semibold text-muted-foreground">{label}</p>
     <p className="text-sm">{value || "—"}</p>
+  </div>
+);
+
+const DetailLink = ({
+  label,
+  href,
+  text,
+}: {
+  label: string;
+  href: string | null | undefined;
+  text: string | null | undefined;
+}) => (
+  <div className="space-y-1">
+    <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+    {href ? (
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="text-sm text-sky-400 hover:underline break-all"
+      >
+        {text || href}
+      </a>
+    ) : (
+      <p className="text-sm">—</p>
+    )}
   </div>
 );
 
