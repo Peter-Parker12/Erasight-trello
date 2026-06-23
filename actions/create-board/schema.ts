@@ -8,4 +8,5 @@ export const CreateBoard = z.object({
   image: z.string({
     error: "Image is required.",
   }),
+  workflowType: z.string().optional(),
 });

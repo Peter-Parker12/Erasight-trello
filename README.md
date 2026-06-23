@@ -124,78 +124,87 @@ trello-clone/
 
 ## :toolbox: Getting Started
 
-1. Make sure **Git** and **NodeJS** is installed.
-2. Clone this repository to your local computer.
-3. Create `.env` file in root directory.
-4. Contents of `.env`:
+You can run this project in two ways: **Development Mode (Local Dev)** or **Docker Mode (Recommended for testing and deployment)**.
 
+### Method 1: Running with Docker (Recommended & Out-of-the-box)
+
+This project is fully configured to run inside a multi-container Docker environment. It automatically builds the Next.js app in production-optimized `standalone` mode, starts a local PostgreSQL 16 database, runs Prisma schema sync, and mounts persistent volumes.
+
+#### 1. Setup environment variables
+Create a `.env` file in the root directory:
 ```bash
-# .env
-
-
-# clerk auth keys
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CLERK_SECRET_KEY=sk_test_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-# clerk redirect url(s)
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
-
-# mysql db url
-DATABASE_URL=<your-db-url>
-
-# unsplash api key
-NEXT_PUBLIC_UNSPLASH_ACCESS_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-# stripe api & webhook key
-STRIPE_API_KEY=sk_test_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-STRIPE_WEBHOOK_SECRET=whsec_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-# app base url
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+cp .env.docker.example .env
 ```
 
-5. **Clerk Keys**:
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` are provided by Clerk. You need to sign up for an account on Clerk (https://www.clerk.dev/), log in, and access these keys in your account settings.
+Open `.env` and fill in the required API keys (Clerk, Unsplash, etc.):
+```env
+NEXT_PUBLIC_APP_URL=http://localhost:9090
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
 
-![Copy Clerk Secret and Publishable Key](/.github/images/step_clerk.png "Copy Clerk Secret and Publishable Key")
+# Database choice (Uncomment the one you want to use)
 
-6. **Stripe Secret Key**:
-   - `STRIPE_API_KEY` is provided by Stripe in order to setup online payments. You need to sign up for an account on Stripe (https://stripe.com/), log in, and access these keys in your account dashboard.
+# Option A: Connect to local Postgres container (Offline local dev)
+POSTGRES_PASSWORD=trello_password_pg
+DATABASE_URL="postgresql://trello_user:trello_password_pg@db:5432/trello_clone"
 
-![Copy Stripe Secret Key](/.github/images/step_stripe.png "Copy Stripe Secret Key")
+# Option B: Connect to Neon Cloud DB
+# DATABASE_URL="postgresql://neondb_owner:PASSWORD@ep-xxx.neon.tech/neondb?sslmode=require"
+```
 
-7. **Stripe Webhook Secret**:
-   - `STRIPE_WEBHOOK_SECRET` is required for handling Stripe webhooks securely. Follow these steps to obtain the webhook secret:
-     - Sign in to your Stripe account (https://dashboard.stripe.com/).
-     - In the Dashboard, go to "Developers" > "Webhooks".
-     - Click the "Add endpoint" button.
-     - Set up the endpoint details and select `checkout.session.completed` and `invoice.payment_succeeded` event.
-     - After saving, you'll see the webhook signing secret. Copy this value to use as `STRIPE_WEBHOOK_SECRET`.
+#### 2. Start the application
+Run the following command to build the production images and launch the containers:
+```bash
+docker compose up --build -d
+```
 
-8. **URLs for Clerk**:
-   - `NEXT_PUBLIC_CLERK_SIGN_IN_URL`, `NEXT_PUBLIC_CLERK_SIGN_UP_URL`, `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`, and `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` are endpoints or URLs related to your Clerk setup. You can configure these in your Clerk dashboard.
+#### 3. Access the app
+The application will be accessible at:
+👉 **[http://localhost:9090](http://localhost:9090)**
 
-9. **Prisma Database URL**:
-   - `DATABASE_URL` is the connection URL for your Supabase PostgreSQL database. You will need to create a Supabase account (https://supabase.com/) or use an existing one. Obtain the connection URL from your Supabase dashboard after creating a new project.
+* **App service:** Running on port `9090` (binds to `0.0.0.0:3000` internally)
+* **Local Database:** Running on port `9736` (internally `5432`)
+* **Migrate service:** Runs one-time `prisma db push` and exits automatically.
 
-10. **Public App URL**:
-    - `NEXT_PUBLIC_APP_URL` are endpoints or URLs related to this Project. You can configure/copy this from your needs.
+---
 
-11. **Unsplash API Key**:
-    - Sign up on [Unsplash](https://unsplash.com/) if you haven't already.
-    - Join the Unsplash Developer Community [here](https://unsplash.com/developers).
-    - Create a new application in the [Developer Dashboard](https://unsplash.com/oauth/applications).
-    - Obtain your `Access Key` from the created application.
-    - Set the `NEXT_PUBLIC_UNSPLASH_ACCESS_KEY` environment variable in your project with the obtained key.
+### Method 2: Traditional Local Development Mode
 
-12. Open terminal in root directory. Run npm install or yarn install.
+If you prefer to run the project directly using Node.js/npm on your machine:
 
-13. Now app is fully configured 👍 and you can start using this app using npm run dev or yarn dev.
+#### 1. Setup local environment
+Create `.env.local` in the root directory and configure it as shown in `.env.example`.
 
-**NOTE:** Please make sure to keep your API keys and configuration values secure and do not expose them publicly.
+#### 2. Install dependencies
+```bash
+npm install --legacy-peer-deps
+```
+
+#### 3. Initialize Database
+Sync the Prisma schema with your database (e.g. Neon DB):
+```bash
+npx prisma db push
+```
+
+#### 4. Run the development server
+```bash
+npm run dev
+```
+Open **[http://localhost:3000](http://localhost:3000)** (or the port specified in your log) to view the application.
+
+---
+
+## 🐋 Docker Configuration Details
+
+### File structure:
+* **[Dockerfile](file:///d:/Erasight-trello/Erasight-trello/Dockerfile):**
+  * `builder`: Installs packages, generates Prisma Client, and builds standalone production build.
+  * `migrate`: Lightweight one-shot container executing `prisma db push`.
+  * `production`: Minimalist production image running `node server.js` with `HOSTNAME=0.0.0.0` for container binding.
+* **[docker-compose.yml](file:///d:/Erasight-trello/Erasight-trello/docker-compose.yml):**
+  * Spins up the `db` (PostgreSQL 16), `migrate` (schema syncer), and `app` (Next.js server).
+  * Uses `depends_on` with healthchecks so the app starts only after the DB is fully online and schema migrations are done.
+* **[.env.docker.example](file:///d:/Erasight-trello/Erasight-trello/.env.docker.example):** Template containing ready-to-use variables.
 
 ## :camera: Screenshots:
 

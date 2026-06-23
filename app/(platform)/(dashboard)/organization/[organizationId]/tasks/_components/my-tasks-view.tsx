@@ -309,16 +309,22 @@ type TaskRowGroupProps = {
   onSelect: (id: string) => void;
   expandedIds: Set<string>;
   onToggleExpand: (id: string) => void;
+  showOverdueOnly: boolean;
 };
 
-const TaskRowGroup = ({ entry, selected, onSelect, expandedIds, onToggleExpand }: TaskRowGroupProps) => {
+const TaskRowGroup = ({ entry, selected, onSelect, expandedIds, onToggleExpand, showOverdueOnly }: TaskRowGroupProps) => {
   const { card } = entry;
   const expanded = expandedIds.has(card.id);
+
+  const displayedSubtasks = useMemo(() => {
+    if (!showOverdueOnly) return card.subtasks;
+    return card.subtasks.filter((subtask) => getEffectiveDueDate(subtask).overdue);
+  }, [card.subtasks, showOverdueOnly]);
 
   return (
     <>
       <CardRow entry={entry} selected={selected} onSelect={onSelect} expanded={expanded} onToggleExpand={onToggleExpand} />
-      {expanded && card.subtasks.map((subtask) => (
+      {expanded && displayedSubtasks.map((subtask) => (
         <SubtaskRow key={subtask.id} subtask={subtask} boardId={card.list.board.id} boardLists={card.list.board.lists} />
       ))}
     </>
@@ -333,9 +339,10 @@ type GroupSectionProps = {
   onSelect: (id: string) => void;
   expandedIds: Set<string>;
   onToggleExpand: (id: string) => void;
+  showOverdueOnly: boolean;
 };
 
-const GroupSection = ({ label, color, entries, selectedIds, onSelect, expandedIds, onToggleExpand }: GroupSectionProps) => {
+const GroupSection = ({ label, color, entries, selectedIds, onSelect, expandedIds, onToggleExpand, showOverdueOnly }: GroupSectionProps) => {
   const [open, setOpen] = useState(true);
   const allSel = entries.length > 0 && entries.every((e) => selectedIds.has(e.card.id));
   return (
@@ -361,7 +368,7 @@ const GroupSection = ({ label, color, entries, selectedIds, onSelect, expandedId
         </td>
       </tr>
       {open && entries.map((entry) => (
-        <TaskRowGroup key={entry.card.id} entry={entry} selected={selectedIds.has(entry.card.id)} onSelect={onSelect} expandedIds={expandedIds} onToggleExpand={onToggleExpand} />
+        <TaskRowGroup key={entry.card.id} entry={entry} selected={selectedIds.has(entry.card.id)} onSelect={onSelect} expandedIds={expandedIds} onToggleExpand={onToggleExpand} showOverdueOnly={showOverdueOnly} />
       ))}
     </>
   );
@@ -376,9 +383,10 @@ type ListSubSectionProps = {
   onSelect: (id: string) => void;
   expandedIds: Set<string>;
   onToggleExpand: (id: string) => void;
+  showOverdueOnly: boolean;
 };
 
-const ListSubSection = ({ list, selectedIds, onSelect, expandedIds, onToggleExpand }: ListSubSectionProps) => {
+const ListSubSection = ({ list, selectedIds, onSelect, expandedIds, onToggleExpand, showOverdueOnly }: ListSubSectionProps) => {
   const [open, setOpen] = useState(true);
   const allSel = list.entries.length > 0 && list.entries.every((e) => selectedIds.has(e.card.id));
   return (
@@ -405,7 +413,7 @@ const ListSubSection = ({ list, selectedIds, onSelect, expandedIds, onToggleExpa
         </td>
       </tr>
       {open && list.entries.map((entry) => (
-        <TaskRowGroup key={entry.card.id} entry={entry} selected={selectedIds.has(entry.card.id)} onSelect={onSelect} expandedIds={expandedIds} onToggleExpand={onToggleExpand} />
+        <TaskRowGroup key={entry.card.id} entry={entry} selected={selectedIds.has(entry.card.id)} onSelect={onSelect} expandedIds={expandedIds} onToggleExpand={onToggleExpand} showOverdueOnly={showOverdueOnly} />
       ))}
     </>
   );
@@ -417,9 +425,10 @@ type ProjectListSectionProps = {
   onSelect: (id: string) => void;
   expandedIds: Set<string>;
   onToggleExpand: (id: string) => void;
+  showOverdueOnly: boolean;
 };
 
-const ProjectListSection = ({ project, selectedIds, onSelect, expandedIds, onToggleExpand }: ProjectListSectionProps) => {
+const ProjectListSection = ({ project, selectedIds, onSelect, expandedIds, onToggleExpand, showOverdueOnly }: ProjectListSectionProps) => {
   const [open, setOpen] = useState(true);
   const allEntries = project.lists.flatMap((l) => l.entries);
   const totalCount = allEntries.length;
@@ -448,7 +457,7 @@ const ProjectListSection = ({ project, selectedIds, onSelect, expandedIds, onTog
         </td>
       </tr>
       {open && project.lists.map((list) => (
-        <ListSubSection key={list.key} list={list} selectedIds={selectedIds} onSelect={onSelect} expandedIds={expandedIds} onToggleExpand={onToggleExpand} />
+        <ListSubSection key={list.key} list={list} selectedIds={selectedIds} onSelect={onSelect} expandedIds={expandedIds} onToggleExpand={onToggleExpand} showOverdueOnly={showOverdueOnly} />
       ))}
     </>
   );
@@ -463,6 +472,7 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
   const [groupBy, setGroupBy] = useState<"project" | "list" | "priority" | "assignee">("project");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [showOverdueOnly, setShowOverdueOnly] = useState(false);
 
   const allEntries = useMemo<GroupEntry[]>(
     () => cards.map((card) => ({
@@ -474,6 +484,15 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
     [cards]
   );
 
+  const filteredEntries = useMemo(() => {
+    if (!showOverdueOnly) return allEntries;
+    return allEntries.filter((entry) => {
+      const parentOverdue = getEffectiveDueDate(entry.card).overdue;
+      const hasOverdueSubtask = entry.card.subtasks?.some((subtask) => getEffectiveDueDate(subtask).overdue);
+      return parentOverdue || hasOverdueSubtask;
+    });
+  }, [allEntries, showOverdueOnly]);
+
   const toggleSelect = (id: string) =>
     setSelectedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
@@ -484,7 +503,7 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
   const listGroups = useMemo<ProjectGroup[] | null>(() => {
     if (groupBy !== "list") return null;
     const boardMap = new Map<string, { title: string; color: string; lists: Map<string, { name: string; color: string; entries: GroupEntry[] }> }>();
-    allEntries.forEach((e) => {
+    filteredEntries.forEach((e) => {
       const boardId = e.card.list.board.id;
       if (!boardMap.has(boardId)) {
         boardMap.set(boardId, { title: e.boardTitle, color: getListColor(e.boardTitle), lists: new Map() });
@@ -507,12 +526,12 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
         entries: list.entries,
       })),
     }));
-  }, [groupBy, allEntries]);
+  }, [groupBy, filteredEntries]);
 
   const groups = useMemo(() => {
     if (groupBy === "project") {
       const map = new Map<string, { title: string; entries: GroupEntry[] }>();
-      allEntries.forEach((e) => {
+      filteredEntries.forEach((e) => {
         const id = e.card.list.board.id;
         if (!map.has(id)) map.set(id, { title: e.boardTitle, entries: [] });
         map.get(id)!.entries.push(e);
@@ -530,13 +549,13 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
           key: p,
           label: PRIORITY_BADGE[p].label,
           color: undefined as string | undefined,
-          entries: allEntries.filter((e) => e.card.priority === p),
+          entries: filteredEntries.filter((e) => e.card.priority === p),
         }))
         .filter((g) => g.entries.length > 0);
     }
     // assignee
     const map = new Map<string, { name: string; entries: GroupEntry[] }>();
-    allEntries.forEach((e) => {
+    filteredEntries.forEach((e) => {
       if (e.card.members.length === 0) {
         if (!map.has("__none")) map.set("__none", { name: "Unassigned", entries: [] });
         map.get("__none")!.entries.push(e);
@@ -553,7 +572,7 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
       color: undefined as string | undefined,
       entries: v.entries,
     }));
-  }, [groupBy, allEntries]);
+  }, [groupBy, filteredEntries]);
 
   if (allEntries.length === 0) {
     return (
@@ -579,6 +598,21 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
             {g === "project" ? "Project" : g === "list" ? "List" : g === "priority" ? "Priority" : "Assignee"}
           </button>
         ))}
+        
+        <div className="w-px h-4 bg-[#333] mx-1 hidden sm:block" />
+        <button
+          onClick={() => setShowOverdueOnly((prev) => !prev)}
+          className={cn(
+            "text-xs px-3 py-1 rounded-full border transition flex items-center gap-1.5",
+            showOverdueOnly 
+              ? "bg-red-500/20 text-red-400 border-red-500/30" 
+              : "bg-[#2a2a2a] text-muted-foreground border-[#333] hover:border-[#888]"
+          )}
+        >
+          <span className={cn("h-1.5 w-1.5 rounded-full", showOverdueOnly ? "bg-red-400 animate-pulse" : "bg-[#555]")} />
+          Overdue Only
+        </button>
+
         {selectedIds.size > 0 && (
           <span className="ml-2 text-xs text-violet-400 font-medium">{selectedIds.size} selected</span>
         )}
@@ -591,8 +625,8 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
               <th className="py-2.5 px-3 w-8">
                 <input
                   type="checkbox"
-                  onChange={(e) => setSelectedIds(e.target.checked ? new Set(allEntries.map((e) => e.card.id)) : new Set())}
-                  checked={selectedIds.size === allEntries.length && allEntries.length > 0}
+                  onChange={(e) => setSelectedIds(e.target.checked ? new Set(filteredEntries.map((e) => e.card.id)) : new Set())}
+                  checked={selectedIds.size === filteredEntries.length && filteredEntries.length > 0}
                   className="rounded border-[#333] text-violet-500 accent-violet-600"
                 />
               </th>
@@ -604,29 +638,39 @@ export const MyTasksView = ({ cards, isAdmin }: MyTasksViewProps) => {
             </tr>
           </thead>
           <tbody>
-            {listGroups
-              ? listGroups.map((project) => (
-                  <ProjectListSection
-                    key={project.key}
-                    project={project}
-                    selectedIds={selectedIds}
-                    onSelect={toggleSelect}
-                    expandedIds={expandedIds}
-                    onToggleExpand={toggleExpand}
-                  />
-                ))
-              : groups.map((group) => (
-                  <GroupSection
-                    key={group.key}
-                    label={group.label}
-                    color={group.color}
-                    entries={group.entries}
-                    selectedIds={selectedIds}
-                    onSelect={toggleSelect}
-                    expandedIds={expandedIds}
-                    onToggleExpand={toggleExpand}
-                  />
-                ))}
+            {filteredEntries.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="py-8 text-center text-xs text-muted-foreground">
+                  No overdue tasks found in this view.
+                </td>
+              </tr>
+            ) : listGroups ? (
+              listGroups.map((project) => (
+                <ProjectListSection
+                  key={project.key}
+                  project={project}
+                  selectedIds={selectedIds}
+                  onSelect={toggleSelect}
+                  expandedIds={expandedIds}
+                  onToggleExpand={toggleExpand}
+                  showOverdueOnly={showOverdueOnly}
+                />
+              ))
+            ) : (
+              groups.map((group) => (
+                <GroupSection
+                  key={group.key}
+                  label={group.label}
+                  color={group.color}
+                  entries={group.entries}
+                  selectedIds={selectedIds}
+                  onSelect={toggleSelect}
+                  expandedIds={expandedIds}
+                  onToggleExpand={toggleExpand}
+                  showOverdueOnly={showOverdueOnly}
+                />
+              ))
+            )}
           </tbody>
         </table>
       </div>

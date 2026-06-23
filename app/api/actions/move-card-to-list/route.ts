@@ -35,9 +35,20 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
     const newOrder = lastCard ? lastCard.order + 1 : 1;
 
+    const destinationList = await db.list.findUnique({
+      where: { id: listId },
+      select: { type: true },
+    });
+
+    const isCompleted = destinationList?.type === "DONE";
+
     updated = await db.card.update({
       where: { id },
-      data: { listId, order: newOrder },
+      data: { 
+        listId, 
+        order: newOrder,
+        completed: isCompleted,
+      },
     });
 
     await createAuditLog({

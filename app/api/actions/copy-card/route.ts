@@ -56,6 +56,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         description: cardToCopy.description,
         order: newOrder,
         listId: cardToCopy.listId,
+        completed: cardToCopy.completed,
       },
     });
 

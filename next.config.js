@@ -28,7 +28,7 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ["localhost:3000", "work.erasight.net"],
+      allowedOrigins: ["localhost:3000", "localhost:3001", "localhost:9090", "work.erasight.net"],
       bodySizeLimit: "6mb",
     },
   },

@@ -26,7 +26,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     };
   }
 
-  const { title, image } = data;
+  const { title, image, workflowType } = data;
 
   const [imageId, imageThumbUrl, imageFullUrl, imageLinkHtml, imageUserName] =
     image.split("|");
@@ -65,13 +65,57 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       action: ACTION.CREATE,
     });
 
-    await db.list.createMany({
-      data: [
-        { boardId: board.id, title: "Done", type: "DONE", order: 100000 },
-        { boardId: board.id, title: "Failed", type: "FAILED", order: 100001 },
-        { boardId: board.id, title: "Cancelled", type: "CANCELLED", order: 100002 },
-      ],
-    });
+    if (workflowType === "KANBAN") {
+      await db.list.createMany({
+        data: [
+          { boardId: board.id, title: "Backlog", type: "STANDARD", order: 1 },
+          { boardId: board.id, title: "To Do", type: "STANDARD", order: 2 },
+          { boardId: board.id, title: "In Progress", type: "STANDARD", order: 3 },
+          { boardId: board.id, title: "In Review", type: "STANDARD", order: 4 },
+          { boardId: board.id, title: "Done", type: "DONE", order: 5 },
+          { boardId: board.id, title: "Failed", type: "FAILED", order: 6 },
+          { boardId: board.id, title: "Cancelled", type: "CANCELLED", order: 7 },
+        ],
+      });
+
+      const lists = await db.list.findMany({
+        where: { boardId: board.id },
+        select: { id: true, title: true },
+      });
+
+      const inProgressList = lists.find((l) => l.title === "In Progress");
+      const inReviewList = lists.find((l) => l.title === "In Review");
+      const failedList = lists.find((l) => l.title === "Failed");
+      const cancelledList = lists.find((l) => l.title === "Cancelled");
+
+      const rules = [];
+      if (inProgressList) {
+        rules.push({ boardId: board.id, listId: inProgressList.id, actions: ["ADD_ASSIGNEE"] });
+      }
+      if (inReviewList) {
+        rules.push({ boardId: board.id, listId: inReviewList.id, actions: ["ADD_DUE_DATE", "ADD_ASSIGNEE"] });
+      }
+      if (failedList) {
+        rules.push({ boardId: board.id, listId: failedList.id, actions: ["ADD_REASON"] });
+      }
+      if (cancelledList) {
+        rules.push({ boardId: board.id, listId: cancelledList.id, actions: ["ADD_REASON"] });
+      }
+
+      if (rules.length > 0) {
+        await db.listTransitionRule.createMany({
+          data: rules,
+        });
+      }
+    } else {
+      await db.list.createMany({
+        data: [
+          { boardId: board.id, title: "Done", type: "DONE", order: 100000 },
+          { boardId: board.id, title: "Failed", type: "FAILED", order: 100001 },
+          { boardId: board.id, title: "Cancelled", type: "CANCELLED", order: 100002 },
+        ],
+      });
+    }
   } catch (error) {
     return {
       error: "Failed to create",

@@ -51,6 +51,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         title,
         listId,
         order: newOrder,
+        completed: list.type === "DONE",
       },
     });
 
