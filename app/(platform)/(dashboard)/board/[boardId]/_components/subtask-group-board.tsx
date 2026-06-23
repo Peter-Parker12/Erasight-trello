@@ -1,6 +1,7 @@
 "use client";
 
-import { CSSProperties, useState } from "react";
+import { CSSProperties, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 
@@ -64,6 +65,8 @@ type SubtaskGroupBoardProps = {
 
 export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {} }: SubtaskGroupBoardProps) => {
   const cardModal = useCardModal();
+  const router = useRouter();
+  const graduatedRef = useRef(false);
 
   const [orderedParents, setOrderedParents] = useState(parents);
   const [prevParents, setPrevParents] = useState(parents);
@@ -75,6 +78,12 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
   }
 
   const { execute: executeUpdateCardOrder } = useAction(updateCardOrder, {
+    onSuccess: () => {
+      if (graduatedRef.current) {
+        graduatedRef.current = false;
+        router.refresh();
+      }
+    },
     onError: (error) => toast.error(error),
   });
 
@@ -172,6 +181,8 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
         snapshot: orderedParents,
       });
     } else {
+      const allDone = newParents[parentIndex].subtasks.every((s) => s.list.type === "DONE");
+      graduatedRef.current = allDone;
       setOrderedParents(newParents);
       executeUpdateCardOrder({
         boardId,
@@ -189,6 +200,13 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
 
   const onTransitionConfirm = (assignee: OrgMember | null, dueDate: string | null, reason: string | null) => {
     if (!pendingDrop) return;
+    const parentIdx = orderedParents.findIndex((p) =>
+      p.subtasks.some((s) => s.id === pendingDrop.movedSubtask.id)
+    );
+    if (parentIdx !== -1) {
+      const allDone = orderedParents[parentIdx].subtasks.every((s) => s.list.type === "DONE");
+      graduatedRef.current = allDone;
+    }
     executeUpdateCardOrder({
       boardId,
       items: pendingDrop.changedItems.map((s) => ({

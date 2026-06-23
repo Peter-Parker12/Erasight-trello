@@ -132,66 +132,69 @@ export const CardItem = ({ data, index }: CardItemProps) => {
             )}
           </div>
 
-          {/* Subtasks toggle tab */}
+          {/* Subtasks section */}
           {hasSubtasks && (
             <div className="border-t border-[#333]">
-              <button
-                onClick={(e) => { e.stopPropagation(); setSubtasksOpen((v) => !v); }}
-                className="w-full flex items-center gap-1.5 px-3 py-1.5 bg-[#1f1f1f] hover:bg-[#333] transition text-xs text-muted-foreground"
-              >
-                {subtasksOpen
-                  ? <ChevronDown className="h-3 w-3 shrink-0" />
-                  : <ChevronRight className="h-3 w-3 shrink-0" />}
-                <span className="font-medium">
-                  Subtasks
-                </span>
-                <span className={cn(
-                  "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold",
-                  doneSubtasks === totalSubtasks ? "bg-green-500/20 text-green-400" : "bg-[#333] text-[#888]"
-                )}>
-                  {doneSubtasks}/{totalSubtasks}
-                </span>
-                {/* mini progress bar */}
-                <div className="flex-1 h-1 bg-[#444] rounded-full overflow-hidden mx-1">
-                  <div
-                    className={cn("h-1 rounded-full transition-all", doneSubtasks === totalSubtasks ? "bg-green-500" : "bg-violet-500")}
-                    style={{ width: `${totalSubtasks > 0 ? Math.round((doneSubtasks / totalSubtasks) * 100) : 0}%` }}
-                  />
+              {doneSubtasks === totalSubtasks ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-green-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-400 shrink-0" />
+                  <span className="font-medium">All {totalSubtasks} subtasks done</span>
                 </div>
-              </button>
+              ) : (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSubtasksOpen((v) => !v); }}
+                    className="w-full flex items-center gap-1.5 px-3 py-1.5 bg-[#1f1f1f] hover:bg-[#333] transition text-xs text-muted-foreground"
+                  >
+                    {subtasksOpen
+                      ? <ChevronDown className="h-3 w-3 shrink-0" />
+                      : <ChevronRight className="h-3 w-3 shrink-0" />}
+                    <span className="font-medium">Subtasks</span>
+                    <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#333] text-[#888]">
+                      {doneSubtasks}/{totalSubtasks}
+                    </span>
+                    <div className="flex-1 h-1 bg-[#444] rounded-full overflow-hidden mx-1">
+                      <div
+                        className="h-1 rounded-full transition-all bg-violet-500"
+                        style={{ width: `${Math.round((doneSubtasks / totalSubtasks) * 100)}%` }}
+                      />
+                    </div>
+                  </button>
 
-              {subtasksOpen && (
-                <div className="divide-y divide-[#333]">
-                  {data.subtasks.map((sub) => (
-                    <button
-                      key={sub.id}
-                      onClick={(e) => { e.stopPropagation(); cardModal.onOpen(sub.id); }}
-                      className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[#333] transition text-left group"
-                    >
-                      <span className={cn(
-                        "h-1.5 w-1.5 rounded-full shrink-0 mt-0.5",
-                        sub.completed ? "bg-green-400" : "bg-[#555]"
-                      )} />
-                      <span className={cn(
-                        "text-xs flex-1 truncate",
-                        sub.completed ? "line-through text-muted-foreground" : "text-[#e5e5e5] group-hover:text-white"
-                      )}>
-                        {sub.title}
-                      </span>
-                      <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">#{sub.cardNumber}</span>
-                      {sub.members.length > 0 && (
-                        <div className="flex -space-x-1 shrink-0">
-                          {sub.members.slice(0, 2).map((m) => (
-                            <Avatar key={m.id} className="h-4 w-4 border border-[#2a2a2a]">
-                              <AvatarImage src={m.userImage} alt={m.userName} />
-                              <AvatarFallback className="text-[8px]">{m.userName.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                          ))}
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
+                  {subtasksOpen && (
+                    <div className="divide-y divide-[#333]">
+                      {data.subtasks.map((sub) => (
+                        <button
+                          key={sub.id}
+                          onClick={(e) => { e.stopPropagation(); cardModal.onOpen(sub.id); }}
+                          className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[#333] transition text-left group"
+                        >
+                          <span className={cn(
+                            "h-1.5 w-1.5 rounded-full shrink-0 mt-0.5",
+                            sub.completed ? "bg-green-400" : "bg-[#555]"
+                          )} />
+                          <span className={cn(
+                            "text-xs flex-1 truncate",
+                            sub.completed ? "line-through text-muted-foreground" : "text-[#e5e5e5] group-hover:text-white"
+                          )}>
+                            {sub.title}
+                          </span>
+                          <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">#{sub.cardNumber}</span>
+                          {sub.members.length > 0 && (
+                            <div className="flex -space-x-1 shrink-0">
+                              {sub.members.slice(0, 2).map((m) => (
+                                <Avatar key={m.id} className="h-4 w-4 border border-[#2a2a2a]">
+                                  <AvatarImage src={m.userImage} alt={m.userName} />
+                                  <AvatarFallback className="text-[8px]">{m.userName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                              ))}
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

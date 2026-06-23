@@ -188,8 +188,12 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
 
   const pendingActions = pendingDrop ? (transitionRules[pendingDrop.destinationListId] ?? []) : [];
 
+  const allSubtasksDone = (card: CardPreview) =>
+    card.subtasks.length > 0 &&
+    card.subtasks.every((s) => s.list.type === "DONE");
+
   const groupedParents = orderedData.flatMap((list) =>
-    list.cards.filter((card) => card.subtasks.length > 0)
+    list.cards.filter((card) => card.subtasks.length > 0 && !allSubtasksDone(card))
   );
   const filteredGroupedParents = isActive ? applyFilter(groupedParents) : groupedParents;
 
@@ -225,7 +229,7 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
                   data={{
                     ...list,
                     cards: (isActive ? applyFilter(list.cards) : list.cards).filter(
-                      (card) => card.subtasks.length === 0
+                      (card) => card.subtasks.length === 0 || allSubtasksDone(card)
                     ),
                   }}
                 />
