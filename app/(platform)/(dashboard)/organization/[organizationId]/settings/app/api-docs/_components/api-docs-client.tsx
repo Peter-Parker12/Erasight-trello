@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, Terminal, Code, Key, Info, BookOpen } from "lucide-react";
+import { Copy, Check, Terminal, Code, Key, Info, BookOpen, FileJson, Download } from "lucide-react";
 import type { ApiKey, CustomFieldDefinition } from "@prisma/client";
 import { toast } from "sonner";
 
@@ -14,7 +14,7 @@ type ApiDocsClientProps = {
   orgId: string;
 };
 
-type TabType = "overview" | "companies" | "contacts" | "leads";
+type TabType = "overview" | "companies" | "contacts" | "leads" | "openapi";
 
 export const ApiDocsClient = ({ apiKeys, customFields, orgId }: ApiDocsClientProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
@@ -120,6 +120,18 @@ export const ApiDocsClient = ({ apiKeys, customFields, orgId }: ApiDocsClientPro
           <Terminal className="h-4 w-4" />
           Leads API
         </button>
+        <button
+          onClick={() => setActiveTab("openapi")}
+          className={cn(
+            "flex items-center gap-2.5 px-3 py-2 text-sm font-medium rounded-md transition text-left",
+            activeTab === "openapi"
+              ? "bg-[#222] text-violet-400 border border-[#333]"
+              : "text-[#888] hover:text-[#e5e5e5] hover:bg-[#111]"
+          )}
+        >
+          <FileJson className="h-4 w-4" />
+          OpenAPI Schema
+        </button>
       </div>
 
       {/* Content Area */}
@@ -198,7 +210,7 @@ export const ApiDocsClient = ({ apiKeys, customFields, orgId }: ApiDocsClientPro
         )}
 
         {/* Dynamic Entities Tab */}
-        {activeTab !== "overview" && (
+        {activeTab !== "overview" && activeTab !== "openapi" && (
           <div className="space-y-8">
             {/* Entity Header */}
             <div className="space-y-1">
@@ -437,6 +449,142 @@ export const ApiDocsClient = ({ apiKeys, customFields, orgId }: ApiDocsClientPro
                 </div>
               </div>
 
+            </div>
+          </div>
+        )}
+
+        {/* OpenAPI Schema Tab */}
+        {activeTab === "openapi" && (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-[#e5e5e5]">OpenAPI 3.0 Schema</h2>
+              <p className="text-sm text-muted-foreground">
+                Spec below is generated dynamically per organization from the current standard and
+                custom field definitions. Each call fetches the latest config, so newly added or
+                removed custom fields appear immediately (no server restart required).
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-[#e5e5e5]">Endpoint URL</h3>
+              <div className="flex items-center justify-between bg-[#111] p-3 rounded border font-mono text-xs text-violet-400">
+                <span>{baseUrl}/api/v1/openapi</span>
+              </div>
+            </div>
+
+            {activeKeyName ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-violet-400">
+                    <Code className="h-3.5 w-3.5" />
+                    Fetch the spec
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`${baseUrl}/api/v1/openapi`, {
+                          headers: { Authorization: `Bearer ${activeKeyRaw}` },
+                        });
+                        if (!res.ok) {
+                          toast.error(`Failed: ${res.status}`);
+                          return;
+                        }
+                        const spec = await res.json();
+                        const blob = new Blob([JSON.stringify(spec, null, 2)], {
+                          type: "application/json",
+                        });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = "openapi.json";
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast.success("Downloaded openapi.json");
+                      } catch (e) {
+                        toast.error("Failed to fetch spec.");
+                      }
+                    }}
+                  >
+                    <Download className="h-3.5 w-3.5 mr-1.5" />
+                    Download openapi.json
+                  </Button>
+                </div>
+
+                {(() => {
+                  const curlCmd = `curl -H "Authorization: Bearer ${activeKeyRaw}" \\\n  ${baseUrl}/api/v1/openapi`;
+                  return (
+                    <div className="relative group">
+                      <pre className="p-3 bg-black/60 rounded border border-[#222] font-mono text-[11px] text-[#888] overflow-x-auto">
+                        {curlCmd}
+                      </pre>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleCopy(curlCmd, "openapi-curl")}
+                        className="absolute right-2 top-2 h-7 px-2 bg-[#111] opacity-0 group-hover:opacity-100 transition"
+                      >
+                        {copiedText === "openapi-curl" ? (
+                          <Check className="h-3 w-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                      </Button>
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              <p className="text-xs text-amber-500">
+                ⚠️ No API Keys generated yet. Generate one under the <strong>API Keys</strong> tab
+                to download or query the OpenAPI spec.
+              </p>
+            )}
+
+            <div className="rounded-md border p-4 bg-[#111] space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-amber-400">
+                <Info className="h-4 w-4" />
+                Using with Swagger Editor
+              </div>
+              <p className="text-xs text-muted-foreground">
+                The endpoint requires authentication, so the spec cannot be loaded directly by a
+                public Swagger UI. Use <code className="text-violet-400">Download openapi.json</code>{" "}
+                above, then import it into{" "}
+                <a
+                  href="https://editor.swagger.io/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-violet-400 underline"
+                >
+                  editor.swagger.io
+                </a>{" "}
+                via <em>File → Import file</em>.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-[#e5e5e5]">Schema overview</h3>
+              <div className="border rounded-md overflow-hidden divide-y">
+                <div className="grid grid-cols-4 p-2.5 text-xs font-semibold bg-[#111] text-muted-foreground">
+                  <div className="col-span-1">Entity</div>
+                  <div className="col-span-1">Standard fields</div>
+                  <div className="col-span-1">Custom fields</div>
+                  <div className="col-span-1">Paths</div>
+                </div>
+                {([
+                  { label: "Companies", custom: companyCustomFields.length, std: 7, paths: "5" },
+                  { label: "Contacts", custom: contactCustomFields.length, std: 6, paths: "5" },
+                  { label: "Leads", custom: leadCustomFields.length, std: 6, paths: "5" },
+                ] as const).map((row) => (
+                  <div key={row.label} className="grid grid-cols-4 p-2.5 text-xs text-muted-foreground">
+                    <div className="col-span-1 font-mono text-white">{row.label}</div>
+                    <div className="col-span-1">{row.std}</div>
+                    <div className="col-span-1 text-violet-300">{row.custom}</div>
+                    <div className="col-span-1">{row.paths}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
