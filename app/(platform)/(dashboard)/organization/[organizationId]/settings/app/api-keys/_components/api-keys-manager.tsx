@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Copy, Plus, Trash2 } from "lucide-react";
+import { BookOpen, Copy, Plus, Trash2 } from "lucide-react";
 import type { ApiKey } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,10 @@ import { deleteApiKey } from "@/actions/delete-api-key";
 
 type ApiKeysManagerProps = {
   apiKeys: ApiKey[];
+  organizationId: string;
 };
 
-export const ApiKeysManager = ({ apiKeys }: ApiKeysManagerProps) => {
+export const ApiKeysManager = ({ apiKeys, organizationId }: ApiKeysManagerProps) => {
   const [name, setName] = useState("");
   const [createdKey, setCreatedKey] = useState<string | null>(null);
 
@@ -99,6 +100,16 @@ export const ApiKeysManager = ({ apiKeys }: ApiKeysManagerProps) => {
                     : " · Never used"}
                 </p>
               </div>
+              <a
+                href={`/organization/${organizationId}/settings/app/api-docs?keyId=${apiKey.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Open API Docs
+                </Button>
+              </a>
               <Button
                 variant="ghost"
                 size="sm"

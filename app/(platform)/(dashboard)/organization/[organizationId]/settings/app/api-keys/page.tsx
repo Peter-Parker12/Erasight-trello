@@ -29,10 +29,12 @@ const ApiKeysSettingsPage = async ({ params }: ApiKeysSettingsPageProps) => {
         <p className="text-sm text-[#e5e5e5]">
           API keys grant third-party apps access to the public CRM API for this organization. Treat
           them like passwords — anyone with a key can read and write Companies, Contacts and Leads.
+          Click <strong>Open API Docs</strong> next to a key to view interactive documentation in a
+          new tab, with code examples pre-filled for that key.
         </p>
       </div>
 
-      <ApiKeysManager apiKeys={apiKeys} />
+      <ApiKeysManager apiKeys={apiKeys} organizationId={organizationId} />
     </div>
   );
 };

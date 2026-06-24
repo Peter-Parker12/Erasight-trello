@@ -7,10 +7,12 @@ import { ApiDocsClient } from "./_components/api-docs-client";
 
 type ApiDocsPageProps = {
   params: Promise<{ organizationId: string }>;
+  searchParams: Promise<{ keyId?: string }>;
 };
 
-const ApiDocsPage = async ({ params }: ApiDocsPageProps) => {
+const ApiDocsPage = async ({ params, searchParams }: ApiDocsPageProps) => {
   const { organizationId } = await params;
+  const { keyId } = await searchParams;
   const { orgId } = await auth();
   if (!orgId) redirect("/select-org");
 
@@ -18,30 +20,31 @@ const ApiDocsPage = async ({ params }: ApiDocsPageProps) => {
     redirect(`/organization/${organizationId}/settings/app/members`);
   }
 
-  // Fetch API keys to display in authorization examples
-  const apiKeys = await db.apiKey.findMany({
-    where: { orgId },
-    orderBy: { createdAt: "desc" },
-  });
+  const [allApiKeys, customFields] = await Promise.all([
+    db.apiKey.findMany({ where: { orgId }, orderBy: { createdAt: "desc" } }),
+    db.customFieldDefinition.findMany({ where: { orgId }, orderBy: { order: "asc" } }),
+  ]);
 
-  // Fetch custom field definitions to dynamically build the API docs payload examples
-  const customFields = await db.customFieldDefinition.findMany({
-    where: { orgId },
-    orderBy: { order: "asc" },
-  });
+  // If a specific key was requested (via ?keyId=), put it first so the docs pre-fill its prefix.
+  const apiKeys = keyId
+    ? [
+        ...allApiKeys.filter((k) => k.id === keyId),
+        ...allApiKeys.filter((k) => k.id !== keyId),
+      ]
+    : allApiKeys;
 
   return (
     <div className="space-y-6 py-4">
       <div className="rounded-md border p-4 space-y-1">
         <p className="text-sm text-[#e5e5e5]">
-          Explore the Erasight CRM API schema. Below, you will find interactive documentation and 
-          code examples that update dynamically based on your custom fields configuration.
+          Explore the Erasight CRM API. Code examples below are pre-filled for the selected API key
+          and update dynamically based on your custom fields configuration.
         </p>
       </div>
 
-      <ApiDocsClient 
-        apiKeys={apiKeys} 
-        customFields={customFields} 
+      <ApiDocsClient
+        apiKeys={apiKeys}
+        customFields={customFields}
         orgId={orgId}
       />
     </div>
