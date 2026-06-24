@@ -500,7 +500,7 @@ export const ApiDocsClient = ({ apiKeys, customFields, orgId }: ApiDocsClientPro
                         a.href = url;
                         a.download = "openapi.json";
                         a.click();
-                        URL.revokeObjectURL(url);
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
                         toast.success("Downloaded openapi.json");
                       } catch (e) {
                         toast.error("Failed to fetch spec.");

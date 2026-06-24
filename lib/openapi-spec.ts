@@ -113,7 +113,7 @@ const buildEntitySchema = (cfg: EntityConfig, defs: CustomFieldDefinition[]) => 
     customFieldProperties[def.key] = def.required
       ? schema
       : { ...schema, nullable: true };
-    if (def.required) required.push("customFields");
+    if (def.required && !required.includes("customFields")) required.push("customFields");
   }
   properties.customFields = {
     type: "object",
@@ -147,13 +147,18 @@ export const buildOpenApiSpec = async (
   const paths: Record<string, Record<string, unknown>> = {};
   const schemas: Record<string, unknown> = {};
 
-  for (const cfg of ENTITY_CONFIGS) {
-    const definitions = await getFieldDefinitions(orgId, cfg.entityType);
+  const allDefinitions = await Promise.all(
+    ENTITY_CONFIGS.map((cfg) => getFieldDefinitions(orgId, cfg.entityType))
+  );
+
+  for (let i = 0; i < ENTITY_CONFIGS.length; i++) {
+    const cfg = ENTITY_CONFIGS[i];
+    const definitions = allDefinitions[i];
     const entitySchema = buildEntitySchema(cfg, definitions);
     schemas[cfg.schemaName] = entitySchema;
 
-    const collectionPath = `/api/v1/${cfg.pathSegment}`;
-    const itemPath = `/api/v1/${cfg.pathSegment}/{id}`;
+    const collectionPath = `/${cfg.pathSegment}`;
+    const itemPath = `/${cfg.pathSegment}/{id}`;
 
     const security = [{ BearerAuth: [] }];
 
