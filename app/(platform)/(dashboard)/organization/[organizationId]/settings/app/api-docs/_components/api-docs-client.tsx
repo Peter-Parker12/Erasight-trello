@@ -57,6 +57,43 @@ export const ApiDocsClient = ({ apiKeys, customFields, orgId }: ApiDocsClientPro
     }
   };
 
+  // Helper to build mock entity payload (reused by POST Create and PATCH Update)
+  const buildEntityPayload = (tab: TabType) => {
+    const payload: Record<string, any> = {};
+    if (tab === "companies") {
+      payload.name = "Acme Corp";
+      payload.domain = "acme.com";
+      payload.industry = "Technology";
+      payload.phone = "+1-555-0100";
+    } else if (tab === "contacts") {
+      payload.firstName = "John";
+      payload.lastName = "Doe";
+      payload.email = "john@doe.com";
+      payload.phone = "+1-555-0102";
+      payload.title = "Director of Operations";
+    } else if (tab === "leads") {
+      payload.title = "Enterprise Deal 2026";
+      payload.value = 50000;
+      payload.stageId = "stage_uuid_goes_here";
+    }
+
+    const targetFields =
+      tab === "companies"
+        ? companyCustomFields
+        : tab === "contacts"
+        ? contactCustomFields
+        : leadCustomFields;
+
+    if (targetFields.length > 0) {
+      payload.customFields = {};
+      targetFields.forEach((f) => {
+        payload.customFields[f.key] = getCustomFieldExample(f);
+      });
+    }
+
+    return payload;
+  };
+
   // Helper to copy code snippets
   const handleCopy = async (text: string, id: string) => {
     await navigator.clipboard.writeText(text);
@@ -281,39 +318,7 @@ export const ApiDocsClient = ({ apiKeys, customFields, orgId }: ApiDocsClientPro
                 <div className="p-3 space-y-4">
                   {/* Dynamic Request Example Builder */}
                   {(() => {
-                    // Build mock payload
-                    const payload: Record<string, any> = {};
-                    if (activeTab === "companies") {
-                      payload.name = "Acme Corp";
-                      payload.domain = "acme.com";
-                      payload.industry = "Technology";
-                      payload.phone = "+1-555-0100";
-                    } else if (activeTab === "contacts") {
-                      payload.firstName = "John";
-                      payload.lastName = "Doe";
-                      payload.email = "john@doe.com";
-                      payload.phone = "+1-555-0102";
-                      payload.title = "Director of Operations";
-                    } else if (activeTab === "leads") {
-                      payload.title = "Enterprise Deal 2026";
-                      payload.value = 50000;
-                      payload.stageId = "stage_uuid_goes_here";
-                    }
-
-                    // Add Custom Fields structure
-                    const targetFields = activeTab === "companies" 
-                      ? companyCustomFields 
-                      : activeTab === "contacts" 
-                      ? contactCustomFields 
-                      : leadCustomFields;
-
-                    if (targetFields.length > 0) {
-                      payload.customFields = {};
-                      targetFields.forEach(f => {
-                        payload.customFields[f.key] = getCustomFieldExample(f);
-                      });
-                    }
-
+                    const payload = buildEntityPayload(activeTab);
                     const curlCmd = `curl -X POST "${baseUrl}/api/v1/${activeTab}" \\\n  -H "Authorization: Bearer ${activeKeyRaw}" \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(payload, null, 2)}'`;
                     return (
                       <div className="space-y-2">
@@ -338,6 +343,130 @@ export const ApiDocsClient = ({ apiKeys, customFields, orgId }: ApiDocsClientPro
                             )}
                           </Button>
                         </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* GET by ID */}
+              <div className="border rounded-md overflow-hidden bg-[#111]">
+                <div className="flex items-center justify-between p-3 border-b bg-black/20">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
+                      GET
+                    </span>
+                    <span className="font-mono text-xs text-[#a9b1d6]">/api/v1/{activeTab}/{"{id}"}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Retrieve a single {activeTab.slice(0, -1)} by ID</span>
+                </div>
+                <div className="p-3 space-y-3">
+                  {(() => {
+                    const curlCmd = `curl -X GET "${baseUrl}/api/v1/${activeTab}/550e8400-e29b-41d4-a716-446655440000" \\\n  -H "Authorization: Bearer ${activeKeyRaw}"`;
+                    return (
+                      <div className="relative group">
+                        <pre className="p-3 bg-black/60 rounded border border-[#222] font-mono text-[11px] text-[#888] overflow-x-auto">
+                          {curlCmd}
+                        </pre>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopy(curlCmd, `get-by-id-${activeTab}`)}
+                          className="absolute right-2 top-2 h-7 px-2 bg-[#111] opacity-0 group-hover:opacity-100 transition"
+                        >
+                          {copiedText === `get-by-id-${activeTab}` ? (
+                            <Check className="h-3 w-3 text-emerald-400" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* PATCH Update */}
+              <div className="border rounded-md overflow-hidden bg-[#111]">
+                <div className="flex items-center justify-between p-3 border-b bg-black/20">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800">
+                      PATCH
+                    </span>
+                    <span className="font-mono text-xs text-[#a9b1d6]">/api/v1/{activeTab}/{"{id}"}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Update an existing {activeTab.slice(0, -1)}</span>
+                </div>
+                <div className="p-3 space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Send partial or full fields. Only the fields you include will be updated.
+                  </p>
+                  {(() => {
+                    const payload = buildEntityPayload(activeTab);
+                    const curlCmd = `curl -X PATCH "${baseUrl}/api/v1/${activeTab}/550e8400-e29b-41d4-a716-446655440000" \\\n  -H "Authorization: Bearer ${activeKeyRaw}" \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(payload, null, 2)}'`;
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-amber-400">
+                          <Code className="h-3.5 w-3.5" />
+                          Request Example
+                        </div>
+                        <div className="relative group">
+                          <pre className="p-3 bg-black/60 rounded border border-[#222] font-mono text-[11px] text-[#888] overflow-x-auto">
+                            {curlCmd}
+                          </pre>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCopy(curlCmd, `update-${activeTab}`)}
+                            className="absolute right-2 top-2 h-7 px-2 bg-[#111] opacity-0 group-hover:opacity-100 transition"
+                          >
+                            {copiedText === `update-${activeTab}` ? (
+                              <Check className="h-3 w-3 text-emerald-400" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* DELETE */}
+              <div className="border rounded-md overflow-hidden bg-[#111]">
+                <div className="flex items-center justify-between p-3 border-b bg-black/20">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-800">
+                      DELETE
+                    </span>
+                    <span className="font-mono text-xs text-[#a9b1d6]">/api/v1/{activeTab}/{"{id}"}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Delete a {activeTab.slice(0, -1)} by ID</span>
+                </div>
+                <div className="p-3 space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Returns <code className="text-emerald-400">204 No Content</code> on success.
+                  </p>
+                  {(() => {
+                    const curlCmd = `curl -X DELETE "${baseUrl}/api/v1/${activeTab}/550e8400-e29b-41d4-a716-446655440000" \\\n  -H "Authorization: Bearer ${activeKeyRaw}"`;
+                    return (
+                      <div className="relative group">
+                        <pre className="p-3 bg-black/60 rounded border border-[#222] font-mono text-[11px] text-[#888] overflow-x-auto">
+                          {curlCmd}
+                        </pre>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopy(curlCmd, `delete-${activeTab}`)}
+                          className="absolute right-2 top-2 h-7 px-2 bg-[#111] opacity-0 group-hover:opacity-100 transition"
+                        >
+                          {copiedText === `delete-${activeTab}` ? (
+                            <Check className="h-3 w-3 text-emerald-400" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </Button>
                       </div>
                     );
                   })()}
