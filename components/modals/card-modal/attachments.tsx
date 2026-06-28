@@ -70,7 +70,14 @@ export const Attachments = ({ data }: AttachmentsProps) => {
   const [fileLoading, setFileLoading] = useState(false);
   const [selectedAttId, setSelectedAttId] = useState<string | null>(null);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
-  const [reviewPanelId, setReviewPanelId] = useState<string | null>(null);
+  const [collapsedReviewIds, setCollapsedReviewIds] = useState<Set<string>>(new Set());
+
+  const toggleReviewPanel = (id: string) =>
+    setCollapsedReviewIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   const [partnerSlug, setPartnerSlug] = useState("");
 
   const downloadAttachment = (att: Attachment) => {
@@ -107,7 +114,7 @@ export const Attachments = ({ data }: AttachmentsProps) => {
         toast.error(json.error ?? "Review failed");
       } else {
         invalidate();
-        setReviewPanelId(att.id);
+        setCollapsedReviewIds((prev) => { const next = new Set(prev); next.delete(att.id); return next; });
         toast.success("Review completed");
       }
     } catch {
@@ -359,25 +366,25 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                                 )}
                               </div>
                               <button
-                                onClick={(e) => { e.stopPropagation(); setReviewPanelId(reviewPanelId === att.id ? null : att.id); }}
+                                onClick={(e) => { e.stopPropagation(); toggleReviewPanel(att.id); }}
                                 className="text-[10px] text-muted-foreground hover:text-[#e5e5e5] transition"
                               >
-                                {reviewPanelId === att.id ? "Thu gọn" : "Xem"}
+                                {collapsedReviewIds.has(att.id) ? "Xem" : "Thu gọn"}
                               </button>
                             </div>
-                            {(reviewPanelId === att.id) && (
-                              <div className="bg-[#171717] rounded-md p-3 text-xs text-[#ccc] leading-relaxed max-h-96 overflow-y-auto border border-[#333] prose prose-invert prose-xs max-w-none
-                                [&_h2]:text-sm [&_h2]:font-bold [&_h2]:text-[#e5e5e5] [&_h2]:mt-3 [&_h2]:mb-1
-                                [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:text-[#e5e5e5] [&_h3]:mt-2 [&_h3]:mb-1
-                                [&_p]:mb-2 [&_p]:text-[#ccc]
-                                [&_ul]:pl-4 [&_ul]:space-y-1 [&_ul]:mb-2
-                                [&_ol]:pl-4 [&_ol]:space-y-1 [&_ol]:mb-2
-                                [&_li]:text-[#ccc]
+                            {!collapsedReviewIds.has(att.id) && (
+                              <div className="bg-[#171717] rounded-md p-4 text-sm text-[#ccc] leading-relaxed overflow-y-auto border border-[#333] prose prose-invert max-w-none
+                                [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-[#e5e5e5] [&_h2]:mt-4 [&_h2]:mb-2
+                                [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-[#e5e5e5] [&_h3]:mt-3 [&_h3]:mb-1
+                                [&_p]:mb-3 [&_p]:text-[#ccc] [&_p]:leading-relaxed
+                                [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:mb-3
+                                [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_ol]:mb-3
+                                [&_li]:text-[#ccc] [&_li]:leading-relaxed
                                 [&_strong]:text-[#e5e5e5] [&_strong]:font-semibold
-                                [&_hr]:border-[#333] [&_hr]:my-2
-                                [&_table]:w-full [&_table]:text-[11px] [&_table]:border-collapse [&_table]:mb-2
-                                [&_th]:bg-[#2a2a2a] [&_th]:text-[#e5e5e5] [&_th]:px-2 [&_th]:py-1 [&_th]:border [&_th]:border-[#444] [&_th]:text-left
-                                [&_td]:px-2 [&_td]:py-1 [&_td]:border [&_td]:border-[#333] [&_td]:text-[#ccc] [&_td]:align-top">
+                                [&_hr]:border-[#333] [&_hr]:my-3
+                                [&_table]:w-full [&_table]:text-xs [&_table]:border-collapse [&_table]:mb-3
+                                [&_th]:bg-[#2a2a2a] [&_th]:text-[#e5e5e5] [&_th]:px-3 [&_th]:py-2 [&_th]:border [&_th]:border-[#444] [&_th]:text-left [&_th]:font-semibold
+                                [&_td]:px-3 [&_td]:py-2 [&_td]:border [&_td]:border-[#333] [&_td]:text-[#ccc] [&_td]:align-top">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                   {att.review}
                                 </ReactMarkdown>

@@ -41,7 +41,7 @@ export const CardModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl w-full p-0 overflow-hidden flex flex-col h-[100dvh] sm:h-[90vh] rounded-none sm:rounded-lg">
+      <DialogContent className="max-w-6xl w-full p-0 overflow-hidden flex flex-col h-[100dvh] sm:h-[95vh] rounded-none sm:rounded-lg">
         {/* Cover color stripe — fixed at top */}
         {coverColor && (
           <div className="h-10 w-full rounded-t-none sm:rounded-t-lg shrink-0" style={{ backgroundColor: coverColor }} />
