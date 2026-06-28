@@ -8,6 +8,58 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { notifyCardInReview } from "@/lib/board-telegram";
 import { toApiRoute } from "@/lib/api-route";
 import { syncParentList } from "@/lib/sync-parent-list";
+import { extractFileContent } from "@/lib/extract-file-content";
+import { runClaudeReview } from "@/lib/claude-cli-review";
+
+async function triggerAiReviewsForCards(cardIds: string[], boardId: string) {
+  try {
+    const cards = await db.card.findMany({
+      where: { id: { in: cardIds } },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        dueDate: true,
+        priority: true,
+        attachments: {
+          where: { review: null }, // only attachments not yet reviewed
+          select: { id: true, url: true, name: true },
+        },
+      },
+    });
+
+    for (const card of cards) {
+      if (card.attachments.length === 0) continue;
+
+      const cardContext = [
+        `Title: ${card.title}`,
+        card.description ? `Description: ${card.description}` : null,
+        card.dueDate ? `Due date: ${card.dueDate.toISOString().split("T")[0]}` : null,
+        card.priority !== "NONE" ? `Priority: ${card.priority}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      for (const attachment of card.attachments) {
+        try {
+          const content = await extractFileContent(attachment.url);
+          if (!content.trim()) continue;
+
+          const review = await runClaudeReview(content, cardContext);
+
+          await db.attachment.update({
+            where: { id: attachment.id },
+            data: { review, reviewedAt: new Date() },
+          });
+        } catch (err) {
+          console.error(`[AI_REVIEW] Failed for attachment ${attachment.id}:`, err);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("[AI_REVIEW] triggerAiReviewsForCards failed:", err);
+  }
+}
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = await auth();
@@ -75,6 +127,11 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   for (const card of movedToReview) {
     await notifyCardInReview({ boardId, cardId: card.id, cardTitle: card.title });
+  }
+
+  // Fire AI review for attachments on cards moved to the review list (async, non-blocking)
+  if (movedToReview.length > 0) {
+    void triggerAiReviewsForCards(movedToReview.map((c) => c.id), boardId);
   }
 
   // Sync parent card list with the least-advanced subtask list.

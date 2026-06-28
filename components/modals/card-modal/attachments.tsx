@@ -7,6 +7,8 @@ import { Paperclip, Plus, Trash2, ExternalLink, Upload, Link2, Image as ImageIco
 import { toast } from "sonner";
 import { format } from "date-fns";
 import type { Attachment } from "@prisma/client";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { CardWithFullDetail } from "@/types";
 import { useAction } from "@/hooks/use-action";
@@ -364,8 +366,21 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                               </button>
                             </div>
                             {(reviewPanelId === att.id) && (
-                              <div className="bg-[#171717] rounded-md p-3 text-xs text-[#ccc] whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto border border-[#333]">
-                                {att.review}
+                              <div className="bg-[#171717] rounded-md p-3 text-xs text-[#ccc] leading-relaxed max-h-96 overflow-y-auto border border-[#333] prose prose-invert prose-xs max-w-none
+                                [&_h2]:text-sm [&_h2]:font-bold [&_h2]:text-[#e5e5e5] [&_h2]:mt-3 [&_h2]:mb-1
+                                [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:text-[#e5e5e5] [&_h3]:mt-2 [&_h3]:mb-1
+                                [&_p]:mb-2 [&_p]:text-[#ccc]
+                                [&_ul]:pl-4 [&_ul]:space-y-1 [&_ul]:mb-2
+                                [&_ol]:pl-4 [&_ol]:space-y-1 [&_ol]:mb-2
+                                [&_li]:text-[#ccc]
+                                [&_strong]:text-[#e5e5e5] [&_strong]:font-semibold
+                                [&_hr]:border-[#333] [&_hr]:my-2
+                                [&_table]:w-full [&_table]:text-[11px] [&_table]:border-collapse [&_table]:mb-2
+                                [&_th]:bg-[#2a2a2a] [&_th]:text-[#e5e5e5] [&_th]:px-2 [&_th]:py-1 [&_th]:border [&_th]:border-[#444] [&_th]:text-left
+                                [&_td]:px-2 [&_td]:py-1 [&_td]:border [&_td]:border-[#333] [&_td]:text-[#ccc] [&_td]:align-top">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {att.review}
+                                </ReactMarkdown>
                               </div>
                             )}
                           </div>

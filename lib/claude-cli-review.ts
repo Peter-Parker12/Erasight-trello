@@ -58,8 +58,10 @@ function buildPrompt(
 
   if (skillList) {
     parts.push(
-      `You have access to the following review skills:\n${skillList}\n\nBased on the file content below, choose the most appropriate skill and apply it. Factor in the partner context above where relevant. Do not explain which skill you chose — just deliver the review directly.\n\n`
+      `You have access to the following review skills:\n${skillList}\n\nBased on the file content below, choose the most appropriate skill and apply it. Factor in the partner context above where relevant. Do not explain which skill you chose — just deliver the review directly.\n\nIMPORTANT: Respond entirely in Vietnamese.\n\n`
     );
+  } else {
+    parts.push(`IMPORTANT: Respond entirely in Vietnamese.\n\n`);
   }
 
   parts.push(`Card context:\n${cardContext}\n\n`);
