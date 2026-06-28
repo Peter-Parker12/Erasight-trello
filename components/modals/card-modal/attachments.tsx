@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Paperclip, Plus, Trash2, ExternalLink, Upload, Link2, Image as ImageIcon, FileText, Film, Download, Copy, X, Info } from "lucide-react";
+import { Paperclip, Plus, Trash2, ExternalLink, Upload, Link2, Image as ImageIcon, FileText, Film, Download, Copy, X, Info, Sparkles, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import type { Attachment } from "@prisma/client";
@@ -67,6 +67,9 @@ export const Attachments = ({ data }: AttachmentsProps) => {
   const [url, setUrl] = useState("");
   const [fileLoading, setFileLoading] = useState(false);
   const [selectedAttId, setSelectedAttId] = useState<string | null>(null);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
+  const [reviewPanelId, setReviewPanelId] = useState<string | null>(null);
+  const [partnerSlug, setPartnerSlug] = useState("");
 
   const downloadAttachment = (att: Attachment) => {
     const a = document.createElement("a");
@@ -83,6 +86,34 @@ export const Attachments = ({ data }: AttachmentsProps) => {
   };
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["card", data.id] });
+
+  const handleReview = async (att: Attachment) => {
+    setReviewingId(att.id);
+    try {
+      const res = await fetch("/api/actions/review-attachment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          attachmentId: att.id,
+          cardId: data.id,
+          boardId,
+          partnerSlug: partnerSlug.trim() || undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        toast.error(json.error ?? "Review failed");
+      } else {
+        invalidate();
+        setReviewPanelId(att.id);
+        toast.success("Review completed");
+      }
+    } catch {
+      toast.error("Could not connect to review service");
+    } finally {
+      setReviewingId(null);
+    }
+  };
 
   const { execute: execCreate, isLoading: isCreating } = useAction(createAttachment, {
     onSuccess: () => {
@@ -146,7 +177,18 @@ export const Attachments = ({ data }: AttachmentsProps) => {
     <div className="flex items-start gap-x-3 w-full">
       <Paperclip className="h-5 w-5 mt-0.5 text-[#e5e5e5] shrink-0" />
       <div className="w-full">
-        <p className="font-semibold text-[#e5e5e5] mb-2">Tệp đính kèm</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="font-semibold text-[#e5e5e5]">Tệp đính kèm</p>
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3 text-emerald-400 shrink-0" />
+            <input
+              value={partnerSlug}
+              onChange={(e) => setPartnerSlug(e.target.value)}
+              placeholder="Partner slug (optional)"
+              className="text-[11px] bg-[#2a2a2a] border border-[#333] rounded px-2 py-1 text-[#ccc] placeholder:text-[#555] focus:outline-none focus:border-emerald-600/50 w-40"
+            />
+          </div>
+        </div>
 
         <div className="space-y-1.5 mb-3">
           {data.attachments.map((att) => {
@@ -281,6 +323,18 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                             </>
                           )}
                           <button
+                            disabled={reviewingId === att.id}
+                            onClick={(e) => { e.stopPropagation(); handleReview(att); }}
+                            className="inline-flex items-center gap-1 text-xs bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-2.5 py-1 rounded-md hover:bg-emerald-600/20 transition font-medium disabled:opacity-50 disabled:cursor-wait"
+                          >
+                            {reviewingId === att.id ? (
+                              <RotateCcw className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Sparkles className="h-3.5 w-3.5" />
+                            )}
+                            {reviewingId === att.id ? "Đang xem xét..." : att.review ? "Xem xét lại" : "AI Review"}
+                          </button>
+                          <button
                             onClick={(e) => { e.stopPropagation(); setSelectedAttId(null); }}
                             className="ml-auto text-muted-foreground hover:text-[#e5e5e5]"
                             title="Đóng"
@@ -288,6 +342,34 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                             <X className="h-4 w-4" />
                           </button>
                         </div>
+
+                        {/* AI Review panel */}
+                        {att.review && (
+                          <div className="mt-3 border-t border-[#333] pt-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-1.5">
+                                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+                                <span className="text-xs font-semibold text-emerald-400">AI Review</span>
+                                {att.reviewedAt && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    · {format(new Date(att.reviewedAt), "HH:mm dd/MM/yyyy")}
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setReviewPanelId(reviewPanelId === att.id ? null : att.id); }}
+                                className="text-[10px] text-muted-foreground hover:text-[#e5e5e5] transition"
+                              >
+                                {reviewPanelId === att.id ? "Thu gọn" : "Xem"}
+                              </button>
+                            </div>
+                            {(reviewPanelId === att.id) && (
+                              <div className="bg-[#171717] rounded-md p-3 text-xs text-[#ccc] whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto border border-[#333]">
+                                {att.review}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

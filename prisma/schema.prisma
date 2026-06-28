@@ -252,10 +252,12 @@ model Comment {
 }
 
 model Attachment {
-  id     String @id @default(uuid())
-  name   String
-  url    String @db.Text
-  cardId String
+  id         String    @id @default(uuid())
+  name       String
+  url        String    @db.Text
+  cardId     String
+  review     String?   @db.Text
+  reviewedAt DateTime?
 
   card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
