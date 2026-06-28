@@ -169,6 +169,13 @@ export const buildOpenApiSpec = async (
         security,
         parameters: [
           {
+            name: "q",
+            in: "query",
+            required: false,
+            description: "Case-insensitive search term. Matches against name/domain for companies, firstName/lastName/email for contacts, and title for leads.",
+            schema: { type: "string" },
+          },
+          {
             name: "limit",
             in: "query",
             required: false,
@@ -324,6 +331,40 @@ export const buildOpenApiSpec = async (
           "204": { description: `Deleted.` },
           "401": { description: "Unauthorized." },
           "404": { description: "Not found." },
+        },
+      },
+    };
+  }
+
+  // Schema discovery endpoints
+  for (const cfg of ENTITY_CONFIGS) {
+    paths[`/schema/${cfg.pathSegment}`] = {
+      get: {
+        summary: `Get ${cfg.schemaName} schema`,
+        description: `Returns the standard and custom field definitions for ${cfg.singularLabel} records, plus pipeline stages for leads.`,
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Field definitions for the entity.",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: {
+                      type: "object",
+                      properties: {
+                        entityType: { type: "string" },
+                        fields: { type: "array", items: { type: "object" } },
+                        customFields: { type: "array", items: { type: "object" } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { description: "Unauthorized." },
         },
       },
     };

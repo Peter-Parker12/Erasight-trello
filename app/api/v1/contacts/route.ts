@@ -16,8 +16,16 @@ export const GET = async (req: Request) => {
   const { searchParams } = new URL(req.url);
   const limit = Math.min(Math.max(Number(searchParams.get("limit")) || 50, 1), 100);
   const offset = Math.max(Number(searchParams.get("offset")) || 0, 0);
+  const q = searchParams.get("q")?.trim() || undefined;
 
-  const where = { orgId: auth.apiKey.orgId };
+  const where = {
+    orgId: auth.apiKey.orgId,
+    ...(q ? { OR: [
+      { firstName: { contains: q, mode: "insensitive" as const } },
+      { lastName: { contains: q, mode: "insensitive" as const } },
+      { email: { contains: q, mode: "insensitive" as const } },
+    ]} : {}),
+  };
 
   const [data, total] = await Promise.all([
     db.contact.findMany({ where, orderBy: { createdAt: "desc" }, take: limit, skip: offset }),
