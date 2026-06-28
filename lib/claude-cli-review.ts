@@ -6,6 +6,7 @@ const SKILLS_DIR = process.env.CLAUDE_SKILLS_DIR ?? "";
 const PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR ?? "";
 const KNOWLEDGE_DIR = process.env.CLAUDE_KNOWLEDGE_DIR ?? "";
 const CLAUDE_BIN = process.env.CLAUDE_BIN ?? "claude";
+const CLAUDE_MODEL = process.env.CLAUDE_REVIEW_MODEL ?? "";
 const REVIEW_TIMEOUT_MS = 120_000; // 2 minutes
 
 interface Skill {
@@ -81,7 +82,10 @@ export async function runClaudeReview(
   return new Promise((resolve, reject) => {
     const cwd = PROJECT_DIR || process.cwd();
 
-    const child = spawn(CLAUDE_BIN, ["-p", "--print"], {
+    const args = ["-p", "--print"];
+    if (CLAUDE_MODEL) args.push("--model", CLAUDE_MODEL);
+
+    const child = spawn(CLAUDE_BIN, args, {
       cwd,
       env: {
         ...process.env,
