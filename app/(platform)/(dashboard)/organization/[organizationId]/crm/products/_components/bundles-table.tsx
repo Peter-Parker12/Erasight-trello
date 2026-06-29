@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import type { Product, ProductBundle, ProductBundleItem } from "@prisma/client";
 import { Pencil, Trash2, Building2 } from "lucide-react";
@@ -7,12 +8,7 @@ import { Pencil, Trash2, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAction } from "@/hooks/use-action";
 import { deleteBundle } from "@/actions/delete-bundle";
-import { BundleFormDialog } from "./bundle-form-dialog";
-
-type BundleWithItems = ProductBundle & {
-  items: (ProductBundleItem & { product: Product })[];
-  _count: { companies: number };
-};
+import { BundleFormDialog, type BundleWithItems } from "./bundle-form-dialog";
 
 function formatVnd(n: number | string) {
   return new Intl.NumberFormat("vi-VN").format(Number(n));
@@ -41,14 +37,28 @@ type BundlesTableProps = {
   products: Product[];
 };
 
-export const BundlesTable = ({ bundles, products }: BundlesTableProps) => {
+export const BundlesTable = ({ bundles: initialBundles, products }: BundlesTableProps) => {
+  // Local state so updates/deletes are reflected immediately without waiting for router.refresh()
+  const [bundles, setBundles] = useState<BundleWithItems[]>(initialBundles);
+
+  // Sync when server re-renders deliver a new list (e.g. after a new bundle is created)
+  useEffect(() => { setBundles(initialBundles); }, [initialBundles]);
+
+  const handleUpdated = (updated: BundleWithItems) =>
+    setBundles((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
+
+  const handleDeleted = (id: string) =>
+    setBundles((prev) => prev.filter((b) => b.id !== id));
+
   const { execute, isLoading } = useAction(deleteBundle, {
+    skipRefresh: true,
     onSuccess: () => toast.success("Bundle deleted."),
     onError: (error) => toast.error(error),
   });
 
   const onDelete = (bundle: BundleWithItems) => {
     if (!confirm(`Delete bundle "${bundle.name}"? This cannot be undone.`)) return;
+    handleDeleted(bundle.id);
     execute({ id: bundle.id });
   };
 
@@ -104,6 +114,7 @@ export const BundlesTable = ({ bundles, products }: BundlesTableProps) => {
                   <BundleFormDialog
                     bundle={bundle}
                     products={products}
+                    onUpdated={handleUpdated}
                     trigger={
                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                         <Pencil className="h-3.5 w-3.5" />

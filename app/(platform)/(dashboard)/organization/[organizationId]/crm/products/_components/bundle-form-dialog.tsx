@@ -24,7 +24,10 @@ import { cn } from "@/lib/utils";
 
 // lineId is a client-only stable key; productId can repeat across rows
 type BundleItem = { lineId: string; productId: string; quantity: number; unitPrice: number };
-type BundleWithItems = ProductBundle & { items: (ProductBundleItem & { product: Product })[] };
+export type BundleWithItems = ProductBundle & {
+  items: (ProductBundleItem & { product: Product })[];
+  _count: { companies: number };
+};
 
 type BundleFormDialogProps = {
   trigger?: React.ReactNode;
@@ -33,6 +36,7 @@ type BundleFormDialogProps = {
   open?: boolean;
   onOpenChange?: (v: boolean) => void;
   onCreated?: (bundle: { id: string; name: string }) => void;
+  onUpdated?: (bundle: BundleWithItems) => void;
 };
 
 const PRICING_MODES = [
@@ -66,6 +70,7 @@ export const BundleFormDialog = ({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   onCreated,
+  onUpdated,
 }: BundleFormDialogProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const open    = controlledOpen          ?? internalOpen;
@@ -172,7 +177,30 @@ export const BundleFormDialog = ({
   });
 
   const { execute: executeUpdate } = useAction(updateBundle, {
-    onSuccess: () => { toast.success("Bundle updated."); closeRef.current?.click(); },
+    skipRefresh: true,
+    onSuccess: (data) => {
+      toast.success("Bundle updated.");
+      if (onUpdated) {
+        const rebuilt: BundleWithItems = {
+          ...data,
+          items: items.map(({ lineId, productId, quantity, unitPrice }) => ({
+            id: lineId,
+            bundleId: data.id,
+            productId,
+            quantity,
+            // BundlesTable uses Number(item.unitPrice) so a plain number is safe
+            unitPrice: unitPrice as unknown as ProductBundleItem["unitPrice"],
+            active: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            product: products.find((p) => p.id === productId)!,
+          })),
+          _count: bundle!._count,
+        };
+        onUpdated(rebuilt);
+      }
+      closeRef.current?.click();
+    },
     onError: (error) => toast.error(error),
   });
 
