@@ -14,12 +14,14 @@ type Props = {
   initialProducts: Product[];
   definitions: CustomFieldDefinitionDTO[];
   initialCategories: ProductCategoryDef[];
+  onProductDeleted?: (id: string) => void;
 };
 
 export const ProductsClientSection = ({
   initialProducts,
   definitions,
   initialCategories,
+  onProductDeleted,
 }: Props) => {
   const [products, setProducts]     = useState(initialProducts);
   const [categories, setCategories] = useState(initialCategories);
@@ -34,6 +36,7 @@ export const ProductsClientSection = ({
 
   const handleDeleted = (id: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
+    onProductDeleted?.(id);
   };
 
   const handleCategoryCreated = (cat: ProductCategoryDef) => {

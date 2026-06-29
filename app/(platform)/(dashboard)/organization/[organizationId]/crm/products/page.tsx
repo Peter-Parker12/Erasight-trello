@@ -1,16 +1,13 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { Plus, Package, Layers } from "lucide-react";
+import { Package, Layers } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { isOrgAdmin } from "@/lib/board-access";
-import { Button } from "@/components/ui/button";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
 import { KpiCard } from "@/components/crm/kpi-card";
 import { CustomFieldsManager } from "@/app/(platform)/(dashboard)/organization/[organizationId]/settings/app/custom-fields/_components/custom-fields-manager";
-import { BundleFormDialog } from "./_components/bundle-form-dialog";
-import { BundlesTable } from "./_components/bundles-table";
-import { ProductsClientSection } from "./_components/products-client-section";
+import { ProductsBundlesWrapper } from "./_components/products-bundles-wrapper";
 
 type ProductsPageProps = {
   params: Promise<{ organizationId: string }>;
@@ -55,41 +52,18 @@ const ProductsPage = async ({ params }: ProductsPageProps) => {
         <KpiCard label="Bundles"        value={bundles.length}    icon={Layers}  iconColor="text-violet-400" />
       </div>
 
-      {/* Products section (client wrapper for immediate-add + inline-edit) */}
-      <div className="space-y-4">
-        {isAdmin && (
-          <CustomFieldsManager entityType="PRODUCT" label="Custom fields" fields={definitions} />
-        )}
+      {/* Custom fields (admin only) */}
+      {isAdmin && (
+        <CustomFieldsManager entityType="PRODUCT" label="Custom fields" fields={definitions} />
+      )}
 
-        <ProductsClientSection
-          initialProducts={products}
-          definitions={definitions}
-          initialCategories={categories}
-        />
-      </div>
-
-      {/* Bundles section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Bundles</h2>
-            <p className="text-sm text-muted-foreground">
-              Group products into a quoted bundle with flexible pricing.
-            </p>
-          </div>
-          <BundleFormDialog
-            products={products}
-            trigger={
-              <Button size="sm" variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                New bundle
-              </Button>
-            }
-          />
-        </div>
-
-        <BundlesTable bundles={bundles} products={products} />
-      </div>
+      {/* Products + Bundles — single client wrapper so product deletions propagate to bundles */}
+      <ProductsBundlesWrapper
+        initialProducts={products}
+        definitions={definitions}
+        initialCategories={categories}
+        initialBundles={bundles}
+      />
     </div>
   );
 };

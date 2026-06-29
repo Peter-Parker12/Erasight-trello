@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef } from "react";
 import { toast } from "sonner";
-import type { Product, ProductBundle, ProductBundleItem } from "@prisma/client";
+import type { Product } from "@prisma/client";
 import { Pencil, Trash2, Building2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -35,30 +35,29 @@ const PRICING_LABEL: Record<string, string> = {
 type BundlesTableProps = {
   bundles: BundleWithItems[];
   products: Product[];
+  onBundleUpdated: (bundle: BundleWithItems) => void;
+  onBundleDeleted: (id: string) => void;
 };
 
-export const BundlesTable = ({ bundles: initialBundles, products }: BundlesTableProps) => {
-  // Local state so updates/deletes are reflected immediately without waiting for router.refresh()
-  const [bundles, setBundles] = useState<BundleWithItems[]>(initialBundles);
-
-  // Sync when server re-renders deliver a new list (e.g. after a new bundle is created)
-  useEffect(() => { setBundles(initialBundles); }, [initialBundles]);
-
-  const handleUpdated = (updated: BundleWithItems) =>
-    setBundles((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
-
-  const handleDeleted = (id: string) =>
-    setBundles((prev) => prev.filter((b) => b.id !== id));
+export const BundlesTable = ({ bundles, products, onBundleUpdated, onBundleDeleted }: BundlesTableProps) => {
+  // Track which bundle id is currently being deleted so onSuccess can reference it
+  const deletingIdRef = useRef<string | null>(null);
 
   const { execute, isLoading } = useAction(deleteBundle, {
     skipRefresh: true,
-    onSuccess: () => toast.success("Bundle deleted."),
+    onSuccess: () => {
+      toast.success("Bundle deleted.");
+      if (deletingIdRef.current) {
+        onBundleDeleted(deletingIdRef.current);
+        deletingIdRef.current = null;
+      }
+    },
     onError: (error) => toast.error(error),
   });
 
   const onDelete = (bundle: BundleWithItems) => {
     if (!confirm(`Delete bundle "${bundle.name}"? This cannot be undone.`)) return;
-    handleDeleted(bundle.id);
+    deletingIdRef.current = bundle.id;
     execute({ id: bundle.id });
   };
 
@@ -84,56 +83,62 @@ export const BundlesTable = ({ bundles: initialBundles, products }: BundlesTable
           </tr>
         </thead>
         <tbody className="divide-y divide-[#333]">
-          {bundles.map((bundle) => (
-            <tr key={bundle.id} className="hover:bg-[#2a2a2a]">
-              <td className="px-4 py-2 font-medium text-[#e5e5e5]">
-                {bundle.name}
-                {bundle.description && (
-                  <p className="text-xs text-muted-foreground truncate max-w-[200px]">{bundle.description}</p>
-                )}
-              </td>
-              <td className="px-4 py-2 text-muted-foreground text-xs">
-                {bundle.items.map((i) => i.product.name).join(", ") || "—"}
-              </td>
-              <td className="px-4 py-2">
-                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-violet-500/20 text-violet-400">
-                  {PRICING_LABEL[bundle.pricingMode]}
-                </span>
-              </td>
-              <td className="px-4 py-2 text-violet-400 font-semibold">
-                {formatVnd(Math.round(bundleTotal(bundle)))} ₫
-              </td>
-              <td className="px-4 py-2 text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Building2 className="h-3.5 w-3.5" />
-                  {bundle._count.companies}
-                </span>
-              </td>
-              <td className="px-4 py-2">
-                <div className="flex items-center gap-1">
-                  <BundleFormDialog
-                    bundle={bundle}
-                    products={products}
-                    onUpdated={handleUpdated}
-                    trigger={
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    }
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
-                    disabled={isLoading}
-                    onClick={() => onDelete(bundle)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </td>
-            </tr>
-          ))}
+          {bundles.map((bundle) => {
+            // Items whose product still exists (guard against cascade timing edge case)
+            const activeItems = bundle.items.filter((i) => i.product != null);
+            const productNames = activeItems.map((i) => i.product.name).join(", ");
+
+            return (
+              <tr key={bundle.id} className="hover:bg-[#2a2a2a]">
+                <td className="px-4 py-2 font-medium text-[#e5e5e5]">
+                  {bundle.name}
+                  {bundle.description && (
+                    <p className="text-xs text-muted-foreground truncate max-w-[200px]">{bundle.description}</p>
+                  )}
+                </td>
+                <td className="px-4 py-2 text-muted-foreground text-xs">
+                  {productNames || <span className="italic">No products</span>}
+                </td>
+                <td className="px-4 py-2">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-violet-500/20 text-violet-400">
+                    {PRICING_LABEL[bundle.pricingMode]}
+                  </span>
+                </td>
+                <td className="px-4 py-2 text-violet-400 font-semibold">
+                  {formatVnd(Math.round(bundleTotal({ ...bundle, items: activeItems })))} ₫
+                </td>
+                <td className="px-4 py-2 text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Building2 className="h-3.5 w-3.5" />
+                    {bundle._count.companies}
+                  </span>
+                </td>
+                <td className="px-4 py-2">
+                  <div className="flex items-center gap-1">
+                    <BundleFormDialog
+                      bundle={{ ...bundle, items: activeItems }}
+                      products={products}
+                      onUpdated={onBundleUpdated}
+                      trigger={
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      }
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
+                      disabled={isLoading}
+                      onClick={() => onDelete(bundle)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
