@@ -2,8 +2,9 @@
 
 import { useState, useCallback, type ElementRef, useRef } from "react";
 import { toast } from "sonner";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import type { Company, Product } from "@prisma/client";
+import type { EnrichmentPayload } from "@/lib/enrichment/types";
 
 import {
   Dialog,
@@ -58,8 +59,15 @@ async function syncBundles(companyId: string, selectedIds: string[], previousIds
 
 export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = [] }: CompanyFormDialogProps) => {
   const [open, setOpen] = useState(false);
+  const [enriching, setEnriching] = useState(false);
   const closeRef = useRef<ElementRef<"button">>(null);
   const isEdit = !!company;
+
+  // Refs for fields that can be auto-filled from the scraped website data.
+  const nameRef = useRef<HTMLInputElement>(null);
+  const domainRef = useRef<HTMLInputElement>(null);
+  const industryRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLInputElement>(null);
 
   const currentBundleIds = company?.bundles?.map((b) => b.bundleId) ?? [];
   const [selectedBundleIds, setSelectedBundleIds] = useState<string[]>(currentBundleIds);
@@ -81,6 +89,70 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
     setSelectedBundleIds((prev) =>
       prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
     );
+
+  // Applies scraped data into empty inputs. Only fills a field if the input is
+  // currently blank — never overwrites something the user already typed.
+  const applyEnrichmentData = useCallback(
+    (data: EnrichmentPayload, sourceDomain: string) => {
+      let filled = 0;
+
+      const tryFill = (ref: React.RefObject<HTMLInputElement | null>, value: string | undefined) => {
+        if (ref.current && !ref.current.value.trim() && value?.trim()) {
+          ref.current.value = value.trim();
+          filled++;
+        }
+      };
+
+      tryFill(domainRef, sourceDomain);
+      tryFill(nameRef, data.name);
+      tryFill(industryRef, data.industry);
+      tryFill(addressRef, data.address);
+
+      if (filled > 0) {
+        toast.success(`Auto-filled ${filled} field${filled > 1 ? "s" : ""} from website`);
+      }
+    },
+    []
+  );
+
+  const runEnrichment = useCallback(
+    async (domain: string) => {
+      if (enriching) return;
+      setEnriching(true);
+      try {
+        const res = await fetch(
+          `/api/enrichment/preview?domain=${encodeURIComponent(domain)}`
+        );
+        if (!res.ok) return;
+        const json = (await res.json()) as { data?: EnrichmentPayload };
+        if (json.data) applyEnrichmentData(json.data, domain);
+      } catch {
+        // enrichment errors are silent — form still works normally
+      } finally {
+        setEnriching(false);
+      }
+    },
+    [enriching, applyEnrichmentData]
+  );
+
+  // Triggered when the user leaves the Website field.
+  const onWebsiteBlur = useCallback(async () => {
+    const raw = (document.getElementById("website") as HTMLInputElement | null)?.value?.trim();
+    if (!raw) return;
+    try {
+      const domain = new URL(raw).hostname.replace(/^www\./, "");
+      if (domain) await runEnrichment(domain);
+    } catch {
+      // not a valid URL yet — do nothing
+    }
+  }, [runEnrichment]);
+
+  // Triggered when the user leaves the Domain field directly.
+  const onDomainBlur = useCallback(async () => {
+    const raw = domainRef.current?.value?.trim();
+    if (!raw) return;
+    await runEnrichment(raw.replace(/^www\./, ""));
+  }, [runEnrichment]);
 
   const onOpenChange = (v: boolean) => {
     setOpen(v);
@@ -144,6 +216,7 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
 
         <form action={onSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
           <FormInput
+            ref={nameRef}
             id="name"
             label="Name"
             required
@@ -153,12 +226,15 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
 
           <div className="grid grid-cols-2 gap-3">
             <FormInput
+              ref={domainRef}
               id="domain"
               label="Domain"
               defaultValue={company?.domain ?? ""}
               errors={fieldErrors}
+              onBlur={onDomainBlur}
             />
             <FormInput
+              ref={industryRef}
               id="industry"
               label="Industry"
               defaultValue={company?.industry ?? ""}
@@ -171,16 +247,26 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
               defaultValue={company?.phone ?? ""}
               errors={fieldErrors}
             />
-            <FormInput
-              id="website"
-              label="Website"
-              placeholder="https://example.com"
-              defaultValue={company?.website ?? ""}
-              errors={fieldErrors}
-            />
+            <div className="relative">
+              <FormInput
+                id="website"
+                label="Website"
+                placeholder="https://example.com"
+                defaultValue={company?.website ?? ""}
+                errors={fieldErrors}
+                onBlur={onWebsiteBlur}
+              />
+              {enriching && (
+                <div className="absolute right-2 top-6 flex items-center gap-1 text-xs text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>Fetching info…</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <FormInput
+            ref={addressRef}
             id="address"
             label="Address"
             defaultValue={company?.address ?? ""}
