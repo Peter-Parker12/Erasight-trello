@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Package, Layers } from "lucide-react";
 import type { Product } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
+import { KpiCard } from "@/components/crm/kpi-card";
 import { ProductsClientSection } from "./products-client-section";
 import { BundlesTable } from "./bundles-table";
 import { BundleFormDialog, type BundleWithItems } from "./bundle-form-dialog";
@@ -54,8 +55,17 @@ export const ProductsBundlesWrapper = ({
   const handleBundleDeleted = (id: string) =>
     setBundles((prev) => prev.filter((b) => b.id !== id));
 
+  const activeCount = products.filter((p) => p.status === "ACTIVE").length;
+
   return (
     <>
+      {/* ── KPI cards — derived from live state so numbers update instantly ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <KpiCard label="Total products" value={products.length} icon={Package} />
+        <KpiCard label="Active"         value={activeCount}     icon={Package} iconColor="text-emerald-400" />
+        <KpiCard label="Bundles"        value={bundles.length}  icon={Layers}  iconColor="text-violet-400" />
+      </div>
+
       {/* ── Products section ── */}
       <div className="space-y-4">
         <ProductsClientSection

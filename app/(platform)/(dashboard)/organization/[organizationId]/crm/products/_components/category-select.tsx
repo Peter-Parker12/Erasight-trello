@@ -169,24 +169,24 @@ export const CategorySelect = ({
                 No categories found.
               </li>
             )}
-            {filtered.map((cat) => (
-              <li key={cat.id}>
-                <button
-                  type="button"
-                  onClick={() => toggle(cat.name)}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-[#2a2a2a]"
-                >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: cat.color }}
-                  />
-                  <span className="flex-1 text-left text-[#e5e5e5]">{cat.name}</span>
-                  {value.includes(cat.name) && (
-                    <Check className="h-3.5 w-3.5 text-violet-400 shrink-0" />
-                  )}
-                </button>
-              </li>
-            ))}
+            {filtered.map((cat) => {
+              const isSelected = value.includes(cat.name);
+              return (
+                <li key={cat.id}>
+                  <button
+                    type="button"
+                    onClick={() => toggle(cat.name)}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[#2a2a2a] transition-colors"
+                    style={isSelected ? { backgroundColor: cat.color + "18" } : undefined}
+                  >
+                    <CategoryBadge name={cat.name} color={cat.color} />
+                    {isSelected && (
+                      <Check className="h-3.5 w-3.5 shrink-0 ml-auto" style={{ color: cat.color }} />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
 
             {canCreate && (
               <li>

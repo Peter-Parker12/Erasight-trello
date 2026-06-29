@@ -1,11 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { Package, Layers } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { isOrgAdmin } from "@/lib/board-access";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
-import { KpiCard } from "@/components/crm/kpi-card";
 import { CustomFieldsManager } from "@/app/(platform)/(dashboard)/organization/[organizationId]/settings/app/custom-fields/_components/custom-fields-manager";
 import { ProductsBundlesWrapper } from "./_components/products-bundles-wrapper";
 
@@ -40,24 +38,16 @@ const ProductsPage = async ({ params }: ProductsPageProps) => {
     }),
   ]);
 
-  const definitions   = definitionRows.map(toFieldDefinitionDTO);
-  const activeProducts = products.filter((p) => p.status === "ACTIVE").length;
+  const definitions = definitionRows.map(toFieldDefinitionDTO);
 
   return (
     <div className="w-full p-4 md:p-6 space-y-6">
-      {/* KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard label="Total products" value={products.length}  icon={Package} />
-        <KpiCard label="Active"         value={activeProducts}    icon={Package} iconColor="text-emerald-400" />
-        <KpiCard label="Bundles"        value={bundles.length}    icon={Layers}  iconColor="text-violet-400" />
-      </div>
-
       {/* Custom fields (admin only) */}
       {isAdmin && (
         <CustomFieldsManager entityType="PRODUCT" label="Custom fields" fields={definitions} />
       )}
 
-      {/* Products + Bundles — single client wrapper so product deletions propagate to bundles */}
+      {/* KPI cards + Products + Bundles — single client wrapper keeps all counts live */}
       <ProductsBundlesWrapper
         initialProducts={products}
         definitions={definitions}
