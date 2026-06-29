@@ -19,7 +19,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "You don't have access to the CRM module." };
   }
 
-  const { id, customFields, unitPrice, ...fields } = data;
+  const { id, customFields, unitPrice, categories, ...fields } = data;
 
   const definitions = await getFieldDefinitions(orgId, "PRODUCT");
   const validation = validateCustomFields(definitions, customFields);
@@ -32,6 +32,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         where: { id, orgId },
         data: {
           ...fields,
+          categories: categories ?? [],
           unitPrice: new Prisma.Decimal(unitPrice),
           customFields: validation.data as Prisma.InputJsonObject,
         },

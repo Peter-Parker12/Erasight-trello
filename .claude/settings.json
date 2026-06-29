@@ -9,7 +9,8 @@
       "Bash(npm list *)",
       "Bash('a[href*=\\\\\"linkedin.com/company\\\\\"]')",
       "Bash(node -e \"const c = require\\('cheerio'\\); const $ = c.load\\('<a href=\\\\\"https://linkedin.com/company/foo\\\\\">linkedin</a>'\\); let found; $\\('a[href*=\\\\\"linkedin.com/company\\\\\"]'\\).each\\(\\(_, el\\) => { found = \\\\$\\(el\\).attr\\('href'\\); return false; }\\); console.log\\(found\\)\")",
-      "Bash(grep -r \"interface.*Product\\\\|type.*Product\" /Users/petertran/Downloads/Erasight-trello --include=\"*.ts\" --include=\"*.tsx\" ! -path \"*/node_modules/*\" ! -path \"*/.next/*\")"
+      "Bash(grep -r \"interface.*Product\\\\|type.*Product\" /Users/petertran/Downloads/Erasight-trello --include=\"*.ts\" --include=\"*.tsx\" ! -path \"*/node_modules/*\" ! -path \"*/.next/*\")",
+      "Bash(DATABASE_URL=\"postgresql://trello_user:trello_password_pg@localhost:9736/trello_clone\" npx prisma db push)"
     ]
   }
 }

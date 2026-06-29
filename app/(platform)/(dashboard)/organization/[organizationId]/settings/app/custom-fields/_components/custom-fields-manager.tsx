@@ -26,6 +26,15 @@ const FIELD_TYPES: CustomFieldType[] = [
   "URL",
 ];
 
+const PRODUCT_DEFAULT_FIELDS: { label: string; key: string; type: string; note?: string }[] = [
+  { label: "Name",        key: "name",        type: "text",         note: "required" },
+  { label: "Description", key: "description", type: "text" },
+  { label: "Categories",  key: "categories",  type: "multi-select", note: "colored tags" },
+  { label: "Unit Price",  key: "unitPrice",   type: "currency",     note: "required" },
+  { label: "Unit",        key: "unit",        type: "select" },
+  { label: "Status",      key: "status",      type: "select" },
+];
+
 type CustomFieldsManagerProps = {
   entityType: CrmEntityType;
   label: string;
@@ -53,7 +62,33 @@ export const CustomFieldsManager = ({ entityType, label, fields }: CustomFieldsM
 
       {open && (
         <div className="border-t p-4 space-y-3">
-          {fields.length === 0 && (
+          {/* Default / built-in fields for PRODUCT entity */}
+          {entityType === "PRODUCT" && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Default fields
+              </p>
+              {PRODUCT_DEFAULT_FIELDS.map((f) => (
+                <div key={f.key} className="flex items-center gap-2 border border-[#2e2e2e] rounded-md px-3 py-2 bg-[#1a1a1a]">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#e5e5e5] truncate">{f.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {f.key} · {f.type}
+                      {f.note ? <span className="ml-1 text-violet-400/80">· {f.note}</span> : null}
+                    </p>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground/50 italic shrink-0">built-in</span>
+                </div>
+              ))}
+              {fields.length > 0 && (
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pt-2">
+                  Custom fields
+                </p>
+              )}
+            </div>
+          )}
+
+          {fields.length === 0 && entityType !== "PRODUCT" && (
             <p className="text-sm text-muted-foreground">No custom fields defined yet.</p>
           )}
 

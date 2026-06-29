@@ -8,6 +8,7 @@ import { Trash2 } from "lucide-react";
 import { updateProduct } from "@/actions/update-product";
 import { deleteProduct } from "@/actions/delete-product";
 import type { CustomFieldDefinitionDTO } from "@/lib/custom-fields";
+import { CategoryBadge, CategorySelect, type ProductCategoryDef } from "./category-select";
 import { cn } from "@/lib/utils";
 
 function formatVnd(n: number | string | { toNumber?: () => number; toString: () => string }) {
@@ -22,26 +23,38 @@ const UNITS = ["item", "hour", "month", "year", "seat", "project"] as const;
 
 type EditState = {
   id: string;
-  field: "name" | "category" | "unitPrice";
+  field: "name" | "unitPrice";
   value: string;
 };
 
 type ProductsTableProps = {
   products: Product[];
   definitions: CustomFieldDefinitionDTO[];
+  categories: ProductCategoryDef[];
+  onCategoryCreated: (cat: ProductCategoryDef) => void;
+  onUpdated: (product: Product) => void;
+  onDeleted: (id: string) => void;
 };
 
-export const ProductsTable = ({ products: initialProducts }: ProductsTableProps) => {
-  const [products, setProducts] = useState(initialProducts);
-  const [edit, setEdit] = useState<EditState | null>(null);
+export const ProductsTable = ({
+  products,
+  categories,
+  onCategoryCreated,
+  onUpdated,
+  onDeleted,
+}: ProductsTableProps) => {
+  const [edit, setEdit]     = useState<EditState | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
-  const cancellingRef = useRef(false);
+  const cancellingRef       = useRef(false);
+
+  // Track which row has the category dropdown open
+  const [catEditId, setCatEditId] = useState<string | null>(null);
 
   const startEdit = (product: Product, field: EditState["field"]) => {
     const value =
       field === "unitPrice"
         ? String(Number(product.unitPrice))
-        : String((product as Record<string, unknown>)[field] ?? "");
+        : product.name;
     setEdit({ id: product.id, field, value });
   };
 
@@ -54,95 +67,79 @@ export const ProductsTable = ({ products: initialProducts }: ProductsTableProps)
     if (!edit || edit.id !== product.id) return;
 
     const { field, value } = edit;
-
     const original =
-      field === "unitPrice"
-        ? String(Number(product.unitPrice))
-        : String((product as Record<string, unknown>)[field] ?? "");
+      field === "unitPrice" ? String(Number(product.unitPrice)) : product.name;
 
-    if (value === original) {
-      setEdit(null);
-      return;
-    }
+    if (value === original) { setEdit(null); return; }
 
     const numValue = field === "unitPrice" ? Number(value) : null;
-    if (field === "unitPrice" && (isNaN(numValue!) || numValue! < 0)) {
-      setEdit(null);
-      return;
-    }
+    if (field === "unitPrice" && (isNaN(numValue!) || numValue! < 0)) { setEdit(null); return; }
 
-    const optimistic = {
-      ...product,
-      [field]: field === "unitPrice" ? numValue : value,
-    } as Product;
-
+    const optimistic = { ...product, [field]: field === "unitPrice" ? numValue : value } as Product;
     setEdit(null);
-    setProducts((prev) => prev.map((p) => (p.id === product.id ? optimistic : p)));
+    onUpdated(optimistic);
     setSaving(product.id);
 
     const result = await updateProduct({
       id: product.id,
-      name: field === "name" ? value : product.name,
-      description: product.description ?? undefined,
-      category:
-        field === "category" ? (value || undefined) : (product.category ?? undefined),
-      unitPrice: field === "unitPrice" ? numValue! : Number(product.unitPrice),
-      unit: product.unit,
-      status: product.status,
+      name:        field === "name"       ? value    : product.name,
+      description: product.description   ?? undefined,
+      category:    product.categories[0] ?? product.category ?? undefined,
+      categories:  product.categories,
+      unitPrice:   field === "unitPrice"  ? numValue! : Number(product.unitPrice),
+      unit:        product.unit,
+      status:      product.status,
     });
 
     setSaving(null);
-
-    if (result.error) {
-      toast.error(result.error);
-      setProducts((prev) => prev.map((p) => (p.id === product.id ? product : p)));
-    } else if (result.data) {
-      setProducts((prev) => prev.map((p) => (p.id === product.id ? result.data! : p)));
-    }
+    if (result.error) { toast.error(result.error); onUpdated(product); }
+    else if (result.data) onUpdated(result.data);
   };
 
-  const saveField = async (
-    product: Product,
-    field: "unit" | "status",
-    value: string
-  ) => {
+  const saveField = async (product: Product, field: "unit" | "status", value: string) => {
     const optimistic = { ...product, [field]: value } as Product;
-    setProducts((prev) => prev.map((p) => (p.id === product.id ? optimistic : p)));
+    onUpdated(optimistic);
 
     const result = await updateProduct({
-      id: product.id,
-      name: product.name,
-      description: product.description ?? undefined,
-      category: product.category ?? undefined,
-      unitPrice: Number(product.unitPrice),
-      unit: field === "unit" ? value : product.unit,
-      status: field === "status" ? (value as "ACTIVE" | "INACTIVE") : product.status,
+      id:          product.id,
+      name:        product.name,
+      description: product.description   ?? undefined,
+      category:    product.categories[0] ?? product.category ?? undefined,
+      categories:  product.categories,
+      unitPrice:   Number(product.unitPrice),
+      unit:        field === "unit"   ? value : product.unit,
+      status:      field === "status" ? (value as "ACTIVE" | "INACTIVE") : product.status,
     });
 
-    if (result.error) {
-      toast.error(result.error);
-      setProducts((prev) => prev.map((p) => (p.id === product.id ? product : p)));
-    } else if (result.data) {
-      setProducts((prev) => prev.map((p) => (p.id === product.id ? result.data! : p)));
-    }
+    if (result.error) { toast.error(result.error); onUpdated(product); }
+    else if (result.data) onUpdated(result.data);
+  };
+
+  const saveCategories = async (product: Product, newCategories: string[]) => {
+    const optimistic = { ...product, categories: newCategories } as Product;
+    onUpdated(optimistic);
+
+    const result = await updateProduct({
+      id:          product.id,
+      name:        product.name,
+      description: product.description ?? undefined,
+      category:    newCategories[0]    ?? undefined,
+      categories:  newCategories,
+      unitPrice:   Number(product.unitPrice),
+      unit:        product.unit,
+      status:      product.status,
+    });
+
+    if (result.error) { toast.error(result.error); onUpdated(product); }
+    else if (result.data) onUpdated(result.data);
   };
 
   const handleDelete = async (product: Product) => {
     if (!confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
-    setProducts((prev) => prev.filter((p) => p.id !== product.id));
+    onDeleted(product.id);
     const result = await deleteProduct({ id: product.id });
-    if (result.error) {
-      toast.error(result.error);
-      setProducts((prev) => {
-        const srcIdx = initialProducts.findIndex((p) => p.id === product.id);
-        if (srcIdx === -1) return [...prev, product];
-        const copy = [...prev];
-        copy.splice(srcIdx, 0, product);
-        return copy;
-      });
-    } else {
-      toast.success("Product deleted.");
-    }
+    if (result.error) { toast.error(result.error); onUpdated(product); }
+    else toast.success("Product deleted.");
   };
 
   if (products.length === 0) {
@@ -159,13 +156,13 @@ export const ProductsTable = ({ products: initialProducts }: ProductsTableProps)
   );
 
   return (
-    <div className="rounded-md border border-[#333] overflow-hidden">
+    <div className="rounded-md border border-[#333] overflow-visible">
       <table className="w-full text-sm border-collapse">
         <thead className="bg-[#252525] border-b border-[#333]">
           <tr className="text-xs font-semibold uppercase text-muted-foreground">
             <th className="w-8 px-2 py-2 text-center border-r border-[#333] select-none">#</th>
             <th className="px-3 py-2 text-left border-r border-[#333]">Name</th>
-            <th className="px-3 py-2 text-left border-r border-[#333]">Category</th>
+            <th className="px-3 py-2 text-left border-r border-[#333]">Categories</th>
             <th className="px-3 py-2 text-right border-r border-[#333] w-48">Unit price (VND)</th>
             <th className="px-3 py-2 text-center border-r border-[#333] w-24">Unit</th>
             <th className="px-3 py-2 text-center border-r border-[#333] w-24">Status</th>
@@ -175,20 +172,24 @@ export const ProductsTable = ({ products: initialProducts }: ProductsTableProps)
         <tbody className="divide-y divide-[#2e2e2e]">
           {products.map((product, idx) => {
             const isEditName  = edit?.id === product.id && edit.field === "name";
-            const isEditCat   = edit?.id === product.id && edit.field === "category";
             const isEditPrice = edit?.id === product.id && edit.field === "unitPrice";
             const isSaving    = saving === product.id;
+            const isCatOpen   = catEditId === product.id;
+
+            const productCats = (product.categories ?? [])
+              .map((name) => categories.find((c) => c.name === name))
+              .filter(Boolean) as ProductCategoryDef[];
 
             return (
               <tr
                 key={product.id}
                 className={cn(
                   "group hover:bg-[#1e1e1e]",
-                  (isEditName || isEditCat || isEditPrice) && "bg-[#1e1e1e]",
+                  (isEditName || isEditPrice || isCatOpen) && "bg-[#1e1e1e]",
                   isSaving && "opacity-60"
                 )}
               >
-                {/* Row number */}
+                {/* # */}
                 <td className="w-8 px-2 text-center text-xs text-muted-foreground border-r border-[#2e2e2e] select-none">
                   {idx + 1}
                 </td>
@@ -209,8 +210,8 @@ export const ProductsTable = ({ products: initialProducts }: ProductsTableProps)
                         commitEdit(product);
                       }}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); }
-                        else if (e.key === "Escape") cancelEdit();
+                        if (e.key === "Enter")  { e.preventDefault(); (e.target as HTMLInputElement).blur(); }
+                        if (e.key === "Escape") cancelEdit();
                       }}
                       className={cellInputCls}
                     />
@@ -219,31 +220,40 @@ export const ProductsTable = ({ products: initialProducts }: ProductsTableProps)
                   )}
                 </td>
 
-                {/* Category */}
-                <td
-                  className={cn("p-0 border-r border-[#2e2e2e] min-w-[120px]", !isEditCat && "cursor-text")}
-                  onClick={() => !isEditCat && startEdit(product, "category")}
-                >
-                  {isEditCat ? (
-                    <input
-                      autoFocus
-                      type="text"
-                      value={edit!.value}
-                      placeholder="Category..."
-                      onChange={(e) => setEdit({ ...edit!, value: e.target.value })}
-                      onBlur={() => {
-                        if (cancellingRef.current) { cancellingRef.current = false; return; }
-                        commitEdit(product);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); }
-                        else if (e.key === "Escape") cancelEdit();
-                      }}
-                      className={cellInputCls}
-                    />
+                {/* Categories — inline multi-select */}
+                <td className="p-0 border-r border-[#2e2e2e] min-w-[180px] relative">
+                  {isCatOpen ? (
+                    <div className="px-2 py-1">
+                      <CategorySelect
+                        value={product.categories ?? []}
+                        onChange={(v) => {
+                          saveCategories(product, v);
+                        }}
+                        categories={categories}
+                        onCategoryCreated={(cat) => {
+                          onCategoryCreated(cat);
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setCatEditId(null)}
+                        className="mt-1 text-[11px] text-muted-foreground/60 hover:text-muted-foreground"
+                      >
+                        Done
+                      </button>
+                    </div>
                   ) : (
-                    <div className="px-3 py-[9px] text-muted-foreground">
-                      {product.category || <span className="opacity-30 italic text-xs">—</span>}
+                    <div
+                      className="px-3 py-[9px] flex flex-wrap gap-1 cursor-pointer min-h-[38px]"
+                      onClick={() => setCatEditId(product.id)}
+                    >
+                      {productCats.length > 0 ? (
+                        productCats.map((cat) => (
+                          <CategoryBadge key={cat.name} name={cat.name} color={cat.color} size="xs" />
+                        ))
+                      ) : (
+                        <span className="text-xs text-muted-foreground/30 italic">—</span>
+                      )}
                     </div>
                   )}
                 </td>
@@ -266,8 +276,8 @@ export const ProductsTable = ({ products: initialProducts }: ProductsTableProps)
                         commitEdit(product);
                       }}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); }
-                        else if (e.key === "Escape") cancelEdit();
+                        if (e.key === "Enter")  { e.preventDefault(); (e.target as HTMLInputElement).blur(); }
+                        if (e.key === "Escape") cancelEdit();
                       }}
                       className={cn(cellInputCls, "text-right tabular-nums")}
                     />
@@ -278,7 +288,7 @@ export const ProductsTable = ({ products: initialProducts }: ProductsTableProps)
                   )}
                 </td>
 
-                {/* Unit dropdown */}
+                {/* Unit */}
                 <td className="p-0 border-r border-[#2e2e2e] w-24">
                   <select
                     value={product.unit}
@@ -289,7 +299,7 @@ export const ProductsTable = ({ products: initialProducts }: ProductsTableProps)
                   </select>
                 </td>
 
-                {/* Status dropdown */}
+                {/* Status */}
                 <td className="p-0 border-r border-[#2e2e2e] w-24">
                   <select
                     value={product.status}
@@ -320,7 +330,7 @@ export const ProductsTable = ({ products: initialProducts }: ProductsTableProps)
         </tbody>
       </table>
       <div className="px-4 py-2 bg-[#1a1a1a] border-t border-[#2e2e2e] text-[11px] text-muted-foreground/50 select-none">
-        Click any cell to edit · Enter to confirm · Esc to cancel · Unit &amp; Status save on change
+        Click name or price to edit · Click categories to select tags · Unit &amp; Status save on change · Enter to confirm · Esc to cancel
       </div>
     </div>
   );

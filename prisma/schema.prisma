@@ -572,6 +572,7 @@ model Product {
   name         String
   description  String?       @db.Text
   category     String?
+  categories   String[]      @default([])
   unitPrice    Decimal       @db.Decimal(15, 0)
   unit         String        @default("item")
   status       ProductStatus @default(ACTIVE)
@@ -583,6 +584,20 @@ model Product {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
+  @@index([orgId])
+}
+
+model ProductCategory {
+  id        String   @id @default(uuid())
+  orgId     String
+  name      String
+  color     String   @default("#7c3aed")
+  order     Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orgId, name])
   @@index([orgId])
 }
 
@@ -615,7 +630,6 @@ model ProductBundleItem {
   bundle    ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
   product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@unique([bundleId, productId])
   @@index([bundleId])
   @@index([productId])
 }

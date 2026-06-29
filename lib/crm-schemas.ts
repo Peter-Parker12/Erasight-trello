@@ -70,6 +70,7 @@ export const productBaseFields = {
   name: z.string().min(1, "Name is required.").max(200, "Name is too long."),
   description: z.string().trim().max(2000, "Description is too long.").optional().nullable(),
   category: z.string().trim().max(100, "Category is too long.").optional().nullable(),
+  categories: z.array(z.string()).optional().default([]),
   unitPrice: z.number().min(0, "Price must be 0 or more."),
   unit: z.string().default("item"),
   status: z.enum(["ACTIVE", "INACTIVE"]).default("ACTIVE"),
