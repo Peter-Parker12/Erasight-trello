@@ -24,13 +24,22 @@ export const ProductsBundlesWrapper = ({
   initialCategories,
   initialBundles,
 }: Props) => {
-  const [bundles, setBundles] = useState<BundleWithItems[]>(initialBundles);
+  // Live products list — kept in sync so bundle dialogs always see the latest products
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [bundles,  setBundles]  = useState<BundleWithItems[]>(initialBundles);
 
-  // Sync from server re-renders (e.g. after a new bundle is created via router.refresh())
-  useEffect(() => { setBundles(initialBundles); }, [initialBundles]);
+  // Sync both when the server re-renders (e.g. after router.refresh())
+  useEffect(() => { setProducts(initialProducts); }, [initialProducts]);
+  useEffect(() => { setBundles(initialBundles);   }, [initialBundles]);
 
-  // Immediately strip a deleted product from every bundle's item list
+  // New product created → immediately available in the bundle product picker
+  const handleProductCreated = (product: Product) => {
+    setProducts((prev) => [product, ...prev]);
+  };
+
+  // Product deleted → remove it from the picker and strip its items from every bundle
   const handleProductDeleted = (productId: string) => {
+    setProducts((prev) => prev.filter((p) => p.id !== productId));
     setBundles((prev) =>
       prev.map((bundle) => ({
         ...bundle,
@@ -53,6 +62,7 @@ export const ProductsBundlesWrapper = ({
           initialProducts={initialProducts}
           definitions={definitions}
           initialCategories={initialCategories}
+          onProductCreated={handleProductCreated}
           onProductDeleted={handleProductDeleted}
         />
       </div>
@@ -67,7 +77,7 @@ export const ProductsBundlesWrapper = ({
             </p>
           </div>
           <BundleFormDialog
-            products={initialProducts}
+            products={products}
             trigger={
               <Button size="sm" variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
@@ -79,7 +89,7 @@ export const ProductsBundlesWrapper = ({
 
         <BundlesTable
           bundles={bundles}
-          products={initialProducts}
+          products={products}
           onBundleUpdated={handleBundleUpdated}
           onBundleDeleted={handleBundleDeleted}
         />
