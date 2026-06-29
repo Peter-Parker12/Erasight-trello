@@ -65,6 +65,44 @@ export const notifyCardInReview = async ({
   });
 };
 
+export const notifyReviewReady = async ({
+  boardId,
+  cardId,
+  cardTitle,
+  attachmentName,
+  reviewText,
+}: {
+  boardId: string;
+  cardId: string;
+  cardTitle: string;
+  attachmentName: string;
+  reviewText: string;
+}): Promise<void> => {
+  const config = await db.boardTelegramConfig.findUnique({ where: { boardId } });
+  if (!config || !config.enabled) return;
+
+  const header = `✅ Review for ${cardTitleHtml(boardId, cardId, cardTitle)}\n📎 <b>${escapeHtml(attachmentName)}</b>\n\n`;
+  const body = escapeHtml(reviewText);
+  const LIMIT = 4000;
+
+  const chunks: string[] = [];
+  let remaining = header + body;
+  while (remaining.length > LIMIT) {
+    chunks.push(remaining.slice(0, LIMIT));
+    remaining = remaining.slice(LIMIT);
+  }
+  chunks.push(remaining);
+
+  for (const chunk of chunks) {
+    await sendTelegramMessage({
+      botToken: config.botToken,
+      chatId: config.chatId,
+      topicId: config.topicId,
+      text: chunk,
+    });
+  }
+};
+
 export const sendDueTodayReminder = async ({
   boardId,
   cards,

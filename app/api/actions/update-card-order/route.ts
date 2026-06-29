@@ -5,7 +5,7 @@ import { UpdateCardOrder } from "@/actions/update-card-order/schema";
 import { InputType, ReturnType } from "@/actions/update-card-order/types";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
-import { notifyCardInReview } from "@/lib/board-telegram";
+import { notifyCardInReview, notifyReviewReady } from "@/lib/board-telegram";
 import { toApiRoute } from "@/lib/api-route";
 import { syncParentList } from "@/lib/sync-parent-list";
 import { extractFileContent } from "@/lib/extract-file-content";
@@ -50,6 +50,14 @@ async function triggerAiReviewsForCards(cardIds: string[], boardId: string) {
           await db.attachment.update({
             where: { id: attachment.id },
             data: { review, reviewedAt: new Date() },
+          });
+
+          await notifyReviewReady({
+            boardId,
+            cardId: card.id,
+            cardTitle: card.title,
+            attachmentName: attachment.name,
+            reviewText: review,
           });
         } catch (err) {
           console.error(`[AI_REVIEW] Failed for attachment ${attachment.id}:`, err);
