@@ -10,7 +10,23 @@
       "Bash('a[href*=\\\\\"linkedin.com/company\\\\\"]')",
       "Bash(node -e \"const c = require\\('cheerio'\\); const $ = c.load\\('<a href=\\\\\"https://linkedin.com/company/foo\\\\\">linkedin</a>'\\); let found; $\\('a[href*=\\\\\"linkedin.com/company\\\\\"]'\\).each\\(\\(_, el\\) => { found = \\\\$\\(el\\).attr\\('href'\\); return false; }\\); console.log\\(found\\)\")",
       "Bash(grep -r \"interface.*Product\\\\|type.*Product\" /Users/petertran/Downloads/Erasight-trello --include=\"*.ts\" --include=\"*.tsx\" ! -path \"*/node_modules/*\" ! -path \"*/.next/*\")",
-      "Bash(DATABASE_URL=\"postgresql://trello_user:trello_password_pg@localhost:9736/trello_clone\" npx prisma db push)"
+      "Bash(DATABASE_URL=\"postgresql://trello_user:trello_password_pg@localhost:9736/trello_clone\" npx prisma db push)",
+      "Bash(cp '/Users/petertran/Downloads/Erasight-trello/.claude/worktrees/agent-a1500095dce1c845c/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/companies/_components/companies-table.tsx' '/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/companies/_components/companies-table.tsx')",
+      "Bash(cp '/Users/petertran/Downloads/Erasight-trello/.claude/worktrees/agent-a1500095dce1c845c/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/companies/_components/company-form-dialog.tsx' '/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/companies/_components/company-form-dialog.tsx')",
+      "Bash(cp '/Users/petertran/Downloads/Erasight-trello/.claude/worktrees/agent-a1500095dce1c845c/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/companies/page.tsx' '/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/companies/page.tsx')",
+      "Bash(cp '__TRACKED_VAR__/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/contacts/_components/contact-form-dialog.tsx' '/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/contacts/_components/contact-form-dialog.tsx')",
+      "Bash(cp '__TRACKED_VAR__/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/contacts/_components/contacts-table.tsx' '/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/contacts/_components/contacts-table.tsx')",
+      "Bash(cp '/Users/petertran/Downloads/Erasight-trello/.claude/worktrees/agent-a1500095dce1c845c/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/companies/_components/companies-client-section.tsx' '/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/companies/_components/companies-client-section.tsx')",
+      "Bash(cp '/Users/petertran/Downloads/Erasight-trello/.claude/worktrees/agent-a511f09fe017e9ee7/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/contacts/_components/contacts-client-section.tsx' '/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/contacts/_components/contacts-client-section.tsx')",
+      "Bash(cp '/Users/petertran/Downloads/Erasight-trello/.claude/worktrees/agent-aa9a57361b814fd1b/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/leads/_components/leads-board-wrapper.tsx' '/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/crm/leads/_components/leads-board-wrapper.tsx')",
+      "Bash(docker-compose ps *)",
+      "Bash(psql postgres://trello_user:trello_password_pg@localhost:5432/trello_clone -c \"SELECT 1;\")",
+      "Bash(pg_isready -h localhost -p 5432)",
+      "Bash(DATABASE_URL=\"postgresql://trello_user:trello_password_pg@localhost:5432/trello_clone\" npx prisma migrate dev --name add-knowledge-base)",
+      "Bash(mkdir -p \"/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/knowledge-base/_components\" \"/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/knowledge-base/[industryId]/_components\")"
+    ],
+    "additionalDirectories": [
+      "/Users/petertran/Downloads/Erasight-trello/app/(platform)/(dashboard)/organization/[organizationId]/knowledge-base"
     ]
   }
 }

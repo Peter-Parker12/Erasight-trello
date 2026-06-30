@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
 import type { Lead, PipelineStage } from "@prisma/client";
@@ -23,17 +24,29 @@ type LeadCardProps = {
   companies: { id: string; name: string }[];
   contacts: { id: string; firstName: string; lastName: string | null }[];
   products?: { id: string; name: string; unitPrice: unknown; unit: string }[];
+  onDeleted?: (id: string) => void;
+  onUpdated?: (lead: Lead) => void;
 };
 
-export const LeadCard = ({ lead, stages, definitions, companies, contacts, products = [] }: LeadCardProps) => {
+export const LeadCard = ({ lead, stages, definitions, companies, contacts, products = [], onDeleted, onUpdated }: LeadCardProps) => {
+  const deletingIdRef = useRef<string | null>(null);
+
   const { execute, isLoading } = useAction(deleteLead, {
-    onSuccess: () => toast.success("Lead deleted."),
+    skipRefresh: true,
+    onSuccess: () => {
+      if (deletingIdRef.current) {
+        onDeleted?.(deletingIdRef.current);
+        deletingIdRef.current = null;
+      }
+      toast.success("Lead deleted.");
+    },
     onError: (error) => toast.error(error),
   });
 
   const onDelete = (event: React.MouseEvent) => {
     event.stopPropagation();
     if (!confirm(`Delete "${lead.title}"? This cannot be undone.`)) return;
+    deletingIdRef.current = lead.id;
     execute({ id: lead.id });
   };
 
@@ -49,6 +62,7 @@ export const LeadCard = ({ lead, stages, definitions, companies, contacts, produ
             companies={companies}
             contacts={contacts}
             products={products}
+            onUpdated={onUpdated}
             trigger={
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                 <Pencil className="h-3 w-3" />

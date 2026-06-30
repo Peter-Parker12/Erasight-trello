@@ -5,7 +5,6 @@ export const UpdateTelegramConfig = z.object({
   botToken: z.string().min(1, "Bot token is required"),
   chatId: z.string().min(1, "Chat ID is required"),
   topicId: z.string().optional().nullable(),
-  reviewListId: z.string().optional().nullable(),
   enabled: z.boolean(),
 });
 

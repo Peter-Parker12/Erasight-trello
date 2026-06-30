@@ -5,7 +5,7 @@ import { UpdateCardOrder } from "@/actions/update-card-order/schema";
 import { InputType, ReturnType } from "@/actions/update-card-order/types";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
-import { notifyCardInReview, notifyReviewReady } from "@/lib/board-telegram";
+import { notifyReviewReady } from "@/lib/board-telegram";
 import { toApiRoute } from "@/lib/api-route";
 import { syncParentList } from "@/lib/sync-parent-list";
 import { extractFileContent } from "@/lib/extract-file-content";
@@ -82,25 +82,16 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   let updatedCards;
   let movedToReview: { id: string; title: string }[] = [];
-  let telegramReviewListId: string | null = null;
   let aiReviewListId: string | null = null;
 
   try {
-    const [telegramConfig, aiConfig] = await Promise.all([
-      db.boardTelegramConfig.findUnique({ where: { boardId } }),
-      db.boardAiConfig.findUnique({ where: { boardId } }),
-    ]);
-
-    telegramReviewListId = telegramConfig?.enabled && telegramConfig.reviewListId
-      ? telegramConfig.reviewListId
-      : null;
+    const aiConfig = await db.boardAiConfig.findUnique({ where: { boardId } });
 
     aiReviewListId = aiConfig?.enabled && aiConfig.reviewListId
       ? aiConfig.reviewListId
       : null;
 
-    // Detect cards moved into either the AI review list or the Telegram review list
-    const triggerListIds = [...new Set([aiReviewListId, telegramReviewListId].filter(Boolean))] as string[];
+    const triggerListIds = aiReviewListId ? [aiReviewListId] : [];
 
     if (triggerListIds.length > 0) {
       const candidates = items.filter((i) => triggerListIds.includes(i.listId));
@@ -147,14 +138,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return {
       error: "Failed to update.",
     };
-  }
-
-  if (telegramReviewListId) {
-    for (const card of movedToReview.filter((c) =>
-      items.some((i) => i.id === c.id && i.listId === telegramReviewListId)
-    )) {
-      await notifyCardInReview({ boardId, cardId: card.id, cardTitle: card.title });
-    }
   }
 
   // Fire AI review for cards that moved into the AI review list (async, non-blocking)

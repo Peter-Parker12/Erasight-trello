@@ -25,7 +25,6 @@ const updateHandler = async (data: UpdateInputType): Promise<ActionState<UpdateI
       botToken: data.botToken,
       chatId: data.chatId,
       topicId: data.topicId || null,
-      reviewListId: data.reviewListId || null,
       enabled: data.enabled,
     },
     create: {
@@ -33,7 +32,6 @@ const updateHandler = async (data: UpdateInputType): Promise<ActionState<UpdateI
       botToken: data.botToken,
       chatId: data.chatId,
       topicId: data.topicId || null,
-      reviewListId: data.reviewListId || null,
       enabled: data.enabled,
     },
   });

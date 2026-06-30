@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import type { Contact } from "@prisma/client";
@@ -18,6 +19,8 @@ type ContactsTableProps = {
   definitions: CustomFieldDefinitionDTO[];
   companies: { id: string; name: string }[];
   organizationId: string;
+  onUpdated?: (contact: ContactWithCompany) => void;
+  onDeleted?: (id: string) => void;
 };
 
 export const ContactsTable = ({
@@ -25,14 +28,26 @@ export const ContactsTable = ({
   definitions,
   companies,
   organizationId,
+  onUpdated,
+  onDeleted,
 }: ContactsTableProps) => {
+  const deletingIdRef = useRef<string | null>(null);
+
   const { execute, isLoading } = useAction(deleteContact, {
-    onSuccess: () => toast.success("Contact deleted."),
+    skipRefresh: true,
+    onSuccess: () => {
+      if (deletingIdRef.current) {
+        onDeleted?.(deletingIdRef.current);
+        deletingIdRef.current = null;
+      }
+      toast.success("Contact deleted.");
+    },
     onError: (error) => toast.error(error),
   });
 
   const onDelete = (contact: ContactWithCompany) => {
     if (!confirm(`Delete "${contact.firstName} ${contact.lastName ?? ""}"? This cannot be undone.`)) return;
+    deletingIdRef.current = contact.id;
     execute({ id: contact.id });
   };
 
@@ -87,6 +102,7 @@ export const ContactsTable = ({
                     contact={contact}
                     definitions={definitions}
                     companies={companies}
+                    onUpdated={onUpdated}
                     trigger={
                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                         <Pencil className="h-3.5 w-3.5" />

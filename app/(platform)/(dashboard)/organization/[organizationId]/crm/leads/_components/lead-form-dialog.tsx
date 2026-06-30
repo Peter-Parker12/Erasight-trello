@@ -32,6 +32,8 @@ type LeadFormDialogProps = {
   contacts: { id: string; firstName: string; lastName: string | null }[];
   products?: { id: string; name: string; unitPrice: unknown; unit: string }[];
   lead?: Lead & { products?: { product: { id: string; name: string } }[] };
+  onCreated?: (lead: Lead) => void;
+  onUpdated?: (lead: Lead) => void;
 };
 
 export const LeadFormDialog = ({
@@ -43,6 +45,8 @@ export const LeadFormDialog = ({
   contacts,
   products = [],
   lead,
+  onCreated,
+  onUpdated,
 }: LeadFormDialogProps) => {
   const [open, setOpen] = useState(false);
   const closeRef = useRef<ElementRef<"button">>(null);
@@ -69,8 +73,10 @@ export const LeadFormDialog = ({
   };
 
   const { execute: executeCreate, fieldErrors: createErrors } = useAction(createLead, {
+    skipRefresh: true,
     onSuccess: async (data) => {
       await saveProductLinks(data.id);
+      onCreated?.(data);
       toast.success("Lead created.");
       closeRef.current?.click();
     },
@@ -78,8 +84,10 @@ export const LeadFormDialog = ({
   });
 
   const { execute: executeUpdate, fieldErrors: updateErrors } = useAction(updateLead, {
+    skipRefresh: true,
     onSuccess: async (data) => {
       await saveProductLinks(data.id);
+      onUpdated?.(data);
       toast.success("Lead updated.");
       closeRef.current?.click();
     },

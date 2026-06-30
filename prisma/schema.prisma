@@ -339,6 +339,9 @@ enum ENTITY_TYPE {
   LEAD
   PRODUCT
   PRODUCT_BUNDLE
+  KB_INDUSTRY
+  KB_FOLDER
+  KB_DOCUMENT
 }
 
 model AuditLog {
@@ -658,4 +661,54 @@ model LeadProduct {
   @@id([leadId, productId])
   @@index([leadId])
   @@index([productId])
+}
+
+model KbIndustry {
+  id          String     @id @default(uuid())
+  orgId       String
+  name        String
+  description String?
+
+  folders     KbFolder[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([orgId])
+}
+
+model KbFolder {
+  id         String       @id @default(uuid())
+  orgId      String
+  industryId String
+  name       String
+
+  industry   KbIndustry   @relation(fields: [industryId], references: [id])
+  documents  KbDocument[]
+
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([industryId])
+  @@index([orgId])
+}
+
+model KbDocument {
+  id          String   @id @default(uuid())
+  orgId       String
+  folderId    String
+  name        String
+  description String?
+  url         String   @db.Text
+  fileType    String?
+  fileSize    Int?
+  uploadedBy  String
+
+  folder      KbFolder @relation(fields: [folderId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([folderId])
+  @@index([orgId])
 }

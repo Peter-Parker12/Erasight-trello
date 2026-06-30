@@ -45,26 +45,6 @@ export const notifyCardAssigned = async ({
   });
 };
 
-export const notifyCardInReview = async ({
-  boardId,
-  cardId,
-  cardTitle,
-}: {
-  boardId: string;
-  cardId: string;
-  cardTitle: string;
-}): Promise<void> => {
-  const config = await db.boardTelegramConfig.findUnique({ where: { boardId } });
-  if (!config || !config.enabled || !config.reviewListId) return;
-
-  await sendTelegramMessage({
-    botToken: config.botToken,
-    chatId: config.chatId,
-    topicId: config.topicId,
-    text: `🔍 ${cardTitleHtml(boardId, cardId, cardTitle)} has moved to review. Mentors, please take a look!`,
-  });
-};
-
 export const notifyReviewReady = async ({
   boardId,
   cardId,

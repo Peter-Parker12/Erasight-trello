@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Handshake,
   Layout,
+  Library,
   ListTodo,
   Package,
   Settings,
@@ -52,6 +53,7 @@ export const NavItem = ({
   const modules = useModuleAccess(organization.id);
 
   const isCRMActive = pathname.startsWith(`/organization/${organization.id}/crm`);
+  const isKBActive = pathname.startsWith(`/organization/${organization.id}/knowledge-base`);
   const [crmExpanded, setCrmExpanded] = useState(() => isCRMActive);
 
   const mainRoutes: { label: string; icon: React.ReactNode; href: string; module?: ModuleKey }[] = [
@@ -107,6 +109,7 @@ export const NavItem = ({
 
   const visibleMainRoutes = mainRoutes.filter((r) => !r.module || modules[r.module]);
   const showCRM = modules["CRM"];
+  const showKB = modules["KNOWLEDGE_BASE"];
 
   const onClick = (href: string) => {
     router.push(href);
@@ -192,6 +195,26 @@ export const NavItem = ({
                   {route.label}
                 </Button>
               ))}
+            <div className="my-1.5 h-px bg-[#333]" />
+          </>
+        )}
+
+        {/* Knowledge Base */}
+        {showKB && (
+          <>
+            <div className="my-1.5 h-px bg-[#333]" />
+            <Button
+              size="sm"
+              onClick={() => onClick(`/organization/${organization.id}/knowledge-base`)}
+              className={cn(
+                "w-full font-normal justify-start pl-10 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
+                isKBActive && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+              )}
+              variant="ghost"
+            >
+              <Library className="h-4 w-4 mr-2" />
+              Knowledge Base
+            </Button>
             <div className="my-1.5 h-px bg-[#333]" />
           </>
         )}

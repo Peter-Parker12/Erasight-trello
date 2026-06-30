@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
-import type { PipelineStage } from "@prisma/client";
+import type { Lead, PipelineStage } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
 import { useAction } from "@/hooks/use-action";
@@ -22,6 +22,9 @@ type LeadsBoardProps = {
   products: { id: string; name: string; unitPrice: unknown; unit: string }[];
   definitions: CustomFieldDefinitionDTO[];
   organizationId: string;
+  onLeadCreated?: (lead: Lead) => void;
+  onLeadUpdated?: (lead: Lead) => void;
+  onLeadDeleted?: (id: string) => void;
 };
 
 export const LeadsBoard = ({
@@ -30,6 +33,9 @@ export const LeadsBoard = ({
   contacts,
   products,
   definitions,
+  onLeadCreated,
+  onLeadUpdated,
+  onLeadDeleted,
 }: LeadsBoardProps) => {
   const { execute: executeMove } = useAction(moveLead, {
     onError: (error) => toast.error(error),
@@ -50,6 +56,7 @@ export const LeadsBoard = ({
           companies={companies}
           contacts={contacts}
           products={products}
+          onCreated={onLeadCreated}
           trigger={
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
@@ -101,6 +108,7 @@ export const LeadsBoard = ({
                   companies={companies}
                   contacts={contacts}
                   products={products}
+                  onCreated={onLeadCreated}
                   trigger={
                     <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground hover:text-[#e5e5e5]">
                       <Plus className="h-4 w-4 mr-2" />
@@ -119,6 +127,8 @@ export const LeadsBoard = ({
               companies={companies}
               contacts={contacts}
               products={products}
+              onDeleted={onLeadDeleted}
+              onUpdated={onLeadUpdated}
             />
           )}
         />

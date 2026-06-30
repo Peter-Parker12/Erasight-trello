@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { toast } from "sonner";
 import type { Company } from "@prisma/client";
 import { Pencil, Trash2 } from "lucide-react";
@@ -19,16 +20,28 @@ type CompaniesTableProps = {
   definitions: CustomFieldDefinitionDTO[];
   allBundles: BundleOption[];
   organizationId: string;
+  onUpdated?: (company: CompanyRow) => void;
+  onDeleted?: (id: string) => void;
 };
 
-export const CompaniesTable = ({ companies, definitions, allBundles, organizationId }: CompaniesTableProps) => {
+export const CompaniesTable = ({ companies, definitions, allBundles, organizationId, onUpdated, onDeleted }: CompaniesTableProps) => {
+  const deletingIdRef = useRef<string | null>(null);
+
   const { execute, isLoading } = useAction(deleteCompany, {
-    onSuccess: () => toast.success("Company deleted."),
+    skipRefresh: true,
+    onSuccess: () => {
+      if (deletingIdRef.current) {
+        onDeleted?.(deletingIdRef.current);
+        deletingIdRef.current = null;
+      }
+      toast.success("Company deleted.");
+    },
     onError: (error) => toast.error(error),
   });
 
   const onDelete = (company: Company) => {
     if (!confirm(`Delete "${company.name}"? This cannot be undone.`)) return;
+    deletingIdRef.current = company.id;
     execute({ id: company.id });
   };
 
@@ -75,6 +88,7 @@ export const CompaniesTable = ({ companies, definitions, allBundles, organizatio
                     company={company}
                     definitions={definitions}
                     allBundles={allBundles}
+                    onUpdated={onUpdated}
                     trigger={
                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                         <Pencil className="h-3.5 w-3.5" />

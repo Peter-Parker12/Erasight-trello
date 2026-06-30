@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { extractFileContent } from "@/lib/extract-file-content";
 import { runClaudeReview } from "@/lib/claude-cli-review";
+import { notifyReviewReady } from "@/lib/board-telegram";
 
 export async function POST(req: Request) {
   try {
@@ -50,6 +51,15 @@ export async function POST(req: Request) {
     const updated = await db.attachment.update({
       where: { id: attachmentId },
       data: { review, reviewedAt: new Date() },
+    });
+
+    // Send review to Telegram (non-blocking — UI response doesn't wait for this)
+    void notifyReviewReady({
+      boardId: card.list.board.id,
+      cardId: card.id,
+      cardTitle: card.title,
+      attachmentName: attachment.name,
+      reviewText: review,
     });
 
     return NextResponse.json({ data: updated });

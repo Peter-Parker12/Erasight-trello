@@ -40,7 +40,6 @@ export const TelegramSettings = ({ boardId }: TelegramSettingsProps) => {
   const [botToken, setBotToken] = useState("");
   const [chatId, setChatId] = useState("");
   const [topicId, setTopicId] = useState("");
-  const [reviewListId, setReviewListId] = useState("");
   const [enabled, setEnabled] = useState(true);
   const [loadedConfig, setLoadedConfig] = useState<TelegramSettingsData["config"] | undefined>(undefined);
 
@@ -49,7 +48,6 @@ export const TelegramSettings = ({ boardId }: TelegramSettingsProps) => {
     setBotToken(data.config.botToken);
     setChatId(data.config.chatId);
     setTopicId(data.config.topicId ?? "");
-    setReviewListId(data.config.reviewListId ?? "");
     setEnabled(data.config.enabled);
   }
 
@@ -63,7 +61,7 @@ export const TelegramSettings = ({ boardId }: TelegramSettingsProps) => {
   const { execute: execRemove, isLoading: isRemoving } = useAction(removeTelegramConfig as any, {
     onSuccess: () => {
       toast.success("Telegram bot unlinked");
-      setBotToken(""); setChatId(""); setTopicId(""); setReviewListId(""); setEnabled(true);
+      setBotToken(""); setChatId(""); setTopicId(""); setEnabled(true);
       invalidate();
     },
     onError: (e) => toast.error(e),
@@ -79,7 +77,6 @@ export const TelegramSettings = ({ boardId }: TelegramSettingsProps) => {
       botToken: botToken.trim(),
       chatId: chatId.trim(),
       topicId: topicId.trim() || null,
-      reviewListId: reviewListId || null,
       enabled,
     } as any);
   };
@@ -111,7 +108,7 @@ export const TelegramSettings = ({ boardId }: TelegramSettingsProps) => {
         ) : (
           <div className="space-y-2 px-3 text-sm">
             <p className="text-xs text-muted-foreground">
-              Link a Telegram bot to this board to get notified about assignments, review requests, and due-date reminders.
+              Link a Telegram bot to this board to get notified about assignments, AI reviews, and due-date reminders.
             </p>
 
             <div>
@@ -143,20 +140,6 @@ export const TelegramSettings = ({ boardId }: TelegramSettingsProps) => {
                 value={topicId}
                 onChange={(e) => setTopicId(e.target.value)}
               />
-            </div>
-
-            <div>
-              <label className="text-xs text-muted-foreground">List that triggers review notification</label>
-              <select
-                className="w-full border rounded p-1 text-xs mt-0.5 bg-[#2a2a2a] border-[#333] text-[#e5e5e5]"
-                value={reviewListId}
-                onChange={(e) => setReviewListId(e.target.value)}
-              >
-                <option value="">— None —</option>
-                {(data?.lists ?? []).map((l) => (
-                  <option key={l.id} value={l.id}>{l.title}</option>
-                ))}
-              </select>
             </div>
 
             <label className="flex items-center gap-2 text-xs pt-1">

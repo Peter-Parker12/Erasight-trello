@@ -22,11 +22,15 @@ import { updateContact } from "@/actions/update-contact";
 import { extractCustomFieldsFromFormData } from "@/lib/custom-fields-form";
 import type { CustomFieldDefinitionDTO } from "@/lib/custom-fields";
 
+type ContactWithCompany = Contact & { company: { id: string; name: string } | null };
+
 type ContactFormDialogProps = {
   trigger: React.ReactNode;
   definitions: CustomFieldDefinitionDTO[];
   companies: { id: string; name: string }[];
   contact?: Contact;
+  onCreated?: (contact: ContactWithCompany) => void;
+  onUpdated?: (contact: ContactWithCompany) => void;
 };
 
 export const ContactFormDialog = ({
@@ -34,13 +38,20 @@ export const ContactFormDialog = ({
   definitions,
   companies,
   contact,
+  onCreated,
+  onUpdated,
 }: ContactFormDialogProps) => {
   const [open, setOpen] = useState(false);
   const closeRef = useRef<ElementRef<"button">>(null);
   const isEdit = !!contact;
 
+  const pendingCompanyIdRef = useRef<string | undefined>(undefined);
+
   const { execute: executeCreate, fieldErrors: createErrors } = useAction(createContact, {
-    onSuccess: () => {
+    skipRefresh: true,
+    onSuccess: (data) => {
+      const company = companies.find((c) => c.id === pendingCompanyIdRef.current) ?? null;
+      onCreated?.({ ...data, company });
       toast.success("Contact created.");
       closeRef.current?.click();
     },
@@ -48,7 +59,10 @@ export const ContactFormDialog = ({
   });
 
   const { execute: executeUpdate, fieldErrors: updateErrors } = useAction(updateContact, {
-    onSuccess: () => {
+    skipRefresh: true,
+    onSuccess: (data) => {
+      const company = companies.find((c) => c.id === (contact?.companyId ?? pendingCompanyIdRef.current)) ?? null;
+      onUpdated?.({ ...data, company });
       toast.success("Contact updated.");
       closeRef.current?.click();
     },
@@ -59,6 +73,7 @@ export const ContactFormDialog = ({
 
   const onSubmit = (formData: FormData) => {
     const companyId = (formData.get("companyId") as string) || undefined;
+    pendingCompanyIdRef.current = companyId;
 
     const fields = {
       firstName: formData.get("firstName") as string,

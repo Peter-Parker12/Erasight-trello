@@ -28,11 +28,15 @@ import { BundleFormDialog } from "../../products/_components/bundle-form-dialog"
 
 type BundleOption = { id: string; name: string };
 
+type CompanyRow = Company & { bundles: { bundleId: string }[] };
+
 type CompanyFormDialogProps = {
   trigger: React.ReactNode;
   definitions: CustomFieldDefinitionDTO[];
   company?: Company & { bundles?: { bundleId: string }[] };
   allBundles?: BundleOption[];
+  onCreated?: (company: CompanyRow) => void;
+  onUpdated?: (company: CompanyRow) => void;
 };
 
 async function syncBundles(companyId: string, selectedIds: string[], previousIds: string[]) {
@@ -57,7 +61,7 @@ async function syncBundles(companyId: string, selectedIds: string[], previousIds
   ]);
 }
 
-export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = [] }: CompanyFormDialogProps) => {
+export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = [], onCreated, onUpdated }: CompanyFormDialogProps) => {
   const [open, setOpen] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const closeRef = useRef<ElementRef<"button">>(null);
@@ -103,10 +107,8 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
         }
       };
 
-      tryFill(domainRef, sourceDomain);
       tryFill(nameRef, data.name);
       tryFill(industryRef, data.industry);
-      tryFill(addressRef, data.address);
 
       if (filled > 0) {
         toast.success(`Auto-filled ${filled} field${filled > 1 ? "s" : ""} from website`);
@@ -164,10 +166,12 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
   };
 
   const { execute: executeCreate, fieldErrors: createErrors } = useAction(createCompany, {
+    skipRefresh: true,
     onSuccess: async (data) => {
       if (selectedBundleIds.length > 0) {
         await syncBundles(data.id, selectedBundleIds, []);
       }
+      onCreated?.({ ...data, bundles: selectedBundleIds.map(id => ({ bundleId: id })) });
       toast.success("Company created.");
       closeRef.current?.click();
     },
@@ -175,8 +179,10 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
   });
 
   const { execute: executeUpdate, fieldErrors: updateErrors } = useAction(updateCompany, {
+    skipRefresh: true,
     onSuccess: async (data) => {
       await syncBundles(data.id, selectedBundleIds, currentBundleIds);
+      onUpdated?.({ ...data, bundles: selectedBundleIds.map(id => ({ bundleId: id })) });
       toast.success("Company updated.");
       closeRef.current?.click();
     },

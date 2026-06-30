@@ -13,6 +13,11 @@ export const MODULE_REGISTRY = {
     description: "Companies, contacts and the sales lead pipeline.",
     defaultAccess: "closed",
   },
+  KNOWLEDGE_BASE: {
+    label: "Knowledge Base",
+    description: "Centralized document library organized by industry and folder.",
+    defaultAccess: "closed",
+  },
 } as const satisfies Record<
   string,
   { label: string; description: string; defaultAccess: "open" | "closed" }
