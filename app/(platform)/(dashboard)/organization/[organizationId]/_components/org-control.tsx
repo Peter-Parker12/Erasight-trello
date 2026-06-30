@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useOrganizationList } from "@clerk/nextjs";
 
 export const OrgControl = () => {
   const params = useParams();
-  const { setActive } = useOrganizationList();
+  const router = useRouter();
+  const { setActive, isLoaded } = useOrganizationList();
 
   useEffect(() => {
-    if (!setActive) return;
+    if (!isLoaded || !setActive) return;
 
-    setActive({
-      organization: params.organizationId as string,
+    setActive({ organization: params.organizationId as string }).then(() => {
+      router.refresh();
     });
-  }, [setActive, params.organizationId]);
+  }, [isLoaded, setActive, params.organizationId, router]);
+
   return null;
 };
