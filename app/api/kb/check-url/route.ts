@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     if (isPrivate || res.status === 401 || res.status === 403) {
       return NextResponse.json({
         accessible: false,
-        hint: "This file is not publicly accessible. Open it in Google → Share → Change to "Anyone with the link" → Viewer, then try again.",
+        hint: "This file is not publicly accessible. In Google, go to Share → Change to 'Anyone with the link' → Viewer, then try again.",
       });
     }
 
