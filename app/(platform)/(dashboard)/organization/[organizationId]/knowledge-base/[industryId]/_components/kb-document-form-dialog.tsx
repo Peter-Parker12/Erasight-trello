@@ -19,7 +19,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
 import { createKbDocument } from "@/actions/create-kb-document";
 
-const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
+const MAX_FILE_MB = 50;
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 
 type KbDocumentFormDialogProps = {
   folderId: string;
@@ -43,16 +44,24 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: KbDocumen
     onSuccess: (doc) => {
       toast.success(`"${doc.name}" added.`);
       onCreated?.(doc);
+      resetForm();
       setOpen(false);
-      setSelectedFile(null);
     },
     onError: (error) => toast.error(error),
   });
 
+  const resetForm = () => {
+    setSelectedFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+    if (nameRef.current) nameRef.current.value = "";
+    if (urlRef.current) urlRef.current.value = "";
+    if (descRef.current) descRef.current.value = "";
+  };
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
-    if (file && file.size > MAX_SIZE) {
-      toast.error("File exceeds the 50 MB limit.");
+    if (file && file.size > MAX_FILE_BYTES) {
+      toast.error(`File exceeds the ${MAX_FILE_MB} MB limit.`);
       e.target.value = "";
       return;
     }
@@ -72,12 +81,15 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: KbDocumen
       if (!selectedFile) return;
       setUploading(true);
       try {
-        const res = await fetch(`/api/kb/upload?filename=${encodeURIComponent(selectedFile.name)}`, {
-          method: "PUT",
-          body: selectedFile,
-        });
-        if (!res.ok) throw new Error("Upload failed");
-        const json = (await res.json()) as { url: string };
+        const res = await fetch(
+          `/api/kb/upload?filename=${encodeURIComponent(selectedFile.name)}`,
+          { method: "PUT", body: selectedFile }
+        );
+        const json = await res.json() as { url?: string; error?: string };
+        if (!res.ok || !json.url) {
+          toast.error(json.error ?? "Upload failed.");
+          return;
+        }
         execute({
           folderId,
           name,
@@ -87,7 +99,7 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: KbDocumen
           fileSize: selectedFile.size,
         });
       } catch {
-        toast.error("File upload failed. Please try again.");
+        toast.error("Upload failed. Check your connection and try again.");
       } finally {
         setUploading(false);
       }
@@ -101,7 +113,7 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: KbDocumen
   const busy = isLoading || uploading;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSelectedFile(null); }}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger asChild>
         {trigger ?? (
           <Button size="sm" variant="outline">
@@ -137,15 +149,23 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: KbDocumen
         <form onSubmit={onSubmit} className="space-y-4">
           {tab === "upload" ? (
             <div className="space-y-1.5">
-              <Label>File</Label>
+              <Label>
+                File{" "}
+                <span className="text-muted-foreground font-normal">
+                  (max {MAX_FILE_MB} MB)
+                </span>
+              </Label>
               <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#333] px-4 py-6 cursor-pointer hover:border-violet-500/50 transition-colors">
                 <Upload className="h-6 w-6 text-muted-foreground" />
                 {selectedFile ? (
-                  <span className="text-sm text-[#e5e5e5]">{selectedFile.name}</span>
+                  <span className="text-sm text-[#e5e5e5] text-center break-all">
+                    {selectedFile.name}
+                  </span>
                 ) : (
-                  <span className="text-sm text-muted-foreground">Click to browse or drag a file here</span>
+                  <span className="text-sm text-muted-foreground">
+                    Click to browse
+                  </span>
                 )}
-                <span className="text-xs text-muted-foreground">Max 50 MB</span>
                 <input
                   ref={fileRef}
                   type="file"
@@ -182,12 +202,20 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: KbDocumen
           </div>
 
           <div className="flex justify-end gap-2 pt-1">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={busy}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={busy}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={busy || (tab === "upload" && !selectedFile)}>
+            <Button
+              type="submit"
+              disabled={busy || (tab === "upload" && !selectedFile)}
+            >
               {busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {busy ? (uploading ? "Uploading…" : "Saving…") : "Add"}
+              {uploading ? "Uploading…" : isLoading ? "Saving…" : "Add"}
             </Button>
           </div>
         </form>
