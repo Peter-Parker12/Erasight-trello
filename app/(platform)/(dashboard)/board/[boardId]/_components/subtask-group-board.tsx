@@ -181,7 +181,7 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
         snapshot: orderedParents,
       });
     } else {
-      const allDone = newParents[parentIndex].subtasks.every((s) => s.list.type === "DONE");
+      const allDone = newParents[parentIndex].subtasks.every((s) => s.list.type === "DONE" || s.list.type === "CANCELLED");
       graduatedRef.current = allDone;
       setOrderedParents(newParents);
       executeUpdateCardOrder({
@@ -204,7 +204,7 @@ export const SubtaskGroupBoard = ({ lists, parents, boardId, transitionRules = {
       p.subtasks.some((s) => s.id === pendingDrop.movedSubtask.id)
     );
     if (parentIdx !== -1) {
-      const allDone = orderedParents[parentIdx].subtasks.every((s) => s.list.type === "DONE");
+      const allDone = orderedParents[parentIdx].subtasks.every((s) => s.list.type === "DONE" || s.list.type === "CANCELLED");
       graduatedRef.current = allDone;
     }
     executeUpdateCardOrder({

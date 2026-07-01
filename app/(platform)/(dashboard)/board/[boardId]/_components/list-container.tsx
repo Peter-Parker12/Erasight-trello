@@ -190,7 +190,7 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
 
   const allSubtasksDone = (card: CardPreview) =>
     card.subtasks.length > 0 &&
-    card.subtasks.every((s) => s.list.type === "DONE");
+    card.subtasks.every((s) => s.list.type === "DONE" || s.list.type === "CANCELLED");
 
   const groupedParents = orderedData.flatMap((list) =>
     list.cards.filter((card) => card.subtasks.length > 0 && !allSubtasksDone(card))
