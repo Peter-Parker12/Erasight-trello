@@ -26,7 +26,9 @@ const FIELD_TYPES: CustomFieldType[] = [
   "URL",
 ];
 
-const PRODUCT_DEFAULT_FIELDS: { label: string; key: string; type: string; note?: string }[] = [
+type DefaultField = { label: string; key: string; type: string; note?: string };
+
+const PRODUCT_DEFAULT_FIELDS: DefaultField[] = [
   { label: "Name",        key: "name",        type: "text",         note: "required" },
   { label: "Description", key: "description", type: "text" },
   { label: "Categories",  key: "categories",  type: "multi-select", note: "colored tags" },
@@ -34,6 +36,41 @@ const PRODUCT_DEFAULT_FIELDS: { label: string; key: string; type: string; note?:
   { label: "Unit",        key: "unit",        type: "select" },
   { label: "Status",      key: "status",      type: "select" },
 ];
+
+const COMPANY_DEFAULT_FIELDS: DefaultField[] = [
+  { label: "Name",        key: "name",        type: "text",     note: "required" },
+  { label: "Domain",      key: "domain",      type: "text" },
+  { label: "Industry",    key: "industry",    type: "text" },
+  { label: "Phone",       key: "phone",       type: "phone" },
+  { label: "Website",     key: "website",     type: "url" },
+  { label: "Address",     key: "address",     type: "text" },
+  { label: "Description", key: "description", type: "text" },
+];
+
+const CONTACT_DEFAULT_FIELDS: DefaultField[] = [
+  { label: "First Name",  key: "firstName",  type: "text",  note: "required" },
+  { label: "Last Name",   key: "lastName",   type: "text" },
+  { label: "Email",       key: "email",      type: "email" },
+  { label: "Phone",       key: "phone",      type: "phone" },
+  { label: "Job Title",   key: "title",      type: "text" },
+  { label: "Company",     key: "companyId",  type: "text",  note: "relation" },
+];
+
+const LEAD_DEFAULT_FIELDS: DefaultField[] = [
+  { label: "Title",       key: "title",     type: "text",     note: "required" },
+  { label: "Value",       key: "value",     type: "currency" },
+  { label: "Stage",       key: "stageId",   type: "select",   note: "pipeline stage" },
+  { label: "Company",     key: "companyId", type: "text",     note: "relation" },
+  { label: "Contact",     key: "contactId", type: "text",     note: "relation" },
+  { label: "Owner",       key: "ownerId",   type: "text",     note: "relation" },
+];
+
+const DEFAULT_FIELDS_BY_ENTITY: Partial<Record<CrmEntityType, DefaultField[]>> = {
+  PRODUCT: PRODUCT_DEFAULT_FIELDS,
+  COMPANY: COMPANY_DEFAULT_FIELDS,
+  CONTACT: CONTACT_DEFAULT_FIELDS,
+  LEAD:    LEAD_DEFAULT_FIELDS,
+};
 
 type CustomFieldsManagerProps = {
   entityType: CrmEntityType;
@@ -62,13 +99,13 @@ export const CustomFieldsManager = ({ entityType, label, fields }: CustomFieldsM
 
       {open && (
         <div className="border-t p-4 space-y-3">
-          {/* Default / built-in fields for PRODUCT entity */}
-          {entityType === "PRODUCT" && (
+          {/* Default / built-in fields for all entity types */}
+          {DEFAULT_FIELDS_BY_ENTITY[entityType] && (
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Default fields
               </p>
-              {PRODUCT_DEFAULT_FIELDS.map((f) => (
+              {DEFAULT_FIELDS_BY_ENTITY[entityType]!.map((f) => (
                 <div key={f.key} className="flex items-center gap-2 border border-[#2e2e2e] rounded-md px-3 py-2 bg-[#1a1a1a]">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-[#e5e5e5] truncate">{f.label}</p>
@@ -88,7 +125,7 @@ export const CustomFieldsManager = ({ entityType, label, fields }: CustomFieldsM
             </div>
           )}
 
-          {fields.length === 0 && entityType !== "PRODUCT" && (
+          {fields.length === 0 && !DEFAULT_FIELDS_BY_ENTITY[entityType] && (
             <p className="text-sm text-muted-foreground">No custom fields defined yet.</p>
           )}
 
