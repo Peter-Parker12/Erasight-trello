@@ -144,6 +144,9 @@ async function strategyDuckDuckGo(
         payload.companySize = item.value;
       if (label === "headquarters" || label === "location")
         payload.address = item.value;
+      if (label === "telephone" || label === "phone")
+        payload.phone = item.value;
+      if (label === "email") payload.email = item.value;
     }
 
     return payload;
@@ -204,6 +207,48 @@ function findLinkedIn(html: string): string | undefined {
   return found;
 }
 
+function findPhone(html: string, jsonLd: Record<string, unknown>): string | undefined {
+  // 1. JSON-LD telephone field
+  if (typeof jsonLd["telephone"] === "string" && jsonLd["telephone"].trim()) {
+    return jsonLd["telephone"].trim();
+  }
+  const $ = cheerio.load(html);
+  // 2. tel: href links
+  let phone: string | undefined;
+  $("a[href^='tel:']").each((_, el) => {
+    const href = $(el).attr("href") ?? "";
+    const num = href.replace(/^tel:/, "").trim();
+    if (num.length >= 7) { phone = num; return false; }
+  });
+  if (phone) return phone;
+  // 3. Regex scan on visible text (E.164 or common formats)
+  const text = $.root().text();
+  const match = text.match(/(\+?\d[\d\s\-().]{6,18}\d)/);
+  return match?.[1]?.trim();
+}
+
+function findEmail(html: string, jsonLd: Record<string, unknown>): string | undefined {
+  // 1. JSON-LD email field
+  if (typeof jsonLd["email"] === "string" && jsonLd["email"].trim()) {
+    return jsonLd["email"].trim();
+  }
+  const $ = cheerio.load(html);
+  // 2. mailto: href links — prefer non-generic addresses
+  const emails: string[] = [];
+  $("a[href^='mailto:']").each((_, el) => {
+    const href = $(el).attr("href") ?? "";
+    const addr = href.replace(/^mailto:/, "").split("?")[0].trim().toLowerCase();
+    if (addr.includes("@") && !addr.startsWith("noreply") && !addr.startsWith("no-reply")) {
+      emails.push(addr);
+    }
+  });
+  if (emails.length > 0) return emails[0];
+  // 3. Regex scan on page text
+  const text = $.root().text();
+  const match = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+  return match?.[0]?.toLowerCase();
+}
+
 function titleToName(title: string): string {
   return title.split(/[|\-–—]/)[0].replace(/\s+/g, " ").trim();
 }
@@ -227,7 +272,10 @@ function parseHtml(html: string, domain: string): Partial<EnrichmentPayload> {
   const address = formatAddress(jsonLd["address"]);
   const linkedinUrl = findLinkedIn(html);
 
-  return { name, industry, companySize, address, linkedinUrl };
+  const phone = findPhone(html, jsonLd);
+  const email = findEmail(html, jsonLd);
+
+  return { name, industry, companySize, address, linkedinUrl, phone, email };
 }
 
 // ─── logo resolution ──────────────────────────────────────────────────────────
@@ -331,6 +379,8 @@ export const webScraperProvider: EnrichmentProvider = {
     if (parsed.companySize) payload.companySize = parsed.companySize;
     if (parsed.linkedinUrl) payload.linkedinUrl = parsed.linkedinUrl;
     if (parsed.address) payload.address = parsed.address;
+    if (parsed.phone) payload.phone = parsed.phone;
+    if (parsed.email) payload.email = parsed.email;
 
     return {
       success: true,

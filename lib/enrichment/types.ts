@@ -7,6 +7,8 @@ export type EnrichmentPayload = {
   revenueRange?: string;
   linkedinUrl?: string;
   address?: string;
+  phone?: string;
+  email?: string;
 };
 
 export type EnrichmentProviderResult =

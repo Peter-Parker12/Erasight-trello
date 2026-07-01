@@ -72,6 +72,7 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
   const domainRef = useRef<HTMLInputElement>(null);
   const industryRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
 
   const currentBundleIds = company?.bundles?.map((b) => b.bundleId) ?? [];
   const [selectedBundleIds, setSelectedBundleIds] = useState<string[]>(currentBundleIds);
@@ -109,8 +110,15 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
 
       tryFill(nameRef, data.name);
       tryFill(industryRef, data.industry);
+      tryFill(addressRef, data.address);
+      tryFill(phoneRef, data.phone);
 
-      if (filled > 0) {
+      // Email has no Company field — surface it separately so user can copy it
+      if (data.email && filled === 0) {
+        toast.info(`Found email: ${data.email}`);
+      } else if (data.email) {
+        toast.success(`Auto-filled ${filled} field${filled > 1 ? "s" : ""} from website · Email found: ${data.email}`);
+      } else if (filled > 0) {
         toast.success(`Auto-filled ${filled} field${filled > 1 ? "s" : ""} from website`);
       }
     },
@@ -247,6 +255,7 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
               errors={fieldErrors}
             />
             <FormInput
+              ref={phoneRef}
               id="phone"
               label="Phone"
               placeholder="+84 123 456 789"
