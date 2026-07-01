@@ -311,60 +311,98 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: Props) =>
               </label>
             </div>
           ) : (
-            <div className="space-y-1.5">
-              <Label htmlFor="kb-link-url">URL</Label>
-              <div className="relative">
-                <Input
-                  id="kb-link-url"
-                  value={linkUrl}
-                  onChange={onLinkUrlChange}
-                  onBlur={onLinkUrlBlur}
-                  placeholder="https://docs.google.com/... or any URL"
-                  autoFocus
-                  className={
-                    urlCheckState === "failed"
-                      ? "border-red-500/70 focus-visible:ring-red-500/50 pr-8"
-                      : urlCheckState === "ok"
-                      ? "border-green-500/70 focus-visible:ring-green-500/50 pr-8"
-                      : "pr-8"
-                  }
-                />
-                <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                  {urlCheckState === "checking" && (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  )}
-                  {urlCheckState === "ok" && (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  )}
-                  {urlCheckState === "failed" && (
-                    <XCircle className="h-4 w-4 text-red-500" />
-                  )}
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="kb-link-url">URL</Label>
+                <div className="relative">
+                  <Input
+                    id="kb-link-url"
+                    value={linkUrl}
+                    onChange={onLinkUrlChange}
+                    onBlur={onLinkUrlBlur}
+                    placeholder="https://docs.google.com/... or any URL"
+                    autoFocus
+                    className={
+                      urlCheckState === "failed"
+                        ? "border-red-500/70 focus-visible:ring-red-500/50 pr-8"
+                        : urlCheckState === "ok"
+                        ? "border-green-500/70 focus-visible:ring-green-500/50 pr-8"
+                        : "pr-8"
+                    }
+                  />
+                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                    {urlCheckState === "checking" && (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    )}
+                    {urlCheckState === "ok" && (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    )}
+                    {urlCheckState === "failed" && (
+                      <XCircle className="h-4 w-4 text-red-500" />
+                    )}
+                  </div>
                 </div>
+
+                {/* Initial check prompt for Google URLs */}
+                {isGoogleUrl && urlCheckState === "idle" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-1 text-xs h-8"
+                    onClick={() => checkGoogleUrl(linkUrl.trim())}
+                  >
+                    Check if publicly accessible
+                  </Button>
+                )}
+
+                {/* Success */}
+                {urlCheckState === "ok" && (
+                  <p className="text-xs text-green-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Publicly accessible — you can save now
+                  </p>
+                )}
               </div>
 
-              {/* Google URL buttons */}
-              {isGoogleUrl && urlCheckState !== "checking" && (
-                <button
-                  type="button"
-                  onClick={() => checkGoogleUrl(linkUrl.trim())}
-                  className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
-                >
-                  {urlCheckState === "idle" ? "Check if publicly accessible" : "Re-check accessibility"}
-                </button>
-              )}
-
-              {/* Error box */}
-              {urlCheckState === "failed" && urlCheckHint && (
-                <div className="flex gap-2.5 rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm">
-                  <AlertCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
-                  <span className="text-red-300">{urlCheckHint}</span>
+              {/* Private file: step-by-step sharing guide + re-check */}
+              {urlCheckState === "failed" && (
+                <div className="rounded-md border border-red-500/30 bg-red-500/10 p-3 space-y-3">
+                  <div className="flex gap-2.5">
+                    <AlertCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-medium text-red-300">
+                        This file is private
+                      </p>
+                      <p className="text-xs text-red-300/80">
+                        You need to make it publicly accessible before saving. Follow these steps:
+                      </p>
+                      <ol className="text-xs text-red-200/70 space-y-1 list-decimal list-inside">
+                        <li>Open the file in Google Drive / Docs / Slides</li>
+                        <li>Click <span className="font-semibold text-red-200">Share</span> (top right)</li>
+                        <li>Under &quot;General access&quot;, change to <span className="font-semibold text-red-200">Anyone with the link</span></li>
+                        <li>Set permission to <span className="font-semibold text-red-200">Viewer</span></li>
+                        <li>Click <span className="font-semibold text-red-200">Done</span>, then come back here</li>
+                      </ol>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="w-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-200 hover:text-red-100"
+                    onClick={() => checkGoogleUrl(linkUrl.trim())}
+                  >
+                    <Loader2 className={`h-3.5 w-3.5 mr-2 ${urlCheckState === "checking" ? "animate-spin" : "hidden"}`} />
+                    I&apos;ve shared it — check again
+                  </Button>
                 </div>
               )}
 
-              {/* Success */}
-              {urlCheckState === "ok" && (
-                <p className="text-xs text-green-400 flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Publicly accessible
+              {/* Checking state */}
+              {urlCheckState === "checking" && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Checking accessibility…
                 </p>
               )}
             </div>

@@ -2,33 +2,36 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
 const GOOGLE_DOC_RE = /docs\.google\.com\/(document|presentation|spreadsheets)\/d\/([^/?#]+)/;
-const GOOGLE_DRIVE_RE = /drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([^/?&#]+)/;
+const GOOGLE_DRIVE_FILE_RE = /drive\.google\.com\/file\/d\/([^/?#]+)/;
+const GOOGLE_DRIVE_OPEN_RE = /drive\.google\.com\/open\?.*id=([^&]+)/;
 
 const PRIVATE_HINT =
   "This file is not publicly accessible. In Google, go to Share → 'Anyone with the link' → Viewer, then try again.";
 
-// Convert Google Docs/Slides/Sheets edit URLs to their /pub endpoint.
-// /pub returns 200 for public docs and redirects to accounts.google.com for private ones.
-function toGoogleDocPublishUrl(url: string): string | null {
+// Normalise a Google Docs/Slides/Sheets URL to the /view endpoint.
+// /view works for "Anyone with the link" sharing (no login needed server-side).
+// We deliberately avoid /pub — that requires "Publish to the web", a different setting.
+function toGoogleDocViewUrl(url: string): string | null {
   const m = url.match(GOOGLE_DOC_RE);
   if (!m) return null;
   const [, type, id] = m;
   const path =
     type === "presentation" ? "presentation" : type === "spreadsheets" ? "spreadsheets" : "document";
-  return `https://docs.google.com/${path}/d/${id}/pub`;
+  return `https://docs.google.com/${path}/d/${id}/view`;
 }
 
-// For Google Drive file links, fetch the thumbnail endpoint.
-// It's a tiny image request: 200 = public, redirects to accounts.google.com = private.
+// For Drive file links, use the thumbnail endpoint — lightweight image request.
+// Public file → image/* response. Private → HTML or redirect to accounts.google.com.
 function toGoogleDriveThumbnailUrl(url: string): string | null {
-  const m = url.match(GOOGLE_DRIVE_RE);
-  if (!m) return null;
-  return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1`;
+  const fileMatch = url.match(GOOGLE_DRIVE_FILE_RE) ?? url.match(GOOGLE_DRIVE_OPEN_RE);
+  if (!fileMatch) return null;
+  return `https://drive.google.com/thumbnail?id=${fileMatch[1]}&sz=w1`;
 }
 
 async function checkUrl(url: string): Promise<{ accessible: boolean; hint?: string }> {
+  const isDriveFile = GOOGLE_DRIVE_FILE_RE.test(url) || GOOGLE_DRIVE_OPEN_RE.test(url);
   const checkTarget =
-    toGoogleDocPublishUrl(url) ?? toGoogleDriveThumbnailUrl(url) ?? url;
+    toGoogleDriveThumbnailUrl(url) ?? toGoogleDocViewUrl(url) ?? url;
 
   try {
     const res = await fetch(checkTarget, {
@@ -46,9 +49,8 @@ async function checkUrl(url: string): Promise<{ accessible: boolean; hint?: stri
       return { accessible: false, hint: PRIVATE_HINT };
     }
 
-    // For Drive thumbnail: a private file sometimes returns 200 with a "login" page.
-    // Detect it by checking Content-Type — a real thumbnail is image/*, not text/html.
-    if (toGoogleDriveThumbnailUrl(url)) {
+    // Drive thumbnail: private files return HTML ("You need access"), not an image.
+    if (isDriveFile) {
       const ct = res.headers.get("content-type") ?? "";
       if (!ct.startsWith("image/")) {
         return { accessible: false, hint: PRIVATE_HINT };

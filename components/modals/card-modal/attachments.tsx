@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Paperclip, Plus, Trash2, ExternalLink, Upload, Link2, Image as ImageIcon, FileText, Film, Download, Copy, X, Info, Sparkles, RotateCcw } from "lucide-react";
+import { Paperclip, Plus, Trash2, ExternalLink, Upload, Link2, Image as ImageIcon, FileText, Film, Download, Copy, X, Info, Sparkles, RotateCcw, AlertCircle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import type { Attachment } from "@prisma/client";
@@ -20,9 +20,11 @@ import { cn } from "@/lib/utils";
 type AttachmentsProps = { data: CardWithFullDetail };
 
 type AddTab = "url" | "file";
+type UrlCheckState = "idle" | "checking" | "ok" | "failed";
 
 const MAX_FILE_MB = 5;
 const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
+const GOOGLE_RE = /(?:docs|drive)\.google\.com\//;
 
 function getAttachmentType(url: string, name?: string): "image" | "video" | "file" {
   if (url.startsWith("data:image/")) return "image";
@@ -69,6 +71,8 @@ export const Attachments = ({ data }: AttachmentsProps) => {
   const [url, setUrl] = useState("");
   const [fileLoading, setFileLoading] = useState(false);
   const [selectedAttId, setSelectedAttId] = useState<string | null>(null);
+  const [urlCheckState, setUrlCheckState] = useState<UrlCheckState>("idle");
+  const [urlCheckHint, setUrlCheckHint] = useState("");
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [collapsedReviewIds, setCollapsedReviewIds] = useState<Set<string>>(new Set());
 
@@ -174,11 +178,36 @@ export const Attachments = ({ data }: AttachmentsProps) => {
     execCreate({ cardId: data.id, boardId, name: name.trim(), url: url.trim() });
   };
 
+  const checkGoogleUrl = async (target: string) => {
+    if (!GOOGLE_RE.test(target)) { setUrlCheckState("idle"); return; }
+    setUrlCheckState("checking");
+    setUrlCheckHint("");
+    try {
+      const res = await fetch("/api/kb/check-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: target }),
+      });
+      const json = await res.json() as { accessible: boolean; hint?: string };
+      if (json.accessible) {
+        setUrlCheckState("ok");
+      } else {
+        setUrlCheckState("failed");
+        setUrlCheckHint(json.hint ?? "This file is not publicly accessible.");
+      }
+    } catch {
+      setUrlCheckState("failed");
+      setUrlCheckHint("Could not verify this URL. Check your connection.");
+    }
+  };
+
   const resetForm = () => {
     setShowForm(false);
     setName("");
     setUrl("");
     setTab("url");
+    setUrlCheckState("idle");
+    setUrlCheckHint("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -405,14 +434,14 @@ export const Attachments = ({ data }: AttachmentsProps) => {
           <div className="border border-[#333] rounded-lg bg-[#1f1f1f] overflow-hidden">
             <div className="flex border-b border-[#333] bg-[#171717]">
               <button
-                onClick={() => { setTab("url"); setName(""); setUrl(""); }}
+                onClick={() => { setTab("url"); setName(""); setUrl(""); setUrlCheckState("idle"); setUrlCheckHint(""); }}
                 className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors", tab === "url" ? "text-violet-400 border-b-2 border-violet-500 bg-violet-600/10" : "text-muted-foreground hover:text-[#e5e5e5]")}
               >
                 <Link2 className="h-3.5 w-3.5" />
                 Nhập URL
               </button>
               <button
-                onClick={() => { setTab("file"); setName(""); setUrl(""); }}
+                onClick={() => { setTab("file"); setName(""); setUrl(""); setUrlCheckState("idle"); setUrlCheckHint(""); }}
                 className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors", tab === "file" ? "text-violet-400 border-b-2 border-violet-500 bg-violet-600/10" : "text-muted-foreground hover:text-[#e5e5e5]")}
               >
                 <Upload className="h-3.5 w-3.5" />
@@ -424,7 +453,66 @@ export const Attachments = ({ data }: AttachmentsProps) => {
               {tab === "url" ? (
                 <>
                   <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên hiển thị..." className="w-full text-sm border border-[#333] rounded-md p-2 bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1 focus:ring-violet-500" />
-                  <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="w-full text-sm border border-[#333] rounded-md p-2 bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1 focus:ring-violet-500" />
+                  <div className="relative">
+                    <input
+                      value={url}
+                      onChange={(e) => { setUrl(e.target.value); setUrlCheckState("idle"); setUrlCheckHint(""); }}
+                      onBlur={(e) => { if (e.target.value.trim()) checkGoogleUrl(e.target.value.trim()); }}
+                      placeholder="https://..."
+                      className={cn(
+                        "w-full text-sm border rounded-md p-2 pr-8 bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1",
+                        urlCheckState === "failed" ? "border-red-500/70 focus:ring-red-500/50" :
+                        urlCheckState === "ok" ? "border-green-500/70 focus:ring-green-500/50" :
+                        "border-[#333] focus:ring-violet-500"
+                      )}
+                    />
+                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                      {urlCheckState === "checking" && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+                      {urlCheckState === "ok" && <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
+                      {urlCheckState === "failed" && <XCircle className="h-3.5 w-3.5 text-red-500" />}
+                    </div>
+                  </div>
+
+                  {/* Google idle prompt */}
+                  {GOOGLE_RE.test(url) && urlCheckState === "idle" && (
+                    <button type="button" onClick={() => checkGoogleUrl(url.trim())} className="text-[11px] text-violet-400 hover:text-violet-300 transition-colors">
+                      Check if publicly accessible
+                    </button>
+                  )}
+
+                  {/* Success */}
+                  {urlCheckState === "ok" && (
+                    <p className="text-[11px] text-green-400 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" /> Publicly accessible
+                    </p>
+                  )}
+
+                  {/* Private: step-by-step guide */}
+                  {urlCheckState === "failed" && (
+                    <div className="rounded-md border border-red-500/30 bg-red-500/10 p-2.5 space-y-2">
+                      <div className="flex gap-2">
+                        <AlertCircle className="h-3.5 w-3.5 text-red-400 mt-0.5 shrink-0" />
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium text-red-300">File này đang ở chế độ riêng tư</p>
+                          <ol className="text-[11px] text-red-200/70 space-y-0.5 list-decimal list-inside">
+                            <li>Mở file trong Google Drive / Docs / Slides</li>
+                            <li>Nhấn <span className="font-semibold text-red-200">Share</span> (góc trên bên phải)</li>
+                            <li>Đổi sang <span className="font-semibold text-red-200">Anyone with the link</span></li>
+                            <li>Đặt quyền là <span className="font-semibold text-red-200">Viewer</span> rồi nhấn <span className="font-semibold text-red-200">Done</span></li>
+                          </ol>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => checkGoogleUrl(url.trim())}
+                        className="w-full text-[11px] bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-200 hover:text-red-100 rounded-md py-1 transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        {urlCheckState === "checking"
+                          ? <><Loader2 className="h-3 w-3 animate-spin" /> Đang kiểm tra...</>
+                          : "Đã chia sẻ — kiểm tra lại"}
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -460,8 +548,16 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                 </>
               )}
               <div className="flex gap-2">
-                <Button size="sm" className="h-7 text-xs" disabled={isCreating || fileLoading || !name.trim() || !url.trim()} onClick={handleAttach}>
-                  {fileLoading ? "Đang đọc..." : "Đính kèm"}
+                <Button
+                  size="sm"
+                  className="h-7 text-xs"
+                  disabled={
+                    isCreating || fileLoading || !name.trim() || !url.trim() ||
+                    (tab === "url" && GOOGLE_RE.test(url) && (urlCheckState === "failed" || urlCheckState === "checking" || urlCheckState === "idle"))
+                  }
+                  onClick={handleAttach}
+                >
+                  {fileLoading ? "Đang đọc..." : isCreating ? "Đang lưu..." : "Đính kèm"}
                 </Button>
                 <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={resetForm}>Hủy</Button>
               </div>
