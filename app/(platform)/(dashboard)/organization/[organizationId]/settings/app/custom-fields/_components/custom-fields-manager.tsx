@@ -39,7 +39,6 @@ const PRODUCT_DEFAULT_FIELDS: DefaultField[] = [
 
 const COMPANY_DEFAULT_FIELDS: DefaultField[] = [
   { label: "Name",        key: "name",        type: "text",     note: "required" },
-  { label: "Domain",      key: "domain",      type: "text" },
   { label: "Industry",    key: "industry",    type: "text" },
   { label: "Phone",       key: "phone",       type: "phone" },
   { label: "Website",     key: "website",     type: "url" },
