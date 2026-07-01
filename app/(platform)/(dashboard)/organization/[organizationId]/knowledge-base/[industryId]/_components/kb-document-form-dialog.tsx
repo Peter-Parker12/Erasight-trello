@@ -20,7 +20,7 @@ import { useAction } from "@/hooks/use-action";
 import { createKbDocument } from "@/actions/create-kb-document";
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
-const GOOGLE_DOC_RE = /docs\.google\.com\/(document|presentation|spreadsheets)\/d\//;
+const GOOGLE_RE = /(?:docs|drive)\.google\.com\//;
 
 type UrlCheckState = "idle" | "checking" | "ok" | "failed";
 
@@ -108,7 +108,7 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: Props) =>
   };
 
   const checkGoogleUrl = async (url: string) => {
-    if (!GOOGLE_DOC_RE.test(url)) {
+    if (!GOOGLE_RE.test(url)) {
       setUrlCheckState("idle");
       return;
     }
@@ -222,7 +222,7 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: Props) =>
     }
   };
 
-  const isGoogleUrl = GOOGLE_DOC_RE.test(linkUrl.trim());
+  const isGoogleUrl = GOOGLE_RE.test(linkUrl.trim());
   const linkSaveBlocked =
     isGoogleUrl && (urlCheckState === "idle" || urlCheckState === "checking" || urlCheckState === "failed");
   const busy = isLoading || uploading;
