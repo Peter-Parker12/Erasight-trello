@@ -62,6 +62,7 @@ export const ProductsClientSection = ({
               New product
             </Button>
           }
+          definitions={definitions}
           categories={categories}
           onCategoryCreated={handleCategoryCreated}
           onCreated={handleCreated}

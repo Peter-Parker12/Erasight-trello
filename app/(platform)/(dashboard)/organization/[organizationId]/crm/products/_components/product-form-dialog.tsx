@@ -19,6 +19,9 @@ import { FormSubmit } from "@/components/form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { createProduct } from "@/actions/create-product";
 import { updateProduct } from "@/actions/update-product";
+import { CustomFieldsFields } from "@/components/crm/custom-fields-fields";
+import { extractCustomFieldsFromFormData } from "@/lib/custom-fields-form";
+import type { CustomFieldDefinitionDTO } from "@/lib/custom-fields";
 import { CategorySelect, type ProductCategoryDef } from "./category-select";
 
 const UNITS = ["item", "hour", "month", "year", "seat", "project"];
@@ -26,6 +29,7 @@ const UNITS = ["item", "hour", "month", "year", "seat", "project"];
 type ProductFormDialogProps = {
   trigger: React.ReactNode;
   product?: Product;
+  definitions?: CustomFieldDefinitionDTO[];
   categories?: ProductCategoryDef[];
   onCategoryCreated?: (cat: ProductCategoryDef) => void;
   onCreated?: (product: Product) => void;
@@ -34,6 +38,7 @@ type ProductFormDialogProps = {
 export const ProductFormDialog = ({
   trigger,
   product,
+  definitions = [],
   categories = [],
   onCategoryCreated,
   onCreated,
@@ -70,13 +75,14 @@ export const ProductFormDialog = ({
 
   const onSubmit = (formData: FormData) => {
     const fields = {
-      name:        formData.get("name") as string,
-      description: (formData.get("description") as string) || undefined,
-      category:    selectedCategories[0] || undefined,
-      categories:  selectedCategories,
-      unitPrice:   Number(formData.get("unitPrice") as string),
-      unit:        (formData.get("unit") as string) || "item",
-      status:      (formData.get("status") as "ACTIVE" | "INACTIVE") || "ACTIVE",
+      name:         formData.get("name") as string,
+      description:  (formData.get("description") as string) || undefined,
+      category:     selectedCategories[0] || undefined,
+      categories:   selectedCategories,
+      unitPrice:    Number(formData.get("unitPrice") as string),
+      unit:         (formData.get("unit") as string) || "item",
+      status:       (formData.get("status") as "ACTIVE" | "INACTIVE") || "ACTIVE",
+      customFields: extractCustomFieldsFromFormData(formData, definitions),
     };
 
     if (isEdit) {
@@ -171,6 +177,12 @@ export const ProductFormDialog = ({
               errors={fieldErrors}
             />
           </div>
+
+          <CustomFieldsFields
+            definitions={definitions}
+            defaultValues={(product?.customFields as Record<string, unknown>) ?? {}}
+            errors={fieldErrors}
+          />
 
           <div className="flex justify-end">
             <FormSubmit>{isEdit ? "Save changes" : "Create product"}</FormSubmit>
