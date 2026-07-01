@@ -25,7 +25,8 @@
       "Bash(DATABASE_URL=\"postgresql://trello_user:trello_password_pg@localhost:5432/trello_clone\" npx prisma migrate dev --name add-knowledge-base)",
       "Bash(mkdir -p \"/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/knowledge-base/_components\" \"/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/knowledge-base/[industryId]/_components\")",
       "Bash(mkdir -p /Users/petertran/Downloads/Erasight-trello/app/api/kb/files/\\\\[filename\\\\])",
-      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(python3 -c ' *)"
     ],
     "additionalDirectories": [
       "/Users/petertran/Downloads/Erasight-trello/app/(platform)/(dashboard)/organization/[organizationId]/knowledge-base",

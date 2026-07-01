@@ -57,6 +57,35 @@ model BoardAiConfig {
   updatedAt    DateTime @updatedAt
 }
 
+model ReviewSkill {
+  id          String   @id @default(uuid())
+  orgId       String
+  name        String
+  description String
+  prompt      String   @db.Text
+  enabled     Boolean  @default(true)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+model ReviewPartner {
+  id        String   @id @default(uuid())
+  orgId     String
+  name      String
+  slug      String
+  context   String   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orgId, slug])
+  @@index([orgId])
+}
+
 model UserTelegramAccount {
   id               String   @id @default(uuid())
   orgId            String

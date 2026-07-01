@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useOrganization } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 import { Paperclip, Plus, Trash2, ExternalLink, Upload, Link2, Image as ImageIcon, FileText, Film, Download, Copy, X, Info, Sparkles, RotateCcw, AlertCircle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -59,9 +60,12 @@ function AttachmentPreview({ url, name }: { url: string; name: string }) {
   );
 }
 
+type PartnerOption = { id: string; name: string; slug: string };
+
 export const Attachments = ({ data }: AttachmentsProps) => {
   const params = useParams();
   const boardId = params.boardId as string;
+  const { organization } = useOrganization();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,6 +79,16 @@ export const Attachments = ({ data }: AttachmentsProps) => {
   const [urlCheckHint, setUrlCheckHint] = useState("");
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [collapsedReviewIds, setCollapsedReviewIds] = useState<Set<string>>(new Set());
+  const [partnerSlug, setPartnerSlug] = useState("");
+  const [partners, setPartners] = useState<PartnerOption[]>([]);
+
+  useEffect(() => {
+    if (!organization?.id) return;
+    fetch(`/api/organizations/${organization.id}/review-partners`)
+      .then((r) => r.json())
+      .then((json) => { if (json.data) setPartners(json.data); })
+      .catch(() => {});
+  }, [organization?.id]);
 
   const toggleReviewPanel = (id: string) =>
     setCollapsedReviewIds((prev) => {
@@ -82,7 +96,6 @@ export const Attachments = ({ data }: AttachmentsProps) => {
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-  const [partnerSlug, setPartnerSlug] = useState("");
 
   const downloadAttachment = (att: Attachment) => {
     const a = document.createElement("a");
@@ -217,15 +230,21 @@ export const Attachments = ({ data }: AttachmentsProps) => {
       <div className="w-full">
         <div className="flex items-center justify-between mb-2">
           <p className="font-semibold text-[#e5e5e5]">Tệp đính kèm</p>
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="h-3 w-3 text-emerald-400 shrink-0" />
-            <input
-              value={partnerSlug}
-              onChange={(e) => setPartnerSlug(e.target.value)}
-              placeholder="Partner slug (optional)"
-              className="text-[11px] bg-[#2a2a2a] border border-[#333] rounded px-2 py-1 text-[#ccc] placeholder:text-[#555] focus:outline-none focus:border-emerald-600/50 w-40"
-            />
-          </div>
+          {partners.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="h-3 w-3 text-emerald-400 shrink-0" />
+              <select
+                value={partnerSlug}
+                onChange={(e) => setPartnerSlug(e.target.value)}
+                className="text-[11px] bg-[#2a2a2a] border border-[#333] rounded px-2 py-1 text-[#ccc] focus:outline-none focus:border-emerald-600/50 w-40"
+              >
+                <option value="">Partner (optional)</option>
+                {partners.map((p) => (
+                  <option key={p.id} value={p.slug}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="space-y-1.5 mb-3">

@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Could not extract any text content from the file" }, { status: 422 });
     }
 
-    const review = await runClaudeReview(content, cardContext, partnerSlug);
+    const review = await runClaudeReview(content, cardContext, orgId, partnerSlug);
 
     const updated = await db.attachment.update({
       where: { id: attachmentId },

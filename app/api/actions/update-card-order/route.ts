@@ -11,7 +11,7 @@ import { syncParentList } from "@/lib/sync-parent-list";
 import { extractFileContent } from "@/lib/extract-file-content";
 import { runClaudeReview } from "@/lib/claude-cli-review";
 
-async function triggerAiReviewsForCards(cardIds: string[], boardId: string) {
+async function triggerAiReviewsForCards(cardIds: string[], boardId: string, orgId: string) {
   try {
     const cards = await db.card.findMany({
       where: { id: { in: cardIds } },
@@ -45,7 +45,7 @@ async function triggerAiReviewsForCards(cardIds: string[], boardId: string) {
           const content = await extractFileContent(attachment.url);
           if (!content.trim()) continue;
 
-          const review = await runClaudeReview(content, cardContext);
+          const review = await runClaudeReview(content, cardContext, orgId);
 
           await db.attachment.update({
             where: { id: attachment.id },
@@ -146,7 +146,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       items.some((i) => i.id === c.id && i.listId === aiReviewListId)
     );
     if (aiCandidates.length > 0) {
-      void triggerAiReviewsForCards(aiCandidates.map((c) => c.id), boardId);
+      void triggerAiReviewsForCards(aiCandidates.map((c) => c.id), boardId, orgId);
     }
   }
 
