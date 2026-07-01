@@ -1,17 +1,15 @@
-import { spawn } from "child_process";
+import Anthropic from "@anthropic-ai/sdk";
 import * as fs from "fs";
 import * as path from "path";
 
-const SKILLS_DIR = process.env.CLAUDE_SKILLS_DIR ?? "";
-const PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR ?? "";
+const SKILLS_DIR    = process.env.CLAUDE_SKILLS_DIR    ?? "";
 const KNOWLEDGE_DIR = process.env.CLAUDE_KNOWLEDGE_DIR ?? "";
-const CLAUDE_BIN = process.env.CLAUDE_BIN ?? "claude";
-const CLAUDE_MODEL = process.env.CLAUDE_REVIEW_MODEL ?? "";
-const REVIEW_TIMEOUT_MS = 120_000; // 2 minutes
+const CLAUDE_MODEL  = process.env.CLAUDE_REVIEW_MODEL  ?? "claude-sonnet-4-6";
 
 interface Skill {
   name: string;
   description: string;
+  content: string;
 }
 
 function readSkills(): Skill[] {
@@ -21,11 +19,11 @@ function readSkills(): Skill[] {
     .readdirSync(SKILLS_DIR)
     .filter((f) => f.endsWith(".md"))
     .map((f) => {
-      const name = "/" + f.replace(/\.md$/, "");
-      const raw = fs.readFileSync(path.join(SKILLS_DIR, f), "utf-8");
+      const name    = "/" + f.replace(/\.md$/, "");
+      const raw     = fs.readFileSync(path.join(SKILLS_DIR, f), "utf-8");
       const descMatch = raw.match(/description:\s*(.+)/);
       const description = descMatch?.[1]?.trim() ?? "No description";
-      return { name, description };
+      return { name, description, content: raw };
     });
 }
 
@@ -44,20 +42,14 @@ function buildPrompt(
 ): string {
   const partnerContext = partnerSlug ? readPartnerContext(partnerSlug) : null;
 
-  const skillList =
-    skills.length > 0
-      ? skills.map((s) => `- ${s.name}: ${s.description}`).join("\n")
-      : null;
-
   const parts: string[] = [];
 
   if (partnerContext) {
-    parts.push(
-      `Partner context — apply this throughout your review:\n${partnerContext}\n\n`
-    );
+    parts.push(`Partner context — apply this throughout your review:\n${partnerContext}\n\n`);
   }
 
-  if (skillList) {
+  if (skills.length > 0) {
+    const skillList = skills.map((s) => `- ${s.name}: ${s.description}`).join("\n");
     parts.push(
       `You have access to the following review skills:\n${skillList}\n\nBased on the file content below, choose the most appropriate skill and apply it. Factor in the partner context above where relevant. Do not explain which skill you chose — just deliver the review directly.\n\nIMPORTANT: Respond entirely in Vietnamese.\n\n`
     );
@@ -76,52 +68,17 @@ export async function runClaudeReview(
   cardContext: string,
   partnerSlug?: string
 ): Promise<string> {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const skills = readSkills();
   const prompt = buildPrompt(content, cardContext, skills, partnerSlug);
 
-  return new Promise((resolve, reject) => {
-    const cwd = PROJECT_DIR || process.cwd();
-
-    const args = ["-p", "--print"];
-    if (CLAUDE_MODEL) args.push("--model", CLAUDE_MODEL);
-
-    const child = spawn(CLAUDE_BIN, args, {
-      cwd,
-      env: process.env,
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-
-    let stdout = "";
-    let stderr = "";
-
-    child.stdout.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString();
-    });
-
-    child.stderr.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString();
-    });
-
-    const timer = setTimeout(() => {
-      child.kill("SIGTERM");
-      reject(new Error("Claude CLI timed out after 2 minutes"));
-    }, REVIEW_TIMEOUT_MS);
-
-    child.on("close", (code) => {
-      clearTimeout(timer);
-      if (code === 0 || stdout.trim()) {
-        resolve(stdout.trim());
-      } else {
-        reject(new Error(`Claude CLI exited with code ${code}: ${stderr.trim()}`));
-      }
-    });
-
-    child.on("error", (err) => {
-      clearTimeout(timer);
-      reject(new Error(`Failed to start Claude CLI: ${err.message}`));
-    });
-
-    child.stdin.write(prompt);
-    child.stdin.end();
+  const message = await client.messages.create({
+    model:      CLAUDE_MODEL,
+    max_tokens: 4096,
+    messages:   [{ role: "user", content: prompt }],
   });
+
+  const block = message.content[0];
+  if (block.type !== "text") throw new Error("Unexpected response type from Anthropic API");
+  return block.text.trim();
 }
