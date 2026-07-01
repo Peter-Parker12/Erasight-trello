@@ -87,10 +87,7 @@ export async function runClaudeReview(
 
     const child = spawn(CLAUDE_BIN, args, {
       cwd,
-      env: {
-        ...process.env,
-        HOME: PROJECT_DIR || "/opt/claude-reviewer",
-      },
+      env: process.env,
       stdio: ["pipe", "pipe", "pipe"],
     });
 
