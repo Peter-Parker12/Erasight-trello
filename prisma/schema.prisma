@@ -634,36 +634,40 @@ model ProductCategory {
 }
 
 model ProductBundle {
-  id          String            @id @default(uuid())
-  orgId       String
-  name        String
-  description String?           @db.Text
-  pricingMode BundlePricingMode @default(SUM)
-  discount    Decimal?          @db.Decimal(15, 0)
-  finalPrice  Decimal?          @db.Decimal(15, 0)
+  id            String            @id @default(uuid())
+  orgId         String
+  name          String
+  description   String?           @db.Text
+  pricingMode   BundlePricingMode @default(SUM)
+  discount      Decimal?          @db.Decimal(15, 0)
+  finalPrice    Decimal?          @db.Decimal(15, 0)
 
-  items       ProductBundleItem[]
-  companies   CompanyBundle[]
+  items         ProductBundleItem[] @relation("ParentBundle")
+  childBundleOf ProductBundleItem[] @relation("ChildBundle")
+  companies     CompanyBundle[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([orgId])
 }
 
 model ProductBundleItem {
-  id        String        @id @default(uuid())
-  bundleId  String
-  productId String
-  quantity  Int           @default(1)
-  unitPrice Decimal       @db.Decimal(15, 0)
-  active    Boolean       @default(true)
+  id            String         @id @default(uuid())
+  bundleId      String
+  productId     String?
+  childBundleId String?
+  quantity      Int            @default(1)
+  unitPrice     Decimal        @db.Decimal(15, 0)
+  active        Boolean        @default(true)
 
-  bundle    ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
-  product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  bundle        ProductBundle  @relation("ParentBundle", fields: [bundleId], references: [id], onDelete: Cascade)
+  product       Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+  childBundle   ProductBundle? @relation("ChildBundle", fields: [childBundleId], references: [id], onDelete: SetNull)
 
   @@index([bundleId])
   @@index([productId])
+  @@index([childBundleId])
 }
 
 model CompanyBundle {

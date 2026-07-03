@@ -2,7 +2,7 @@
 
 import { useState, useRef, type ElementRef, type KeyboardEvent } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Search, Check } from "lucide-react";
+import { Plus, Trash2, Search, Check, Layers } from "lucide-react";
 import type { Product, ProductBundle, ProductBundleItem } from "@prisma/client";
 
 import {
@@ -22,16 +22,24 @@ import { createBundle } from "@/actions/create-bundle";
 import { updateBundle } from "@/actions/update-bundle";
 import { cn } from "@/lib/utils";
 
-// lineId is a client-only stable key; productId can repeat across rows
-type BundleItem = { lineId: string; productId: string; quantity: number; unitPrice: number };
+// lineId is a client-only stable key
+type BundleItem = {
+  lineId: string;
+  productId?: string;
+  childBundleId?: string;
+  quantity: number;
+  unitPrice: number;
+};
+
 export type BundleWithItems = ProductBundle & {
-  items: (ProductBundleItem & { product: Product })[];
+  items: (ProductBundleItem & { product: Product | null; childBundle: ProductBundle | null })[];
   _count: { companies: number };
 };
 
 type BundleFormDialogProps = {
   trigger?: React.ReactNode;
   products: Product[];
+  bundles?: BundleWithItems[];
   bundle?: BundleWithItems;
   open?: boolean;
   onOpenChange?: (v: boolean) => void;
@@ -63,9 +71,28 @@ function calcTotal(
   return sum;
 }
 
+function calcBundleTotal(b: BundleWithItems): number {
+  const sum = b.items.reduce((acc, i) => acc + Number(i.unitPrice) * i.quantity, 0);
+  if (b.pricingMode === "FIXED")            return Number(b.finalPrice ?? 0);
+  if (b.pricingMode === "DISCOUNT_PERCENT") return sum * (1 - Number(b.discount ?? 0) / 100);
+  if (b.pricingMode === "DISCOUNT_FLAT")    return Math.max(0, sum - Number(b.discount ?? 0));
+  return sum;
+}
+
+function itemsFromBundle(bundle: BundleWithItems): BundleItem[] {
+  return bundle.items.map((i) => ({
+    lineId:        i.id,
+    productId:     i.productId     ?? undefined,
+    childBundleId: i.childBundleId ?? undefined,
+    quantity:      i.quantity,
+    unitPrice:     Number(i.unitPrice),
+  }));
+}
+
 export const BundleFormDialog = ({
   trigger,
   products,
+  bundles,
   bundle,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
@@ -73,19 +100,12 @@ export const BundleFormDialog = ({
   onUpdated,
 }: BundleFormDialogProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
-  const open    = controlledOpen          ?? internalOpen;
-  const setOpen = controlledOnOpenChange  ?? setInternalOpen;
+  const open    = controlledOpen         ?? internalOpen;
+  const setOpen = controlledOnOpenChange ?? setInternalOpen;
   const closeRef = useRef<ElementRef<"button">>(null);
   const isEdit   = !!bundle;
 
-  const [items, setItems] = useState<BundleItem[]>(
-    bundle?.items.map((i) => ({
-      lineId:    i.id,
-      productId: i.productId,
-      quantity:  i.quantity,
-      unitPrice: Number(i.unitPrice),
-    })) ?? []
-  );
+  const [items, setItems] = useState<BundleItem[]>(bundle ? itemsFromBundle(bundle) : []);
   const [pricingMode, setPricingMode] = useState<"SUM" | "DISCOUNT_PERCENT" | "DISCOUNT_FLAT" | "FIXED">(
     bundle?.pricingMode ?? "SUM"
   );
@@ -96,18 +116,34 @@ export const BundleFormDialog = ({
   const [pickerSearch,   setPickerSearch]   = useState("");
   const [pickerSelected, setPickerSelected] = useState<Set<string>>(new Set());
 
-  // Refs for Tab/Enter navigation between Qty ↔ Unit Price
+  // Bundle picker
+  const [bundleSearch,   setBundleSearch]   = useState("");
+  const [bundleSelected, setBundleSelected] = useState<Set<string>>(new Set());
+
+  // Refs for Tab/Enter navigation
   const qtyRefs   = useRef<(HTMLInputElement | null)[]>([]);
   const priceRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const availableToAdd  = products.filter((p) => p.status === "ACTIVE");
+  const availableToAdd    = products.filter((p) => p.status === "ACTIVE");
+  const availableBundles  = (bundles ?? []).filter((b) => b.id !== bundle?.id);
+
   const pickerFiltered  = availableToAdd.filter((p) =>
     p.name.toLowerCase().includes(pickerSearch.toLowerCase()) ||
     (p.category ?? "").toLowerCase().includes(pickerSearch.toLowerCase())
   );
+  const bundlesFiltered = availableBundles.filter((b) =>
+    b.name.toLowerCase().includes(bundleSearch.toLowerCase())
+  );
 
   const togglePicker = (id: string) =>
     setPickerSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const toggleBundlePicker = (id: string) =>
+    setBundleSelected((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
@@ -128,6 +164,23 @@ export const BundleFormDialog = ({
     setItems((prev) => [...prev, ...newRows]);
     setPickerSelected(new Set());
     setPickerSearch("");
+  };
+
+  const addSelectedBundles = () => {
+    const newRows: BundleItem[] = [];
+    bundleSelected.forEach((childBundleId) => {
+      const b = availableBundles.find((b) => b.id === childBundleId);
+      if (!b) return;
+      newRows.push({
+        lineId:        crypto.randomUUID(),
+        childBundleId: b.id,
+        quantity:      1,
+        unitPrice:     Math.round(calcBundleTotal(b)),
+      });
+    });
+    setItems((prev) => [...prev, ...newRows]);
+    setBundleSelected(new Set());
+    setBundleSearch("");
   };
 
   const removeItem = (lineId: string) =>
@@ -183,17 +236,18 @@ export const BundleFormDialog = ({
       if (onUpdated) {
         const rebuilt: BundleWithItems = {
           ...data,
-          items: items.map(({ lineId, productId, quantity, unitPrice }) => ({
-            id: lineId,
-            bundleId: data.id,
-            productId,
+          items: items.map(({ lineId, productId, childBundleId, quantity, unitPrice }) => ({
+            id:            lineId,
+            bundleId:      data.id,
+            productId:     productId     ?? null,
+            childBundleId: childBundleId ?? null,
             quantity,
-            // BundlesTable uses Number(item.unitPrice) so a plain number is safe
-            unitPrice: unitPrice as unknown as ProductBundleItem["unitPrice"],
-            active: true,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            product: products.find((p) => p.id === productId)!,
+            unitPrice:     unitPrice as unknown as ProductBundleItem["unitPrice"],
+            active:        true,
+            createdAt:     new Date(),
+            updatedAt:     new Date(),
+            product:       productId     ? (products.find((p) => p.id === productId)            ?? null) : null,
+            childBundle:   childBundleId ? (availableBundles.find((b) => b.id === childBundleId) ?? null) : null,
           })),
           _count: bundle!._count,
         };
@@ -205,7 +259,7 @@ export const BundleFormDialog = ({
   });
 
   const onSubmit = (formData: FormData) => {
-    if (items.length === 0) { toast.error("Add at least one product."); return; }
+    if (items.length === 0) { toast.error("Add at least one product or bundle."); return; }
     const fields = {
       name:        formData.get("name") as string,
       description: (formData.get("description") as string) || undefined,
@@ -221,24 +275,17 @@ export const BundleFormDialog = ({
   const onOpenChange = (v: boolean) => {
     setOpen(v);
     if (!v) {
-      setItems(
-        bundle?.items.map((i) => ({
-          lineId:    i.id,
-          productId: i.productId,
-          quantity:  i.quantity,
-          unitPrice: Number(i.unitPrice),
-        })) ?? []
-      );
+      setItems(bundle ? itemsFromBundle(bundle) : []);
       setPricingMode(bundle?.pricingMode ?? "SUM");
       setDiscount(Number(bundle?.discount   ?? 0));
       setFinalPrice(Number(bundle?.finalPrice ?? 0));
       setPickerSearch("");
       setPickerSelected(new Set());
+      setBundleSearch("");
+      setBundleSelected(new Set());
     }
   };
 
-  // Cell input: no ring on a border-collapsed table (prevents bleed into neighbours)
-  // Instead we use a background shift + subtle left border as focus indicator.
   const cellInput = cn(
     "w-full h-full px-3 py-2.5 text-sm bg-transparent text-[#e5e5e5] tabular-nums",
     "focus:outline-none focus:bg-blue-500/[0.08] transition-colors"
@@ -248,7 +295,6 @@ export const BundleFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
-      {/* wider + taller — use 90vw cap with explicit max */}
       <DialogContent className="w-[min(90vw,1100px)] max-w-none p-0 gap-0 overflow-hidden">
         {/* ── Header ── */}
         <DialogHeader className="px-7 pt-6 pb-4 border-b border-[#2e2e2e]">
@@ -292,13 +338,12 @@ export const BundleFormDialog = ({
                 </span>
               </div>
 
-              {/* wrapper: rounded-md + overflow-hidden clips cell highlights to the border radius */}
               <div className="rounded-lg border border-[#2e2e2e] overflow-hidden">
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="bg-[#222] text-xs text-muted-foreground border-b border-[#2e2e2e]">
                       <th className="w-9 px-3 py-2.5 text-center border-r border-[#2e2e2e] font-medium select-none">#</th>
-                      <th className="px-4 py-2.5 text-left border-r border-[#2e2e2e] font-medium">Product</th>
+                      <th className="px-4 py-2.5 text-left border-r border-[#2e2e2e] font-medium">Item</th>
                       <th className="w-28 px-4 py-2.5 text-center border-r border-[#2e2e2e] font-medium">Qty</th>
                       <th className="w-52 px-4 py-2.5 text-right border-r border-[#2e2e2e] font-medium">
                         Unit Price (VND)
@@ -315,13 +360,17 @@ export const BundleFormDialog = ({
                     {items.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground italic">
-                          No products yet — select some from the picker below.
+                          No items yet — add products or bundles below.
                         </td>
                       </tr>
                     ) : (
                       items.map((item, idx) => {
-                        const product     = products.find((p) => p.id === item.productId);
-                        const rowSubtotal = item.unitPrice * item.quantity;
+                        const product         = products.find((p) => p.id === item.productId);
+                        const childBundleInfo = availableBundles.find((b) => b.id === item.childBundleId);
+                        const isBundle        = !!item.childBundleId;
+                        const displayName     = product?.name ?? childBundleInfo?.name ?? "Unknown";
+                        const rowSubtotal     = item.unitPrice * item.quantity;
+
                         return (
                           <tr key={item.lineId} className="hover:bg-[#1c1c1c] group">
                             {/* # */}
@@ -329,17 +378,23 @@ export const BundleFormDialog = ({
                               {idx + 1}
                             </td>
 
-                            {/* Product */}
+                            {/* Item name */}
                             <td className="px-4 py-2.5 border-r border-[#262626]">
-                              <span className="font-medium text-[#e5e5e5]">
-                                {product?.name ?? "Unknown"}
-                              </span>
-                              {product?.unit && (
-                                <span className="text-muted-foreground text-xs ml-2">/ {product.unit}</span>
-                              )}
+                              <div className="flex items-center gap-2">
+                                {isBundle && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded shrink-0">
+                                    <Layers className="h-2.5 w-2.5" />
+                                    BUNDLE
+                                  </span>
+                                )}
+                                <span className="font-medium text-[#e5e5e5]">{displayName}</span>
+                                {!isBundle && product?.unit && (
+                                  <span className="text-muted-foreground text-xs">/ {product.unit}</span>
+                                )}
+                              </div>
                             </td>
 
-                            {/* Qty — overflow-hidden keeps focus bg inside cell */}
+                            {/* Qty */}
                             <td className="w-28 p-0 border-r border-[#262626] overflow-hidden">
                               <input
                                 ref={(el) => { qtyRefs.current[idx] = el; }}
@@ -494,7 +549,6 @@ export const BundleFormDialog = ({
                 <Label className="text-xs font-semibold text-[#e5e5e5]">Add products</Label>
 
                 <div className="rounded-lg border border-[#2e2e2e] overflow-hidden">
-                  {/* Search */}
                   <div className="flex items-center gap-2.5 px-4 py-2.5 bg-[#222] border-b border-[#2e2e2e]">
                     <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     <input
@@ -511,7 +565,6 @@ export const BundleFormDialog = ({
                     )}
                   </div>
 
-                  {/* List */}
                   <div className="max-h-48 overflow-y-auto">
                     {pickerFiltered.length === 0 ? (
                       <p className="px-4 py-5 text-xs text-muted-foreground text-center italic">
@@ -533,25 +586,18 @@ export const BundleFormDialog = ({
                                   : "hover:bg-[#222]"
                               )}
                             >
-                              {/* Custom checkbox */}
                               <div className={cn(
                                 "w-4 h-4 rounded border shrink-0 flex items-center justify-center transition-colors",
                                 checked ? "bg-violet-600 border-violet-600" : "border-[#555]"
                               )}>
                                 {checked && <Check className="h-2.5 w-2.5 text-white" />}
                               </div>
-
-                              {/* Name */}
                               <span className="flex-1 text-sm text-[#e5e5e5] truncate">
                                 {product.name}
                               </span>
-
-                              {/* Unit badge */}
                               <span className="text-[11px] text-muted-foreground/70 bg-[#2a2a2a] px-1.5 py-0.5 rounded shrink-0">
                                 {product.unit}
                               </span>
-
-                              {/* Price */}
                               <span className="text-xs text-violet-400 tabular-nums shrink-0 min-w-[90px] text-right">
                                 {formatVnd(Number(product.unitPrice))} ₫
                               </span>
@@ -562,7 +608,6 @@ export const BundleFormDialog = ({
                     )}
                   </div>
 
-                  {/* Footer */}
                   <div className="flex items-center justify-between px-4 py-2.5 bg-[#222] border-t border-[#2e2e2e]">
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <button
@@ -585,7 +630,6 @@ export const BundleFormDialog = ({
                         </>
                       )}
                     </div>
-
                     <Button
                       type="button"
                       size="sm"
@@ -601,10 +645,87 @@ export const BundleFormDialog = ({
               </div>
             )}
 
+            {/* ── Bundle picker ── */}
+            {availableBundles.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-[#e5e5e5]">Add bundles</Label>
+                <p className="text-[11px] text-muted-foreground/60">
+                  Nest another bundle as a line item. Unit price defaults to the bundle total and can be overridden.
+                </p>
+
+                <div className="rounded-lg border border-[#2e2e2e] overflow-hidden">
+                  <div className="flex items-center gap-2.5 px-4 py-2.5 bg-[#222] border-b border-[#2e2e2e]">
+                    <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Search bundles…"
+                      value={bundleSearch}
+                      onChange={(e) => setBundleSearch(e.target.value)}
+                      className="flex-1 text-sm bg-transparent text-[#e5e5e5] focus:outline-none placeholder:text-muted-foreground/40"
+                    />
+                    {bundleSelected.size > 0 && (
+                      <span className="text-xs font-medium text-violet-400 shrink-0 tabular-nums">
+                        {bundleSelected.size} selected
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="max-h-40 overflow-y-auto divide-y divide-[#262626]">
+                    {bundlesFiltered.length === 0 ? (
+                      <p className="px-4 py-5 text-xs text-muted-foreground text-center italic">
+                        No bundles found.
+                      </p>
+                    ) : (
+                      bundlesFiltered.map((b) => {
+                        const checked = bundleSelected.has(b.id);
+                        const bTotal  = Math.round(calcBundleTotal(b));
+                        return (
+                          <button
+                            key={b.id}
+                            type="button"
+                            onClick={() => toggleBundlePicker(b.id)}
+                            className={cn(
+                              "w-full flex items-center gap-3.5 px-4 py-2.5 text-left transition-colors",
+                              checked ? "bg-violet-600/10 hover:bg-violet-600/[0.14]" : "hover:bg-[#222]"
+                            )}
+                          >
+                            <div className={cn(
+                              "w-4 h-4 rounded border shrink-0 flex items-center justify-center transition-colors",
+                              checked ? "bg-violet-600 border-violet-600" : "border-[#555]"
+                            )}>
+                              {checked && <Check className="h-2.5 w-2.5 text-white" />}
+                            </div>
+                            <Layers className="h-3.5 w-3.5 text-violet-400/70 shrink-0" />
+                            <span className="flex-1 text-sm text-[#e5e5e5] truncate">{b.name}</span>
+                            <span className="text-xs text-violet-400 tabular-nums shrink-0 min-w-[90px] text-right">
+                              {formatVnd(bTotal)} ₫
+                            </span>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-end px-4 py-2.5 bg-[#222] border-t border-[#2e2e2e]">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={bundleSelected.size === 0}
+                      onClick={addSelectedBundles}
+                      className="h-8"
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1.5" />
+                      Add{bundleSelected.size > 0 ? ` ${bundleSelected.size}` : ""} bundle{bundleSelected.size !== 1 ? "s" : ""}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </form>
         </div>
 
-        {/* ── Sticky footer with save button ── */}
+        {/* ── Sticky footer ── */}
         <div className="px-7 py-4 border-t border-[#2e2e2e] flex justify-end bg-[#161616]">
           <Button type="submit" form="bundle-form" size="sm">
             {isEdit ? "Save changes" : "Create bundle"}

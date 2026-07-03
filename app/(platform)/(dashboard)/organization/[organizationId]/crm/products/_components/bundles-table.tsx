@@ -84,9 +84,13 @@ export const BundlesTable = ({ bundles, products, onBundleUpdated, onBundleDelet
         </thead>
         <tbody className="divide-y divide-[#333]">
           {bundles.map((bundle) => {
-            // Items whose product still exists (guard against cascade timing edge case)
-            const activeItems = bundle.items.filter((i) => i.product != null);
-            const productNames = activeItems.map((i) => i.product.name).join(", ");
+            // Filter out stale items (cascade timing edge case)
+            const activeItems = bundle.items.filter((i) => i.product != null || i.childBundle != null);
+            const productNames = activeItems.map((i) =>
+              i.childBundle
+                ? `${i.childBundle.name} (bundle)`
+                : i.product?.name ?? "Unknown"
+            ).join(", ");
 
             return (
               <tr key={bundle.id} className="hover:bg-[#2a2a2a]">
@@ -118,6 +122,7 @@ export const BundlesTable = ({ bundles, products, onBundleUpdated, onBundleDelet
                     <BundleFormDialog
                       bundle={{ ...bundle, items: activeItems }}
                       products={products}
+                      bundles={bundles}
                       onUpdated={onBundleUpdated}
                       trigger={
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0">

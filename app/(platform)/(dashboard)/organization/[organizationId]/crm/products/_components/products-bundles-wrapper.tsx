@@ -88,6 +88,7 @@ export const ProductsBundlesWrapper = ({
           </div>
           <BundleFormDialog
             products={products}
+            bundles={bundles}
             trigger={
               <Button size="sm" variant="outline">
                 <Plus className="h-4 w-4 mr-2" />

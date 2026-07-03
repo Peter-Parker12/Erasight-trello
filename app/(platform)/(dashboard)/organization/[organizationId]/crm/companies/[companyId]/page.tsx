@@ -28,7 +28,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
         bundles: {
           include: {
             bundle: {
-              include: { items: { include: { product: true } } },
+              include: { items: { include: { product: true, childBundle: true } } },
             },
           },
         },
@@ -37,7 +37,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
     getFieldDefinitions(orgId, "COMPANY"),
     db.productBundle.findMany({
       where: { orgId },
-      include: { items: { include: { product: true } } },
+      include: { items: { include: { product: true, childBundle: true } } },
       orderBy: { name: "asc" },
     }),
   ]);

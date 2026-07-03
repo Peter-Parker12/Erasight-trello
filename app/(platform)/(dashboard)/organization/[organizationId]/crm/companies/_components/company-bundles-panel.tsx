@@ -9,7 +9,7 @@ import type { Product, ProductBundle, ProductBundleItem } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 
 type BundleWithItems = ProductBundle & {
-  items: (ProductBundleItem & { product: Product })[];
+  items: (ProductBundleItem & { product: Product | null; childBundle: ProductBundle | null })[];
 };
 
 type CompanyBundlesPanelProps = {
@@ -113,7 +113,10 @@ export const CompanyBundlesPanel = ({
               <div>
                 <p className="text-sm font-medium text-[#e5e5e5]">{bundle.name}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {bundle.items.map((i) => `${i.product.name} ×${i.quantity}`).join(" · ")}
+                  {bundle.items.map((i) => {
+                    const name = i.childBundle ? `${i.childBundle.name} (bundle)` : (i.product?.name ?? "Unknown");
+                    return `${name} ×${i.quantity}`;
+                  }).join(" · ")}
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">

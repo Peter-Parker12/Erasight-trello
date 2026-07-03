@@ -26,7 +26,7 @@ const ProductsPage = async ({ params }: ProductsPageProps) => {
     db.productBundle.findMany({
       where: { orgId },
       include: {
-        items: { where: { active: true }, include: { product: true } },
+        items: { where: { active: true }, include: { product: true, childBundle: true } },
         _count: { select: { companies: true } },
       },
       orderBy: { createdAt: "desc" },

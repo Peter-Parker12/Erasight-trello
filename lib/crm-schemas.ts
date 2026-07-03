@@ -78,7 +78,8 @@ export const productBaseFields = {
 };
 
 export const bundleItemSchema = z.object({
-  productId: z.string(),
+  productId: z.string().optional(),
+  childBundleId: z.string().optional(),
   quantity: z.number().int().min(1, "Quantity must be at least 1.").default(1),
   unitPrice: z.number().min(0, "Price must be 0 or more."),
 });
@@ -89,5 +90,5 @@ export const bundleBaseFields = {
   pricingMode: z.enum(["SUM", "DISCOUNT_PERCENT", "DISCOUNT_FLAT", "FIXED"]).default("SUM"),
   discount: z.number().min(0, "Discount must be 0 or more.").optional().nullable(),
   finalPrice: z.number().min(0, "Price must be 0 or more.").optional().nullable(),
-  items: z.array(bundleItemSchema).min(1, "Add at least one product."),
+  items: z.array(bundleItemSchema).min(1, "Add at least one product or bundle."),
 };

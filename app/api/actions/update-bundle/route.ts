@@ -34,8 +34,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
           finalPrice: finalPrice != null ? new Prisma.Decimal(finalPrice) : null,
           items: {
             create: items.map((item) => ({
-              productId: item.productId,
-              quantity: item.quantity,
+              ...(item.productId     ? { productId:     item.productId     } : {}),
+              ...(item.childBundleId ? { childBundleId: item.childBundleId } : {}),
+              quantity:  item.quantity,
               unitPrice: new Prisma.Decimal(item.unitPrice),
             })),
           },

@@ -18,7 +18,8 @@ import type { CustomFieldDefinitionDTO } from "@/lib/custom-fields";
 
 type Contact = { id: string; firstName: string; lastName: string | null; email: string | null };
 type Lead = { id: string; title: string; stage: { name: string } };
-type BundleItem = { product: { id: string; name: string; unitPrice: unknown; unit: string }; quantity: number; unitPrice: unknown };
+type BundleChildBundle = { id: string; name: string };
+type BundleItem = { product: { id: string; name: string; unitPrice: unknown; unit: string } | null; childBundle: BundleChildBundle | null; quantity: number; unitPrice: unknown };
 type Bundle = {
   id: string; orgId: string; name: string; description: string | null;
   pricingMode: string; discount: unknown; finalPrice: unknown;
