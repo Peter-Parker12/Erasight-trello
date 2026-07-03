@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
-import { isOrgAdmin } from "@/lib/board-access";
+import { canAccessModule } from "@/lib/module-access";
 import { ensureDefaultPipelineStages } from "@/lib/pipeline-stages";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
 import { CustomFieldsManager } from "@/app/(platform)/(dashboard)/organization/[organizationId]/settings/app/custom-fields/_components/custom-fields-manager";
@@ -14,14 +14,14 @@ type LeadsPageProps = {
 
 const LeadsPage = async ({ params }: LeadsPageProps) => {
   const { organizationId } = await params;
-  const { orgId } = await auth();
+  const { orgId, userId } = await auth();
 
-  if (!orgId || orgId !== organizationId) redirect("/select-org");
+  if (!orgId || !userId || orgId !== organizationId) redirect("/select-org");
 
   await ensureDefaultPipelineStages(orgId);
 
-  const [isAdmin, stages, companies, contacts, products, definitionRows] = await Promise.all([
-    isOrgAdmin(orgId),
+  const [canManageFields, stages, companies, contacts, products, definitionRows] = await Promise.all([
+    canAccessModule(orgId, userId, "CRM"),
     db.pipelineStage.findMany({
       where: { orgId },
       orderBy: { order: "asc" },
@@ -65,7 +65,7 @@ const LeadsPage = async ({ params }: LeadsPageProps) => {
         </p>
       </div>
 
-      {isAdmin && (
+      {canManageFields && (
         <CustomFieldsManager entityType="LEAD" label="Custom fields" fields={definitions} />
       )}
 

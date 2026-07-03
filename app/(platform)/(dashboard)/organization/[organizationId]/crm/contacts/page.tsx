@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
-import { isOrgAdmin } from "@/lib/board-access";
+import { canAccessModule } from "@/lib/module-access";
 import { getFieldDefinitions, toFieldDefinitionDTO } from "@/lib/custom-fields";
 import { CustomFieldsManager } from "@/app/(platform)/(dashboard)/organization/[organizationId]/settings/app/custom-fields/_components/custom-fields-manager";
 import { ContactsClientSection } from "./_components/contacts-client-section";
@@ -13,12 +13,12 @@ type ContactsPageProps = {
 
 const ContactsPage = async ({ params }: ContactsPageProps) => {
   const { organizationId } = await params;
-  const { orgId } = await auth();
+  const { orgId, userId } = await auth();
 
-  if (!orgId || orgId !== organizationId) redirect("/select-org");
+  if (!orgId || !userId || orgId !== organizationId) redirect("/select-org");
 
-  const [isAdmin, contacts, companies, definitionRows] = await Promise.all([
-    isOrgAdmin(orgId),
+  const [canManageFields, contacts, companies, definitionRows] = await Promise.all([
+    canAccessModule(orgId, userId, "CRM"),
     db.contact.findMany({
       where: { orgId },
       include: { company: { select: { id: true, name: true } } },
@@ -43,7 +43,7 @@ const ContactsPage = async ({ params }: ContactsPageProps) => {
         organizationId={organizationId}
       />
 
-      {isAdmin && (
+      {canManageFields && (
         <CustomFieldsManager entityType="CONTACT" label="Custom fields" fields={definitions} />
       )}
     </div>
