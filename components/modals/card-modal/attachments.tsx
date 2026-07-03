@@ -221,6 +221,7 @@ export const Attachments = ({ data }: AttachmentsProps) => {
     setTab("url");
     setUrlCheckState("idle");
     setUrlCheckHint("");
+    setPartnerSlug("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -230,21 +231,6 @@ export const Attachments = ({ data }: AttachmentsProps) => {
       <div className="w-full">
         <div className="flex items-center justify-between mb-2">
           <p className="font-semibold text-[#e5e5e5]">Tệp đính kèm</p>
-          {partners.length > 0 && (
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="h-3 w-3 text-emerald-400 shrink-0" />
-              <select
-                value={partnerSlug}
-                onChange={(e) => setPartnerSlug(e.target.value)}
-                className="text-[11px] bg-[#2a2a2a] border border-[#333] rounded px-2 py-1 text-[#ccc] focus:outline-none focus:border-emerald-600/50 w-40"
-              >
-                <option value="">Partner (optional)</option>
-                {partners.map((p) => (
-                  <option key={p.id} value={p.slug}>{p.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
 
         <div className="space-y-1.5 mb-3">
@@ -389,8 +375,17 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                             ) : (
                               <Sparkles className="h-3.5 w-3.5" />
                             )}
-                            {reviewingId === att.id ? "Đang xem xét..." : att.review ? "Xem xét lại" : "AI Review"}
+                            {reviewingId === att.id
+                              ? "Đang xem xét..."
+                              : att.review
+                              ? "Xem xét lại"
+                              : "AI Review"}
                           </button>
+                          {partnerSlug && (
+                            <span className="text-[10px] text-emerald-600 flex items-center gap-0.5">
+                              · {partners.find((p) => p.slug === partnerSlug)?.name ?? partnerSlug}
+                            </span>
+                          )}
                           <button
                             onClick={(e) => { e.stopPropagation(); setSelectedAttId(null); }}
                             className="ml-auto text-muted-foreground hover:text-[#e5e5e5]"
@@ -565,6 +560,22 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                     <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên file..." className="w-full text-sm border border-[#333] rounded-md p-2 bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1 focus:ring-violet-500" />
                   )}
                 </>
+              )}
+              {partners.length > 0 && (
+                <div className="flex items-center gap-2 pt-1 border-t border-[#2a2a2a]">
+                  <Sparkles className="h-3 w-3 text-emerald-400 shrink-0" />
+                  <label className="text-xs text-[#666] shrink-0">AI review partner</label>
+                  <select
+                    value={partnerSlug}
+                    onChange={(e) => setPartnerSlug(e.target.value)}
+                    className="flex-1 text-xs bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-[#ccc] focus:outline-none focus:border-emerald-600/50"
+                  >
+                    <option value="">None (optional)</option>
+                    {partners.map((p) => (
+                      <option key={p.id} value={p.slug}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
               )}
               <div className="flex gap-2">
                 <Button

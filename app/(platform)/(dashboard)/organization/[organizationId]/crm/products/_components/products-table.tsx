@@ -10,6 +10,7 @@ import { deleteProduct } from "@/actions/delete-product";
 import type { CustomFieldDefinitionDTO } from "@/lib/custom-fields";
 import { CategoryBadge, CategorySelect, type ProductCategoryDef } from "./category-select";
 import { cn } from "@/lib/utils";
+import { ProductDetailSheet } from "./product-detail-sheet";
 
 function formatVnd(n: number | string | { toNumber?: () => number; toString: () => string }) {
   return new Intl.NumberFormat("vi-VN").format(
@@ -23,7 +24,7 @@ const UNITS = ["item", "hour", "month", "year", "seat", "project"] as const;
 
 type EditState = {
   id: string;
-  field: "name" | "unitPrice";
+  field: "unitPrice";
   value: string;
 };
 
@@ -38,6 +39,7 @@ type ProductsTableProps = {
 
 export const ProductsTable = ({
   products,
+  definitions,
   categories,
   onCategoryCreated,
   onUpdated,
@@ -50,11 +52,11 @@ export const ProductsTable = ({
   // Track which row has the category dropdown open
   const [catEditId, setCatEditId] = useState<string | null>(null);
 
+  // Detail sheet state
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
+
   const startEdit = (product: Product, field: EditState["field"]) => {
-    const value =
-      field === "unitPrice"
-        ? String(Number(product.unitPrice))
-        : product.name;
+    const value = String(Number(product.unitPrice));
     setEdit({ id: product.id, field, value });
   };
 
@@ -67,26 +69,25 @@ export const ProductsTable = ({
     if (!edit || edit.id !== product.id) return;
 
     const { field, value } = edit;
-    const original =
-      field === "unitPrice" ? String(Number(product.unitPrice)) : product.name;
+    const original = String(Number(product.unitPrice));
 
     if (value === original) { setEdit(null); return; }
 
-    const numValue = field === "unitPrice" ? Number(value) : null;
-    if (field === "unitPrice" && (isNaN(numValue!) || numValue! < 0)) { setEdit(null); return; }
+    const numValue = Number(value);
+    if (isNaN(numValue) || numValue < 0) { setEdit(null); return; }
 
-    const optimistic = { ...product, [field]: field === "unitPrice" ? numValue : value } as Product;
+    const optimistic = { ...product, unitPrice: numValue } as unknown as Product;
     setEdit(null);
     onUpdated(optimistic);
     setSaving(product.id);
 
     const result = await updateProduct({
-      id: product.id,
-      name:        field === "name"       ? value    : product.name,
+      id:          product.id,
+      name:        product.name,
       description: product.description   ?? undefined,
       category:    product.categories[0] ?? product.category ?? undefined,
       categories:  product.categories,
-      unitPrice:   field === "unitPrice"  ? numValue! : Number(product.unitPrice),
+      unitPrice:   numValue,
       unit:        product.unit,
       status:      product.status,
     });
@@ -171,7 +172,6 @@ export const ProductsTable = ({
         </thead>
         <tbody className="divide-y divide-[#2e2e2e]">
           {products.map((product, idx) => {
-            const isEditName  = edit?.id === product.id && edit.field === "name";
             const isEditPrice = edit?.id === product.id && edit.field === "unitPrice";
             const isSaving    = saving === product.id;
             const isCatOpen   = catEditId === product.id;
@@ -185,7 +185,7 @@ export const ProductsTable = ({
                 key={product.id}
                 className={cn(
                   "group hover:bg-[#1e1e1e]",
-                  (isEditName || isEditPrice || isCatOpen) && "bg-[#1e1e1e]",
+                  (isEditPrice || isCatOpen) && "bg-[#1e1e1e]",
                   isSaving && "opacity-60"
                 )}
               >
@@ -194,30 +194,15 @@ export const ProductsTable = ({
                   {idx + 1}
                 </td>
 
-                {/* Name */}
-                <td
-                  className={cn("p-0 border-r border-[#2e2e2e] min-w-[160px]", !isEditName && "cursor-text")}
-                  onClick={() => !isEditName && startEdit(product, "name")}
-                >
-                  {isEditName ? (
-                    <input
-                      autoFocus
-                      type="text"
-                      value={edit!.value}
-                      onChange={(e) => setEdit({ ...edit!, value: e.target.value })}
-                      onBlur={() => {
-                        if (cancellingRef.current) { cancellingRef.current = false; return; }
-                        commitEdit(product);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter")  { e.preventDefault(); (e.target as HTMLInputElement).blur(); }
-                        if (e.key === "Escape") cancelEdit();
-                      }}
-                      className={cellInputCls}
-                    />
-                  ) : (
-                    <div className="px-3 py-[9px] font-medium text-[#e5e5e5]">{product.name}</div>
-                  )}
+                {/* Name — click to open detail sheet */}
+                <td className="p-0 border-r border-[#2e2e2e] min-w-[160px]">
+                  <button
+                    type="button"
+                    className="w-full text-left px-3 py-[9px] font-medium text-[#e5e5e5] hover:text-violet-400 transition-colors"
+                    onClick={() => setDetailProduct(product)}
+                  >
+                    {product.name || <span className="text-muted-foreground italic">Untitled</span>}
+                  </button>
                 </td>
 
                 {/* Categories — inline multi-select */}
@@ -330,8 +315,21 @@ export const ProductsTable = ({
         </tbody>
       </table>
       <div className="px-4 py-2 bg-[#1a1a1a] border-t border-[#2e2e2e] text-[11px] text-muted-foreground/50 select-none">
-        Click name or price to edit · Click categories to select tags · Unit &amp; Status save on change · Enter to confirm · Esc to cancel
+        Click name to view details · Click price to edit · Click categories to select tags · Unit &amp; Status save on change
       </div>
+
+      <ProductDetailSheet
+        product={detailProduct}
+        open={!!detailProduct}
+        onOpenChange={(open) => { if (!open) setDetailProduct(null); }}
+        definitions={definitions}
+        categories={categories}
+        onCategoryCreated={onCategoryCreated}
+        onUpdated={(updated) => {
+          onUpdated(updated);
+          setDetailProduct(updated);
+        }}
+      />
     </div>
   );
 };

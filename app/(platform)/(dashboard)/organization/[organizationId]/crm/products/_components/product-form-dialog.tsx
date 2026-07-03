@@ -106,7 +106,6 @@ export const ProductFormDialog = ({
           <FormInput
             id="name"
             label="Name"
-            required
             defaultValue={product?.name}
             errors={fieldErrors}
           />
@@ -172,7 +171,6 @@ export const ProductFormDialog = ({
               id="unitPrice"
               label=""
               type="number"
-              required
               defaultValue={product?.unitPrice ? String(product.unitPrice) : ""}
               errors={fieldErrors}
             />

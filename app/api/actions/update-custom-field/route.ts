@@ -7,15 +7,15 @@ import { InputType, ReturnType } from "@/actions/update-custom-field/types";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { toApiRoute } from "@/lib/api-route";
-import { isOrgAdmin } from "@/lib/board-access";
+import { canAccessModule } from "@/lib/module-access";
 import { ENTITY_TYPE_PATHS } from "@/lib/crm-entity-paths";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { orgId } = await auth();
-  if (!orgId) return { error: "Unauthorized" };
+  const { orgId, userId } = await auth();
+  if (!orgId || !userId) return { error: "Unauthorized" };
 
-  if (!(await isOrgAdmin(orgId))) {
-    return { error: "Only admins can manage custom fields." };
+  if (!(await canAccessModule(orgId, userId, "CRM"))) {
+    return { error: "You don't have access to the CRM module." };
   }
 
   const { id, options, ...fields } = data;
