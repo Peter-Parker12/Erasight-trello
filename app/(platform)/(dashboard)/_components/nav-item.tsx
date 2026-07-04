@@ -12,6 +12,7 @@ import {
   ListTodo,
   Package,
   Settings,
+  Target,
   Users,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
@@ -95,6 +96,12 @@ export const NavItem = ({
   ];
 
   const bottomRoutes = [
+    {
+      label: "OKRs & KPIs",
+      icon: <Target className="h-4 w-4 mr-2" />,
+      href: `/organization/${organization.id}/okrs`,
+      matchPrefix: true,
+    },
     {
       label: "Activity",
       icon: <Activity className="h-4 w-4 mr-2" />,
@@ -227,7 +234,9 @@ export const NavItem = ({
             onClick={() => onClick(route.href)}
             className={cn(
               "w-full font-normal justify-start pl-10 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
-              pathname === route.href && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+              ("matchPrefix" in route && route.matchPrefix
+                ? pathname?.startsWith(route.href)
+                : pathname === route.href) && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
             )}
             variant="ghost"
           >

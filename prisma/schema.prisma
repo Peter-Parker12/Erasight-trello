@@ -371,6 +371,10 @@ enum ENTITY_TYPE {
   KB_INDUSTRY
   KB_FOLDER
   KB_DOCUMENT
+  DEPARTMENT
+  OBJECTIVE
+  KEY_RESULT
+  KPI
 }
 
 model AuditLog {
@@ -394,6 +398,7 @@ enum NOTIFICATION_TYPE {
   DUE_DATE_SOON
   CARD_UPDATED
   CARD_WATCHED_UPDATE
+  OKR_REMINDER
 }
 
 model Notification {
@@ -778,4 +783,136 @@ model KbDocument {
 
   @@index([folderId])
   @@index([orgId])
+}
+
+// ---------------------------------------------------------------------------
+// OKR & KPI module
+// ---------------------------------------------------------------------------
+
+enum METRIC_DIRECTION {
+  INCREASE // higher is better: score = clamp(actual/target, 0, 1)
+  DECREASE // lower is better:  score = clamp(target/actual, 0, 1)
+}
+
+model Department {
+  id       String  @id @default(uuid())
+  orgId    String
+  name     String
+  leaderId String?
+  color    String?
+  order    Int     @default(0)
+
+  objectives Objective[]
+  kpis       Kpi[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orgId, name])
+  @@index([orgId])
+}
+
+model Objective {
+  id           String      @id @default(uuid())
+  orgId        String
+  departmentId String? // null = company-level OKR
+  title        String      @db.Text
+  ownerId      String
+  quarter      Int // 1..4
+  year         Int
+  order        Int         @default(0)
+
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  keyResults KeyResult[]
+  checkIns   OkrCheckIn[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId, year, quarter])
+  @@index([departmentId])
+}
+
+model KeyResult {
+  id          String           @id @default(uuid())
+  objectiveId String
+  title       String           @db.Text
+  targetValue Float
+  actualValue Float            @default(0)
+  unit        String?
+  direction   METRIC_DIRECTION @default(INCREASE)
+  order       Int              @default(0)
+
+  objective Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([objectiveId])
+}
+
+model OkrCheckIn {
+  id             String  @id @default(uuid())
+  objectiveId    String
+  userId         String
+  userName       String  @db.Text
+  note           String? @db.Text
+  scoreAtCheckIn Float
+
+  objective Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([objectiveId])
+}
+
+model Kpi {
+  id           String           @id @default(uuid())
+  orgId        String
+  departmentId String? // null = company-level KPI
+  name         String           @db.Text
+  unit         String?
+  direction    METRIC_DIRECTION @default(INCREASE)
+  order        Int              @default(0)
+
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  entries KpiEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+  @@index([departmentId])
+}
+
+model KpiEntry {
+  id          String  @id @default(uuid())
+  kpiId       String
+  year        Int
+  month       Int // 1..12
+  target      Float
+  actual      Float? // null = not yet reported
+  updatedById String?
+
+  kpi Kpi @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([kpiId, year, month])
+  @@index([kpiId])
+}
+
+model OrgTelegramConfig {
+  id       String  @id @default(uuid())
+  orgId    String  @unique
+  botToken String  @db.Text
+  chatId   String
+  topicId  String?
+  enabled  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
