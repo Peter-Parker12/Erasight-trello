@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Activity, Layout, ListTodo, Settings } from "lucide-react";
+import { Activity, Layout, ListTodo, Settings, Target } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 import {
@@ -49,6 +49,12 @@ export const NavItem = ({
       href: `/organization/${organization.id}/tasks`,
     },
     {
+      label: "OKRs & KPIs",
+      icon: <Target className="h-4 w-4 mr-2" />,
+      href: `/organization/${organization.id}/okrs`,
+      matchPrefix: true,
+    },
+    {
       label: "Activity",
       icon: <Activity className="h-4 w-4 mr-2" />,
       href: `/organization/${organization.id}/activity`,
@@ -94,7 +100,9 @@ export const NavItem = ({
             onClick={() => onClick(route.href)}
             className={cn(
               "w-full font-normal justify-start pl-10  mb-1",
-              pathname === route.href && "bg-primary/10 text-primary"
+              ("matchPrefix" in route && route.matchPrefix
+                ? pathname?.startsWith(route.href)
+                : pathname === route.href) && "bg-primary/10 text-primary"
             )}
             variant="ghost"
           >
