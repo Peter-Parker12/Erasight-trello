@@ -6,12 +6,15 @@ import type { InputType, ReturnType } from "@/actions/upsert-list-transition-rul
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { toApiRoute } from "@/lib/api-route";
-import { isOrgAdmin } from "@/lib/board-access";
+import { canPerform } from "@/lib/rbac";
+import { ACTIONS } from "@/lib/rbac-actions";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { orgId } = await auth();
-  if (!orgId) return { error: "Unauthorized" };
-  if (!(await isOrgAdmin(orgId))) return { error: "Only admins can configure board settings." };
+  const { userId, orgId } = await auth();
+  if (!orgId || !userId) return { error: "Unauthorized" };
+  if (!(await canPerform(orgId, userId, ACTIONS.BOARD_TRANSITION_RULES_MANAGE))) {
+    return { error: "Only admins can configure board settings." };
+  }
 
   const { boardId, listId, actions } = data;
 

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { isOrgAdmin } from "@/lib/board-access";
+import { canPerform } from "@/lib/rbac";
+import { ACTIONS } from "@/lib/rbac-actions";
 
 export async function GET(
   _req: Request,
@@ -12,8 +13,9 @@ export async function GET(
     const { userId, orgId } = await auth();
     if (!userId || !orgId) return new NextResponse("Unauthorized", { status: 401 });
 
-    const admin = await isOrgAdmin(orgId);
-    if (!admin) return new NextResponse("Forbidden", { status: 403 });
+    if (!(await canPerform(orgId, userId, ACTIONS.BOARD_TELEGRAM_MANAGE))) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
 
     const board = await db.board.findUnique({ where: { id: boardId, orgId } });
     if (!board) return new NextResponse("Not found", { status: 404 });

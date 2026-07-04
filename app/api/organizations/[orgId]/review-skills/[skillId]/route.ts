@@ -1,12 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isOrgAdmin } from "@/lib/board-access";
+import { canPerform } from "@/lib/rbac";
+import { ACTIONS } from "@/lib/rbac-actions";
 
 async function guard(orgId: string) {
-  const { orgId: sessionOrgId } = await auth();
-  if (!sessionOrgId || sessionOrgId !== orgId) return "unauthorized";
-  if (!(await isOrgAdmin(orgId))) return "forbidden";
+  const { orgId: sessionOrgId, userId } = await auth();
+  if (!sessionOrgId || sessionOrgId !== orgId || !userId) return "unauthorized";
+  if (!(await canPerform(orgId, userId, ACTIONS.REVIEW_SKILLS_MANAGE))) return "forbidden";
   return null;
 }
 

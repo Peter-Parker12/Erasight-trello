@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const ADMIN_TABS = [
   { href: "modules", label: "Modules" },
+  { href: "roles", label: "Roles" },
   { href: "api-keys", label: "API keys" },
   { href: "ai-settings", label: "AI Review" },
 ];

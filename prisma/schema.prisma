@@ -3,46 +3,46 @@ generator client {
 }
 
 datasource db {
-  provider      = "postgresql"
-  relationMode  = "prisma"
+  provider     = "postgresql"
+  relationMode = "prisma"
 }
 
 model Board {
-  id               String    @id @default(uuid())
-  orgId            String
-  title            String
-  imageId          String
-  imageThumbUrl    String    @db.Text
-  imageFullUrl     String    @db.Text
-  imageUserName    String    @db.Text
-  imageLinkHtml    String    @db.Text
-  backgroundType   String    @default("image")
-  backgroundColor  String?
+  id              String  @id @default(uuid())
+  orgId           String
+  title           String
+  imageId         String
+  imageThumbUrl   String  @db.Text
+  imageFullUrl    String  @db.Text
+  imageUserName   String  @db.Text
+  imageLinkHtml   String  @db.Text
+  backgroundType  String  @default("image")
+  backgroundColor String?
 
-  lists            List[]
-  labels           Label[]
-  boardMembers     BoardMember[]
-  telegramConfig   BoardTelegramConfig?
-  aiConfig         BoardAiConfig?
-  transitionRules  ListTransitionRule[]
+  lists           List[]
+  labels          Label[]
+  boardMembers    BoardMember[]
+  telegramConfig  BoardTelegramConfig?
+  aiConfig        BoardAiConfig?
+  transitionRules ListTransitionRule[]
 
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model BoardTelegramConfig {
-  id           String   @id @default(uuid())
-  boardId      String   @unique
-  botToken     String   @db.Text
+  id           String  @id @default(uuid())
+  boardId      String  @unique
+  botToken     String  @db.Text
   chatId       String
   topicId      String?
   reviewListId String?
-  enabled      Boolean  @default(true)
+  enabled      Boolean @default(true)
 
-  board        Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model BoardAiConfig {
@@ -51,33 +51,33 @@ model BoardAiConfig {
   reviewListId String?
   enabled      Boolean @default(true)
 
-  board        Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ReviewSkill {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   orgId       String
   name        String
   description String
-  prompt      String   @db.Text
-  enabled     Boolean  @default(true)
-  order       Int      @default(0)
+  prompt      String  @db.Text
+  enabled     Boolean @default(true)
+  order       Int     @default(0)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orgId])
 }
 
 model ReviewPartner {
-  id        String   @id @default(uuid())
-  orgId     String
-  name      String
-  slug      String
-  context   String   @db.Text
+  id      String @id @default(uuid())
+  orgId   String
+  name    String
+  slug    String
+  context String @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -87,26 +87,26 @@ model ReviewPartner {
 }
 
 model UserTelegramAccount {
-  id               String   @id @default(uuid())
+  id               String @id @default(uuid())
   orgId            String
   userId           String
   telegramUsername String
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([orgId, userId])
   @@index([orgId])
 }
 
 model UserDisplayName {
-  id          String   @id @default(uuid())
+  id          String @id @default(uuid())
   orgId       String
   userId      String
-  displayName String   @db.Text
+  displayName String @db.Text
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([orgId, userId])
   @@index([orgId])
@@ -119,7 +119,7 @@ model BoardMember {
   userName  String @db.Text
   userImage String @db.Text
 
-  board     Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
   @@unique([boardId, userId])
   @@index([boardId])
@@ -140,32 +140,32 @@ enum TransitionActionType {
 }
 
 model List {
-  id             String               @id  @default(uuid())
-  title          String
-  order          Int
-  wipLimit       Int?
-  type           ListType             @default(STANDARD)
+  id       String   @id @default(uuid())
+  title    String
+  order    Int
+  wipLimit Int?
+  type     ListType @default(STANDARD)
 
-  boardId        String
-  board          Board                @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
   cards          Card[]
   transitionRule ListTransitionRule?
 
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([boardId])
 }
 
 model ListTransitionRule {
-  id        String   @id @default(uuid())
-  boardId   String
-  listId    String   @unique
-  actions   Json
+  id      String @id @default(uuid())
+  boardId String
+  listId  String @unique
+  actions Json
 
-  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  list      List     @relation(fields: [listId], references: [id], onDelete: Cascade)
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  list  List  @relation(fields: [listId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -182,49 +182,49 @@ enum Priority {
 }
 
 model Card {
-  id            String    @id @default(uuid())
-  cardNumber    Int       @default(autoincrement())
-  title         String
-  order         Int
-  description   String?   @db.Text
-  reason        String?   @db.Text
-  priority      Priority  @default(NONE)
-  startDate     DateTime?
-  dueDate       DateTime?
+  id             String    @id @default(uuid())
+  cardNumber     Int       @default(autoincrement())
+  title          String
+  order          Int
+  description    String?   @db.Text
+  reason         String?   @db.Text
+  priority       Priority  @default(NONE)
+  startDate      DateTime?
+  dueDate        DateTime?
   reviewDeadline DateTime?
-  completed     Boolean   @default(false)
-  coverColor    String?
-  isTemplate    Boolean   @default(false)
-  templateOrgId String?
-  parentCardId  String?
+  completed      Boolean   @default(false)
+  coverColor     String?
+  isTemplate     Boolean   @default(false)
+  templateOrgId  String?
+  parentCardId   String?
 
-  listId        String
-  list          List      @relation(fields: [listId], references: [id], onDelete: Cascade)
-  parentCard    Card?     @relation("CardSubtasks", fields: [parentCardId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  subtasks      Card[]    @relation("CardSubtasks")
+  listId     String
+  list       List   @relation(fields: [listId], references: [id], onDelete: Cascade)
+  parentCard Card?  @relation("CardSubtasks", fields: [parentCardId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  subtasks   Card[] @relation("CardSubtasks")
 
-  labels        CardLabel[]
-  members       CardMember[]
-  checklists    Checklist[]
-  comments      Comment[]
-  attachments   Attachment[]
-  watchers      CardWatcher[]
+  labels      CardLabel[]
+  members     CardMember[]
+  checklists  Checklist[]
+  comments    Comment[]
+  attachments Attachment[]
+  watchers    CardWatcher[]
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([listId])
   @@index([parentCardId])
 }
 
 model Label {
-  id      String  @id @default(uuid())
+  id      String @id @default(uuid())
   name    String
   color   String
   boardId String
-  board   Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
-  cards   CardLabel[]
+  cards CardLabel[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -237,8 +237,8 @@ model CardLabel {
   cardId  String
   labelId String
 
-  card    Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  label   Label  @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  card  Card  @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
 
   @@unique([cardId, labelId])
   @@index([cardId])
@@ -252,7 +252,7 @@ model Checklist {
   cardId String
   card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
-  items  ChecklistItem[]
+  items ChecklistItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -261,10 +261,10 @@ model Checklist {
 }
 
 model ChecklistItem {
-  id          String    @id @default(uuid())
-  content     String    @db.Text
-  completed   Boolean   @default(false)
-  order       Int       @default(0)
+  id        String  @id @default(uuid())
+  content   String  @db.Text
+  completed Boolean @default(false)
+  order     Int     @default(0)
 
   checklistId String
   checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
@@ -276,16 +276,16 @@ model ChecklistItem {
 }
 
 model Comment {
-  id        String @id @default(uuid())
-  content   String @db.Text
+  id        String  @id @default(uuid())
+  content   String  @db.Text
   imageUrl  String? @db.Text
   cardId    String
   orgId     String
   userId    String
-  userName  String @db.Text
-  userImage String @db.Text
+  userName  String  @db.Text
+  userImage String  @db.Text
 
-  card      Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -301,7 +301,7 @@ model Attachment {
   review     String?   @db.Text
   reviewedAt DateTime?
 
-  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -315,18 +315,18 @@ model CardMember {
   userName  String @db.Text
   userImage String @db.Text
 
-  card      Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   @@unique([cardId, userId])
   @@index([cardId])
 }
 
 model CardWatcher {
-  id        String @id @default(uuid())
-  cardId    String
-  userId    String
+  id     String @id @default(uuid())
+  cardId String
+  userId String
 
-  card      Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   @@unique([cardId, userId])
   @@index([cardId])
@@ -334,16 +334,16 @@ model CardWatcher {
 }
 
 model CardTemplate {
-  id             String   @id @default(uuid())
+  id             String  @id @default(uuid())
   orgId          String
   title          String
-  description    String?  @db.Text
-  checklistsJson String?  @db.Text
-  labelsJson     String?  @db.Text
+  description    String? @db.Text
+  checklistsJson String? @db.Text
+  labelsJson     String? @db.Text
   createdBy      String
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orgId])
 }
@@ -384,10 +384,9 @@ model AuditLog {
   userImage   String      @db.Text
   userName    String      @db.Text
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-
 
 enum NOTIFICATION_TYPE {
   CARD_ASSIGNED
@@ -410,7 +409,7 @@ model Notification {
   actorName  String            @db.Text
   actorImage String            @db.Text
 
-  createdAt  DateTime          @default(now())
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([orgId])
@@ -433,6 +432,41 @@ model ModuleAccess {
 }
 
 // ---------------------------------------------------------------------------
+// Platform: role-based access control (custom roles + permissions)
+// ---------------------------------------------------------------------------
+
+model Role {
+  id          String   @id @default(uuid())
+  orgId       String
+  name        String
+  description String?  @db.Text
+  actions     String[] @default([])
+
+  assignments UserRoleAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orgId, name])
+  @@index([orgId])
+}
+
+model UserRoleAssignment {
+  id     String @id @default(uuid())
+  orgId  String
+  userId String
+  roleId String
+
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([orgId, userId, roleId])
+  @@index([orgId, userId])
+  @@index([roleId])
+}
+
+// ---------------------------------------------------------------------------
 // Platform: API keys for third-party access to the public API
 // ---------------------------------------------------------------------------
 
@@ -446,7 +480,7 @@ model ApiKey {
   lastUsedAt DateTime?
   revokedAt  DateTime?
 
-  createdAt  DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([orgId])
 }
@@ -486,66 +520,66 @@ model CustomFieldDefinition {
   required   Boolean         @default(false)
   order      Int             @default(0)
 
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([orgId, entityType, key])
   @@index([orgId, entityType])
 }
 
 model Company {
-  id           String   @id @default(uuid())
+  id           String  @id @default(uuid())
   orgId        String
   name         String
   domain       String?
   industry     String?
   phone        String?
-  website      String?  @db.Text
-  address      String?  @db.Text
-  description  String?  @db.Text
-  customFields Json     @default("{}")
+  website      String? @db.Text
+  address      String? @db.Text
+  description  String? @db.Text
+  customFields Json    @default("{}")
 
-  contacts     Contact[]
-  leads        Lead[]
-  bundles      CompanyBundle[]
+  contacts Contact[]
+  leads    Lead[]
+  bundles  CompanyBundle[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orgId])
 }
 
 model Contact {
-  id           String   @id @default(uuid())
+  id           String  @id @default(uuid())
   orgId        String
   firstName    String
   lastName     String?
   email        String?
   phone        String?
   title        String?
-  customFields Json     @default("{}")
+  customFields Json    @default("{}")
 
-  companyId    String?
-  company      Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
-  leads        Lead[]
+  leads Lead[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orgId])
   @@index([companyId])
 }
 
 model PipelineStage {
-  id        String   @id @default(uuid())
-  orgId     String
-  name      String
-  order     Int
-  isWon     Boolean  @default(false)
-  isLost    Boolean  @default(false)
+  id     String  @id @default(uuid())
+  orgId  String
+  name   String
+  order  Int
+  isWon  Boolean @default(false)
+  isLost Boolean @default(false)
 
-  leads     Lead[]
+  leads Lead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -554,27 +588,27 @@ model PipelineStage {
 }
 
 model Lead {
-  id           String         @id @default(uuid())
+  id           String   @id @default(uuid())
   orgId        String
   title        String
   order        Int
-  value        Decimal?       @db.Decimal(14, 2)
+  value        Decimal? @db.Decimal(14, 2)
   ownerId      String?
-  customFields Json           @default("{}")
+  customFields Json     @default("{}")
 
-  stageId      String
-  stage        PipelineStage  @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  stageId String
+  stage   PipelineStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
 
-  companyId    String?
-  company      Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
-  contactId    String?
-  contact      Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
-  products     LeadProduct[]
+  products LeadProduct[]
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orgId])
   @@index([stageId])
@@ -610,21 +644,21 @@ model Product {
   status       ProductStatus @default(ACTIVE)
   customFields Json          @default("{}")
 
-  bundleItems  ProductBundleItem[]
-  leads        LeadProduct[]
+  bundleItems ProductBundleItem[]
+  leads       LeadProduct[]
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orgId])
 }
 
 model ProductCategory {
-  id        String   @id @default(uuid())
-  orgId     String
-  name      String
-  color     String   @default("#7c3aed")
-  order     Int      @default(0)
+  id    String @id @default(uuid())
+  orgId String
+  name  String
+  color String @default("#7c3aed")
+  order Int    @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -634,36 +668,36 @@ model ProductCategory {
 }
 
 model ProductBundle {
-  id            String            @id @default(uuid())
-  orgId         String
-  name          String
-  description   String?           @db.Text
-  pricingMode   BundlePricingMode @default(SUM)
-  discount      Decimal?          @db.Decimal(15, 0)
-  finalPrice    Decimal?          @db.Decimal(15, 0)
+  id          String            @id @default(uuid())
+  orgId       String
+  name        String
+  description String?           @db.Text
+  pricingMode BundlePricingMode @default(SUM)
+  discount    Decimal?          @db.Decimal(15, 0)
+  finalPrice  Decimal?          @db.Decimal(15, 0)
 
   items         ProductBundleItem[] @relation("ParentBundle")
   childBundleOf ProductBundleItem[] @relation("ChildBundle")
   companies     CompanyBundle[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orgId])
 }
 
 model ProductBundleItem {
-  id            String         @id @default(uuid())
+  id            String  @id @default(uuid())
   bundleId      String
   productId     String?
   childBundleId String?
-  quantity      Int            @default(1)
-  unitPrice     Decimal        @db.Decimal(15, 0)
-  active        Boolean        @default(true)
+  quantity      Int     @default(1)
+  unitPrice     Decimal @db.Decimal(15, 0)
+  active        Boolean @default(true)
 
-  bundle        ProductBundle  @relation("ParentBundle", fields: [bundleId], references: [id], onDelete: Cascade)
-  product       Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
-  childBundle   ProductBundle? @relation("ChildBundle", fields: [childBundleId], references: [id], onDelete: SetNull)
+  bundle      ProductBundle  @relation("ParentBundle", fields: [bundleId], references: [id], onDelete: Cascade)
+  product     Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+  childBundle ProductBundle? @relation("ChildBundle", fields: [childBundleId], references: [id], onDelete: SetNull)
 
   @@index([bundleId])
   @@index([productId])
@@ -675,8 +709,8 @@ model CompanyBundle {
   bundleId   String
   assignedAt DateTime @default(now())
 
-  company    Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  bundle     ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  bundle  ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
 
   @@id([companyId, bundleId])
   @@index([companyId])
@@ -697,50 +731,50 @@ model LeadProduct {
 }
 
 model KbIndustry {
-  id          String     @id @default(uuid())
+  id          String  @id @default(uuid())
   orgId       String
   name        String
   description String?
 
-  folders     KbFolder[]
+  folders KbFolder[]
 
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orgId])
 }
 
 model KbFolder {
-  id         String       @id @default(uuid())
+  id         String @id @default(uuid())
   orgId      String
   industryId String
   name       String
 
-  industry   KbIndustry   @relation(fields: [industryId], references: [id])
-  documents  KbDocument[]
+  industry  KbIndustry   @relation(fields: [industryId], references: [id])
+  documents KbDocument[]
 
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([industryId])
   @@index([orgId])
 }
 
 model KbDocument {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   orgId       String
   folderId    String
   name        String
   description String?
-  url         String   @db.Text
+  url         String  @db.Text
   fileType    String?
   fileSize    Int?
   uploadedBy  String
 
-  folder      KbFolder @relation(fields: [folderId], references: [id])
+  folder KbFolder @relation(fields: [folderId], references: [id])
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([folderId])
   @@index([orgId])

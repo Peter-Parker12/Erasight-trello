@@ -6,14 +6,15 @@ import { InputType, ReturnType } from "@/actions/create-api-key/types";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { toApiRoute } from "@/lib/api-route";
-import { isOrgAdmin } from "@/lib/board-access";
 import { generateApiKey } from "@/lib/api-keys";
+import { canPerform } from "@/lib/rbac";
+import { ACTIONS } from "@/lib/rbac-actions";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = await auth();
   if (!userId || !orgId) return { error: "Unauthorized" };
 
-  if (!(await isOrgAdmin(orgId))) {
+  if (!(await canPerform(orgId, userId, ACTIONS.ORG_API_KEYS_MANAGE))) {
     return { error: "Only admins can manage API keys." };
   }
 

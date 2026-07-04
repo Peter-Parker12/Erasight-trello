@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isOrgAdmin } from "@/lib/board-access";
+import { canPerform } from "@/lib/rbac";
+import { ACTIONS } from "@/lib/rbac-actions";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
@@ -21,11 +22,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ orgId: 
 
 export async function POST(req: Request, { params }: { params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
-  const { orgId: sessionOrgId } = await auth();
-  if (!sessionOrgId || sessionOrgId !== orgId) {
+  const { orgId: sessionOrgId, userId } = await auth();
+  if (!sessionOrgId || sessionOrgId !== orgId || !userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!(await isOrgAdmin(orgId))) {
+  if (!(await canPerform(orgId, userId, ACTIONS.REVIEW_PARTNERS_MANAGE))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

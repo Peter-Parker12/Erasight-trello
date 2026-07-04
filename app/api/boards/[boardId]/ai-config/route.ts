@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isOrgAdmin } from "@/lib/board-access";
+import { canPerform } from "@/lib/rbac";
+import { ACTIONS } from "@/lib/rbac-actions";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ boardId: string }> }) {
   const { boardId } = await params;
@@ -22,9 +23,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ boardId
 
 export async function POST(req: Request, { params }: { params: Promise<{ boardId: string }> }) {
   const { boardId } = await params;
-  const { orgId } = await auth();
-  if (!orgId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!(await isOrgAdmin(orgId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { userId, orgId } = await auth();
+  if (!orgId || !userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await canPerform(orgId, userId, ACTIONS.BOARD_AI_CONFIG_MANAGE))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const { reviewListId, enabled } = await req.json();
 
@@ -39,9 +42,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ boardId
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ boardId: string }> }) {
   const { boardId } = await params;
-  const { orgId } = await auth();
-  if (!orgId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!(await isOrgAdmin(orgId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { userId, orgId } = await auth();
+  if (!orgId || !userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await canPerform(orgId, userId, ACTIONS.BOARD_AI_CONFIG_MANAGE))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   await db.boardAiConfig.deleteMany({ where: { boardId } });
   return NextResponse.json({ data: null });

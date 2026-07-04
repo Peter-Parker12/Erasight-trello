@@ -6,15 +6,17 @@ import { UpdateTelegramConfig } from "@/actions/manage-telegram-config/schema";
 import type { UpdateInputType } from "@/actions/manage-telegram-config/types";
 import { ActionState } from "@/lib/create-safe-action";
 import { BoardTelegramConfig } from "@prisma/client";
-import { isOrgAdmin } from "@/lib/board-access";
 import { toApiRoute } from "@/lib/api-route";
+import { canPerform } from "@/lib/rbac";
+import { ACTIONS } from "@/lib/rbac-actions";
 
 const updateHandler = async (data: UpdateInputType): Promise<ActionState<UpdateInputType, BoardTelegramConfig | null>> => {
-  const { orgId } = await auth();
-  if (!orgId) return { error: "Unauthorized" };
+  const { userId, orgId } = await auth();
+  if (!orgId || !userId) return { error: "Unauthorized" };
 
-  const admin = await isOrgAdmin(orgId);
-  if (!admin) return { error: "Only admins can manage Telegram settings" };
+  if (!(await canPerform(orgId, userId, ACTIONS.BOARD_TELEGRAM_MANAGE))) {
+    return { error: "Only admins can manage Telegram settings" };
+  }
 
   const board = await db.board.findUnique({ where: { id: data.boardId, orgId } });
   if (!board) return { error: "Board not found" };
