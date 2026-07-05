@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 import { isOrgAdmin } from "@/lib/board-access";
 import { parseWorkbook } from "@/lib/okr-import/parse-workbook";
 import { computeImportPreview, commitImport } from "@/lib/okr-import/commit-import";
 import { NameMapping } from "@/lib/okr-import/types";
 
-export const maxDuration = 60;
+export const maxDuration = 90;
 
 const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
@@ -49,8 +49,14 @@ export async function POST(req: Request) {
   const commit = new URL(req.url).searchParams.get("commit") === "1";
 
   if (!commit) {
-    const preview = await computeImportPreview(orgId, parsed);
-    return NextResponse.json(preview);
+    try {
+      const preview = await computeImportPreview(orgId, parsed);
+      return NextResponse.json(preview);
+    } catch (error) {
+      console.error("[OKR_IMPORT_PREVIEW_ERROR]", error);
+      const message = error instanceof Error ? error.message : "Failed to build preview.";
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
   }
 
   let nameMapping: NameMapping = {};
@@ -63,6 +69,19 @@ export async function POST(req: Request) {
     }
   }
 
-  const counts = await commitImport(orgId, parsed, nameMapping, userId, year);
-  return NextResponse.json({ counts });
+  const user = await currentUser();
+  const actor = {
+    userId,
+    userName: `${user?.firstName ?? ""}${user?.lastName ? ` ${user.lastName}` : ""}`.trim() || "Unknown",
+    userImage: user?.imageUrl ?? "",
+  };
+
+  try {
+    const counts = await commitImport(orgId, parsed, nameMapping, actor, year);
+    return NextResponse.json({ counts });
+  } catch (error) {
+    console.error("[OKR_IMPORT_COMMIT_ERROR]", error);
+    const message = error instanceof Error ? error.message : "Import failed.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

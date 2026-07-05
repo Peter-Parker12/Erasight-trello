@@ -1,8 +1,42 @@
+import type { ACTION, ENTITY_TYPE, Prisma } from "@prisma/client";
+
 import { db } from "@/lib/db";
-import { createAuditLog } from "@/lib/create-audit-log";
 import { getOrgMembers } from "@/lib/org-members";
 import { buildOwnerNameGuesses } from "./match-org-member";
 import { ImportCounts, ImportPreview, NameMapping, ParsedWorkbook } from "./types";
+
+export type ImportActor = {
+  userId: string;
+  userName: string;
+  userImage: string;
+};
+
+// Writes an audit log row directly on the transaction client. We deliberately
+// avoid the shared createAuditLog() helper here: it re-fetches auth()/currentUser()
+// from Clerk on every call, and doing that dozens of times while holding open a
+// Postgres interactive transaction is what was blowing past the transaction
+// timeout on real (multi-row) workbooks.
+const logAudit = (
+  tx: Prisma.TransactionClient,
+  orgId: string,
+  actor: ImportActor,
+  entityId: string,
+  entityType: ENTITY_TYPE,
+  entityTitle: string,
+  action: ACTION
+) =>
+  tx.auditLog.create({
+    data: {
+      orgId,
+      entityId,
+      entityType,
+      entityTitle,
+      action,
+      userId: actor.userId,
+      userImage: actor.userImage,
+      userName: actor.userName,
+    },
+  });
 
 const findDepartmentIdByName = (
   departments: { id: string; name: string }[],
@@ -48,10 +82,10 @@ export const commitImport = async (
   orgId: string,
   parsed: ParsedWorkbook,
   nameMapping: NameMapping,
-  fallbackUserId: string,
+  actor: ImportActor,
   year: number
 ): Promise<ImportCounts> => {
-  const resolveOwnerId = (ownerName: string) => nameMapping[ownerName] || fallbackUserId;
+  const resolveOwnerId = (ownerName: string) => nameMapping[ownerName] || actor.userId;
 
   const counts: ImportCounts = {
     departments: 0,
@@ -77,12 +111,7 @@ export const commitImport = async (
         });
         departments.push({ id: department.id, name: department.name });
         counts.departments++;
-        await createAuditLog({
-          entityId: department.id,
-          entityType: "DEPARTMENT",
-          entityTitle: department.name,
-          action: "CREATE",
-        });
+        await logAudit(tx, orgId, actor, department.id, "DEPARTMENT", department.name, "CREATE");
       }
 
       const objectiveOrderByGroup = new Map<string, number>();
@@ -134,12 +163,7 @@ export const commitImport = async (
 
         if (!existingObjective) {
           counts.objectives++;
-          await createAuditLog({
-            entityId: objective.id,
-            entityType: "OBJECTIVE",
-            entityTitle: objective.title,
-            action: "CREATE",
-          });
+          await logAudit(tx, orgId, actor, objective.id, "OBJECTIVE", objective.title, "CREATE");
         }
 
         let keyResultOrder = await tx.keyResult.count({ where: { objectiveId: objective.id } });
@@ -170,12 +194,7 @@ export const commitImport = async (
               },
             });
             counts.keyResults++;
-            await createAuditLog({
-              entityId: keyResult.id,
-              entityType: "KEY_RESULT",
-              entityTitle: keyResult.title,
-              action: "CREATE",
-            });
+            await logAudit(tx, orgId, actor, keyResult.id, "KEY_RESULT", keyResult.title, "CREATE");
           }
         }
       }
@@ -219,12 +238,7 @@ export const commitImport = async (
 
         if (!existingKpi) {
           counts.kpis++;
-          await createAuditLog({
-            entityId: kpi.id,
-            entityType: "KPI",
-            entityTitle: kpi.name,
-            action: "CREATE",
-          });
+          await logAudit(tx, orgId, actor, kpi.id, "KPI", kpi.name, "CREATE");
         }
 
         for (const entry of parsedKpi.monthlyEntries) {
@@ -247,7 +261,7 @@ export const commitImport = async (
         }
       }
     },
-    { timeout: 30_000 }
+    { timeout: 60_000 }
   );
 
   return counts;
