@@ -61,7 +61,7 @@ export const KpiTable = ({
     <div className="rounded-lg border">
       <Table>
         <TableHeader>
-          <TableRow className="bg-neutral-50/70">
+          <TableRow className="bg-[#242424]">
             <TableHead className="min-w-44">KPI</TableHead>
             {months.map((month) => (
               <TableHead key={month} className="text-center min-w-24">
@@ -152,7 +152,7 @@ export const KpiTable = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 w-7 p-0 text-neutral-400 hover:text-neutral-700"
+                      className="h-7 w-7 p-0 text-neutral-400 hover:text-[#e5e5e5]"
                       onClick={() => onEdit(kpi)}
                     >
                       <Pencil className="h-3.5 w-3.5" />

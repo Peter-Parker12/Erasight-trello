@@ -172,7 +172,7 @@ export const KpiDashboard = ({
         return (
           <section key={group.key} className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="flex items-center gap-x-2 font-semibold text-neutral-800">
+              <h3 className="flex items-center gap-x-2 font-semibold text-[#e5e5e5]">
                 {group.color ? (
                   <span
                     className="h-3 w-3 rounded-full"

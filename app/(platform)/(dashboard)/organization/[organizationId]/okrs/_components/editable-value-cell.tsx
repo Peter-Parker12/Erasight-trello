@@ -80,7 +80,7 @@ export const EditableValueCell = ({
       className={cn(
         "w-20 rounded border border-transparent bg-transparent px-1.5 py-0.5 text-sm tabular-nums",
         "text-blue-600 font-semibold",
-        "hover:border-neutral-200 focus:border-blue-400 focus:outline-none focus:bg-white",
+        "hover:border-[#555] focus:border-blue-400 focus:outline-none focus:bg-[#333]",
         needsUpdate && "bg-yellow-100",
         className
       )}

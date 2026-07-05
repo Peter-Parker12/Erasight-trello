@@ -140,7 +140,7 @@ export const DepartmentFormDialog = ({
                   onClick={() => setColor(option)}
                   className={cn(
                     "h-7 w-7 rounded-full border-2 border-transparent transition",
-                    color === option && "border-neutral-800 scale-110"
+                    color === option && "border-white scale-110"
                   )}
                   style={{ backgroundColor: option }}
                 />

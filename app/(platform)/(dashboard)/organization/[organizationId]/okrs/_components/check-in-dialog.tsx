@@ -56,10 +56,10 @@ export const CheckInDialog = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="rounded-md bg-neutral-50 p-3 text-sm">
+          <div className="rounded-md bg-[#1f1f1f] p-3 text-sm">
             <p className="font-medium leading-snug">{objective.title}</p>
             <div className="mt-2 flex items-center gap-x-2">
-              <span className="text-neutral-500">
+              <span className="text-neutral-400">
                 Điểm hiện tại | Current score:
               </span>
               <ScoreBadge score={currentScore} />
@@ -83,7 +83,7 @@ export const CheckInDialog = ({
           )}
 
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-neutral-600">
+            <p className="text-sm font-semibold text-neutral-300">
               Lịch sử | History ({objective.checkIns.length})
             </p>
             {objective.checkIns.length === 0 ? (
@@ -109,7 +109,7 @@ export const CheckInDialog = ({
                           {band.emoji} {formatScore(checkIn.scoreAtCheckIn)}
                         </span>
                         {checkIn.note && (
-                          <span className="text-neutral-600">{checkIn.note}</span>
+                          <span className="text-neutral-300">{checkIn.note}</span>
                         )}
                       </div>
                     </li>

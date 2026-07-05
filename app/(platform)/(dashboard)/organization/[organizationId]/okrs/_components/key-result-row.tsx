@@ -59,7 +59,7 @@ export const KeyResultRow = ({
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-[1fr_5.5rem_5.5rem_3.5rem_6rem_auto] gap-x-2 gap-y-1 items-center rounded-md px-1 py-1.5 hover:bg-neutral-50 text-sm">
+    <div className="grid grid-cols-2 sm:grid-cols-[1fr_5.5rem_5.5rem_3.5rem_6rem_auto] gap-x-2 gap-y-1 items-center rounded-md px-1 py-1.5 hover:bg-[#333] text-sm">
       <div className="col-span-2 sm:col-span-1 flex items-center gap-x-1.5 min-w-0">
         {keyResult.direction === "DECREASE" ? (
           <TrendingDown className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
@@ -79,7 +79,7 @@ export const KeyResultRow = ({
         needsUpdate={pending}
         onSave={(value) => executeUpdate({ id: keyResult.id, actualValue: value })}
       />
-      <span className="text-neutral-500 text-xs">{keyResult.unit ?? ""}</span>
+      <span className="text-neutral-400 text-xs">{keyResult.unit ?? ""}</span>
       {/* computed score — black text, not editable */}
       <span className="text-right font-semibold tabular-nums">
         {band.emoji} {formatScore(score)}
@@ -90,7 +90,7 @@ export const KeyResultRow = ({
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 w-7 p-0 text-neutral-400 hover:text-neutral-700"
+              className="h-7 w-7 p-0 text-neutral-400 hover:text-[#e5e5e5]"
               onClick={onEdit}
             >
               <Pencil className="h-3.5 w-3.5" />

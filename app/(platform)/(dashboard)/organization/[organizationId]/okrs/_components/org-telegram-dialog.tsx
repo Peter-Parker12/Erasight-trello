@@ -82,7 +82,7 @@ export const OrgTelegramDialog = ({ open, onOpenChange, config }: Props) => {
         <DialogHeader>
           <DialogTitle>Nhắc OKR/KPI qua Telegram | Telegram reminders</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-400">
           Nhắc leader cập nhật KPI (thứ 2 hàng tuần) và check-in OKR (đầu tháng)
           vào nhóm Telegram của công ty. | Weekly KPI and monthly OKR check-in
           reminders posted to your company group.

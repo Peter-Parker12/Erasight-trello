@@ -142,7 +142,7 @@ export const KeyResultFormDialog = ({
                   "rounded-md border px-3 py-2 text-sm text-left transition",
                   direction === "INCREASE"
                     ? "border-primary bg-primary/5 font-medium"
-                    : "border-input text-neutral-500 hover:bg-neutral-50"
+                    : "border-input text-neutral-400 hover:bg-[#333]"
                 )}
               >
                 📈 Càng cao càng tốt
@@ -156,7 +156,7 @@ export const KeyResultFormDialog = ({
                   "rounded-md border px-3 py-2 text-sm text-left transition",
                   direction === "DECREASE"
                     ? "border-primary bg-primary/5 font-medium"
-                    : "border-input text-neutral-500 hover:bg-neutral-50"
+                    : "border-input text-neutral-400 hover:bg-[#333]"
                 )}
               >
                 📉 Càng thấp càng tốt

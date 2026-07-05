@@ -99,7 +99,7 @@ export const KpiCharts = ({ departments, kpis, months, focusMonth }: Props) => {
       {hasLineData && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-600">
+            <CardTitle className="text-sm font-medium text-neutral-400">
               % đạt KPI theo tháng | Monthly achievement by department
             </CardTitle>
           </CardHeader>
@@ -153,7 +153,7 @@ export const KpiCharts = ({ departments, kpis, months, focusMonth }: Props) => {
       {barData.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-600">
+            <CardTitle className="text-sm font-medium text-neutral-400">
               % đạt từng KPI — T{focusMonth} | Per-KPI achievement
             </CardTitle>
           </CardHeader>

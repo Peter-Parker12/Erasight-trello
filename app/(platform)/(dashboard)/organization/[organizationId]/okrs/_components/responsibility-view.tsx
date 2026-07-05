@@ -42,7 +42,7 @@ export const ResponsibilityView = ({
         <h2 className="text-lg font-semibold">
           Sơ đồ trách nhiệm | Responsibility chart
         </h2>
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-400">
           Ai làm gì, báo cáo cho ai, nhịp báo cáo | Who owns what, reporting
           lines &amp; cadence — Quý {quarter}/{year}
         </p>
@@ -59,7 +59,7 @@ export const ResponsibilityView = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow className="bg-neutral-50/70">
+          <TableRow className="bg-[#242424]">
             <TableCell>
               <span className="flex items-center gap-x-2 font-semibold">
                 <Landmark className="h-4 w-4" />
@@ -83,7 +83,7 @@ export const ResponsibilityView = ({
                 )}
               </div>
             </TableCell>
-            <TableCell className="text-sm text-neutral-500">—</TableCell>
+            <TableCell className="text-sm text-neutral-400">—</TableCell>
             <TableCell className="text-center">
               {objectiveCountMap["company"] ?? 0}
             </TableCell>
@@ -119,7 +119,7 @@ export const ResponsibilityView = ({
                     </span>
                   )}
                 </TableCell>
-                <TableCell className="text-sm text-neutral-600">
+                <TableCell className="text-sm text-neutral-400">
                   Admin ({admins.map((a) => a.userName).join(", ") || "—"})
                 </TableCell>
                 <TableCell className="text-center">
@@ -149,7 +149,7 @@ export const ResponsibilityView = ({
                   <p className="font-semibold">
                     {row.vi} <span className="text-neutral-400">| {row.en}</span>
                   </p>
-                  <p className="text-neutral-600">{row.taskVi}</p>
+                  <p className="text-neutral-300">{row.taskVi}</p>
                   <p className="text-neutral-400">{row.taskEn}</p>
                 </li>
               ))}
@@ -170,7 +170,7 @@ export const ResponsibilityView = ({
                   <p className="font-semibold font-mono">
                     {row.emoji} {row.range}
                   </p>
-                  <p className="text-neutral-600">{row.vi}</p>
+                  <p className="text-neutral-300">{row.vi}</p>
                   <p className="text-neutral-400">{row.en}</p>
                 </li>
               ))}
