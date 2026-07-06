@@ -37,7 +37,7 @@ const updateHandler = async (data: UpdateInputType): Promise<UpdateReturnType> =
     },
   });
 
-  revalidatePath(`/organization/${orgId}/okrs`, "layout");
+  revalidatePath(`/organization/${orgId}/dashboard/okrs`, "layout");
   return { data: config };
 };
 
@@ -52,7 +52,7 @@ const removeHandler = async (_data: RemoveInputType): Promise<RemoveReturnType> 
   if (!existing) return { data: null };
 
   await db.orgTelegramConfig.delete({ where: { orgId } });
-  revalidatePath(`/organization/${orgId}/okrs`, "layout");
+  revalidatePath(`/organization/${orgId}/dashboard/okrs`, "layout");
   return { data: existing };
 };
 

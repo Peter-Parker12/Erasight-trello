@@ -13,7 +13,7 @@ type Props = {
 
 export const OkrTabs = ({ organizationId, isAdmin }: Props) => {
   const pathname = usePathname();
-  const base = `/organization/${organizationId}/okrs`;
+  const base = `/organization/${organizationId}/dashboard/okrs`;
 
   const tabs = [
     {

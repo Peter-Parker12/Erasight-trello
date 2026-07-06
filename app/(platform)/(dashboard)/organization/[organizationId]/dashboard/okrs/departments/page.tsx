@@ -17,7 +17,7 @@ const DepartmentsPage = async ({ params }: Props) => {
   if (!userId || !orgId) redirect("/select-org");
 
   const admin = await isOrgAdmin(orgId);
-  if (!admin) redirect(`/organization/${organizationId}/okrs`);
+  if (!admin) redirect(`/organization/${organizationId}/dashboard/okrs`);
 
   const [departments, members, telegramConfig] = await Promise.all([
     db.department.findMany({

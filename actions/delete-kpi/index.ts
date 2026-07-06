@@ -33,7 +33,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     action: "DELETE",
   });
 
-  revalidatePath(`/organization/${orgId}/okrs`, "layout");
+  revalidatePath(`/organization/${orgId}/dashboard/okrs`, "layout");
   return { data: existing };
 };
 

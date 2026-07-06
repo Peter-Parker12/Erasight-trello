@@ -97,6 +97,7 @@ model UserTelegramAccount {
 
   @@unique([orgId, userId])
   @@index([orgId])
+  @@index([orgId, telegramUsername])
 }
 
 model UserDisplayName {
@@ -813,14 +814,14 @@ model Department {
 }
 
 model Objective {
-  id           String      @id @default(uuid())
+  id           String  @id @default(uuid())
   orgId        String
   departmentId String? // null = company-level OKR
-  title        String      @db.Text
+  title        String  @db.Text
   ownerId      String
   quarter      Int // 1..4
   year         Int
-  order        Int         @default(0)
+  order        Int     @default(0)
 
   department Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
 
@@ -915,4 +916,25 @@ model OrgTelegramConfig {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Dashboard module: daily reports captured from the Telegram bot
+// ---------------------------------------------------------------------------
+
+model DailyReport {
+  id                String   @id @default(uuid())
+  orgId             String
+  userId            String // Clerk userId, resolved from the telegram username
+  reportDate        DateTime @db.Date // one row per user per day
+  content           String   @db.Text
+  telegramUsername  String? // recorded for traceability
+  telegramMessageId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orgId, userId, reportDate])
+  @@index([orgId, reportDate])
+  @@index([orgId, userId])
 }

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { isOrgAdmin } from "@/lib/board-access";
 import { getOrgMembers } from "@/lib/org-members";
-import { Info } from "../_components/info";
+import { Info } from "../../_components/info";
 import { OkrTabs } from "./_components/okr-tabs";
 import { ImportWorkbookDialog } from "./_components/import-workbook-dialog";
 
@@ -18,7 +18,7 @@ const OkrsLayout = async ({ children, params }: Props) => {
   const { userId, orgId } = await auth();
 
   if (!userId || !orgId) redirect("/select-org");
-  if (orgId !== organizationId) redirect(`/organization/${orgId}/okrs`);
+  if (orgId !== organizationId) redirect(`/organization/${orgId}/dashboard/okrs`);
 
   const admin = await isOrgAdmin(orgId);
   const members = admin ? await getOrgMembers(orgId) : [];

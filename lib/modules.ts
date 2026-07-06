@@ -18,6 +18,11 @@ export const MODULE_REGISTRY = {
     description: "Centralized document library organized by industry and folder.",
     defaultAccess: "closed",
   },
+  DASHBOARD: {
+    label: "Dashboard",
+    description: "Team oversight: due/overdue tasks, daily reports, OKRs & KPIs.",
+    defaultAccess: "closed",
+  },
 } as const satisfies Record<
   string,
   { label: string; description: string; defaultAccess: "open" | "closed" }

@@ -41,7 +41,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     action: "UPDATE",
   });
 
-  revalidatePath(`/organization/${orgId}/okrs`, "layout");
+  revalidatePath(`/organization/${orgId}/dashboard/okrs`, "layout");
   return { data: keyResult };
 };
 

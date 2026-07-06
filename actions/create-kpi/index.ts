@@ -31,7 +31,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     action: "CREATE",
   });
 
-  revalidatePath(`/organization/${orgId}/okrs`, "layout");
+  revalidatePath(`/organization/${orgId}/dashboard/okrs`, "layout");
   return { data: kpi };
 };
 

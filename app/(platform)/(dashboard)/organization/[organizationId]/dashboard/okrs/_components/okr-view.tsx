@@ -93,7 +93,7 @@ export const OkrView = ({
         <div className="flex items-center gap-x-2">
           <Legend />
           <PeriodPicker
-            basePath={`/organization/${organizationId}/okrs`}
+            basePath={`/organization/${organizationId}/dashboard/okrs`}
             quarter={quarter}
             year={year}
           />

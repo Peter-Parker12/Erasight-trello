@@ -5,9 +5,12 @@ import { useState } from "react";
 import {
   Activity,
   Building2,
+  CalendarClock,
   ChevronRight,
+  FileText,
   Handshake,
   Layout,
+  LayoutDashboard,
   Library,
   ListTodo,
   Package,
@@ -55,7 +58,9 @@ export const NavItem = ({
 
   const isCRMActive = pathname.startsWith(`/organization/${organization.id}/crm`);
   const isKBActive = pathname.startsWith(`/organization/${organization.id}/knowledge-base`);
+  const isDashboardActive = pathname.startsWith(`/organization/${organization.id}/dashboard`);
   const [crmExpanded, setCrmExpanded] = useState(() => isCRMActive);
+  const [dashboardExpanded, setDashboardExpanded] = useState(() => isDashboardActive);
 
   const mainRoutes: { label: string; icon: React.ReactNode; href: string; module?: ModuleKey }[] = [
     {
@@ -95,13 +100,28 @@ export const NavItem = ({
     },
   ];
 
-  const bottomRoutes = [
+  const dashboardRoutes = [
+    {
+      label: "Due & Overdue",
+      icon: <CalendarClock className="h-4 w-4 mr-2" />,
+      href: `/organization/${organization.id}/dashboard`,
+      exact: true,
+    },
+    {
+      label: "Daily Report",
+      icon: <FileText className="h-4 w-4 mr-2" />,
+      href: `/organization/${organization.id}/dashboard/daily-report`,
+      exact: false,
+    },
     {
       label: "OKRs & KPIs",
       icon: <Target className="h-4 w-4 mr-2" />,
-      href: `/organization/${organization.id}/okrs`,
-      matchPrefix: true,
+      href: `/organization/${organization.id}/dashboard/okrs`,
+      exact: false,
     },
+  ];
+
+  const bottomRoutes = [
     {
       label: "Activity",
       icon: <Activity className="h-4 w-4 mr-2" />,
@@ -115,6 +135,7 @@ export const NavItem = ({
   ];
 
   const visibleMainRoutes = mainRoutes.filter((r) => !r.module || modules[r.module]);
+  const showDashboard = modules["DASHBOARD"];
   const showCRM = modules["CRM"];
   const showKB = modules["KNOWLEDGE_BASE"];
 
@@ -162,6 +183,48 @@ export const NavItem = ({
             {route.label}
           </Button>
         ))}
+
+        {/* Dashboard collapsible group */}
+        {showDashboard && (
+          <>
+            <div className="my-1.5 h-px bg-[#333]" />
+            <button
+              onClick={() => setDashboardExpanded((v) => !v)}
+              className={cn(
+                "w-full flex items-center pl-10 pr-2 py-1.5 rounded-md text-[10px] font-semibold uppercase tracking-widest transition",
+                isDashboardActive ? "text-violet-400" : "text-[#888]",
+                "hover:bg-[#2a2a2a] hover:text-[#e5e5e5]"
+              )}
+            >
+              <LayoutDashboard className="h-3.5 w-3.5 mr-2 shrink-0" />
+              <span className="flex-1 text-left">Dashboard</span>
+              <ChevronRight
+                className={cn(
+                  "h-3 w-3 transition-transform duration-200",
+                  dashboardExpanded && "rotate-90"
+                )}
+              />
+            </button>
+            {dashboardExpanded &&
+              dashboardRoutes.map((route) => (
+                <Button
+                  key={route.label}
+                  size="sm"
+                  onClick={() => onClick(route.href)}
+                  className={cn(
+                    "w-full font-normal justify-start pl-14 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
+                    (route.exact ? pathname === route.href : pathname?.startsWith(route.href)) &&
+                      "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+                  )}
+                  variant="ghost"
+                >
+                  {route.icon}
+                  {route.label}
+                </Button>
+              ))}
+            <div className="my-1.5 h-px bg-[#333]" />
+          </>
+        )}
 
         {/* CRM collapsible group */}
         {showCRM && (

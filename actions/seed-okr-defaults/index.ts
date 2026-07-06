@@ -40,7 +40,7 @@ const handler = async (_data: InputType): Promise<ReturnType> => {
     });
   }
 
-  revalidatePath(`/organization/${orgId}/okrs`, "layout");
+  revalidatePath(`/organization/${orgId}/dashboard/okrs`, "layout");
   return { data: created };
 };
 

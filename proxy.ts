@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+const isPublicRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  // Telegram delivers webhook updates with no Clerk session; the route itself
+  // authenticates via the X-Telegram-Bot-Api-Secret-Token header.
+  "/api/telegram/webhook(.*)",
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   const authObj = await auth();

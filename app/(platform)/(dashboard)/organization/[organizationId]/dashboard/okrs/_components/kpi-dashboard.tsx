@@ -103,7 +103,7 @@ export const KpiDashboard = ({
         <div className="flex items-center gap-x-2">
           <Legend />
           <PeriodPicker
-            basePath={`/organization/${organizationId}/okrs/kpis`}
+            basePath={`/organization/${organizationId}/dashboard/okrs/kpis`}
             year={year}
             half={half}
           />
