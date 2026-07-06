@@ -36,10 +36,10 @@ const avgAchievementPercent = (kpis: KpiFull[], month: number): number | null =>
   const ratios = kpis
     .map((kpi) => {
       const entry = kpi.entries.find(
-        (e) => e.month === month && e.actual !== null && e.target > 0
+        (e) => e.month === month && e.actual !== null && e.target !== null && e.target > 0
       );
       return entry
-        ? computeKpiAchievement(entry.target, entry.actual!, kpi.direction)
+        ? computeKpiAchievement(entry.target!, entry.actual!, kpi.direction)
         : null;
     })
     .filter((r): r is number => r !== null);
@@ -78,11 +78,11 @@ export const KpiCharts = ({ departments, kpis, months, focusMonth }: Props) => {
   const barData = kpis
     .map((kpi) => {
       const entry = kpi.entries.find(
-        (e) => e.month === focusMonth && e.actual !== null && e.target > 0
+        (e) => e.month === focusMonth && e.actual !== null && e.target !== null && e.target > 0
       );
       if (!entry) return null;
       const percent = Math.round(
-        computeKpiAchievement(entry.target, entry.actual!, kpi.direction) * 100
+        computeKpiAchievement(entry.target!, entry.actual!, kpi.direction)! * 100
       );
       return {
         name: kpi.name.length > 32 ? `${kpi.name.slice(0, 32)}…` : kpi.name,

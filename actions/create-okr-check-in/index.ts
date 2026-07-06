@@ -36,7 +36,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       userId,
       userName,
       note: note || null,
-      scoreAtCheckIn: score,
+      // scoreAtCheckIn is a historical snapshot and can't be null; no
+      // measurable KRs yet is recorded as 0 progress.
+      scoreAtCheckIn: score ?? 0,
     },
   });
 

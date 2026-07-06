@@ -93,11 +93,11 @@ export const KpiTable = ({
                 const entry = kpi.entries.find(
                   (e) => e.month === month && e.year === year
                 );
-                const hasTarget = !!entry && entry.target > 0;
+                const hasTarget = !!entry && entry.target !== null && entry.target > 0;
                 const hasActual = !!entry && entry.actual !== null;
                 const ratio =
                   hasTarget && hasActual
-                    ? computeKpiAchievement(entry!.target, entry!.actual!, kpi.direction)
+                    ? computeKpiAchievement(entry!.target!, entry!.actual!, kpi.direction)
                     : null;
                 const band = ratio !== null ? getStatusBand(ratio) : null;
                 // yellow: month has arrived (or passed), target set, actual missing

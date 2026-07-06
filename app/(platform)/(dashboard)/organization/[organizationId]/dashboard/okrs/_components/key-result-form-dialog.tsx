@@ -42,7 +42,9 @@ export const KeyResultFormDialog = ({
     setPrevOpen(open);
     if (open) {
       setTitle(keyResult?.title ?? "");
-      setTarget(keyResult ? String(keyResult.targetValue) : "");
+      setTarget(keyResult?.targetValue !== null && keyResult?.targetValue !== undefined
+        ? String(keyResult.targetValue)
+        : "");
       setUnit(keyResult?.unit ?? "");
       setDirection(keyResult?.direction ?? "INCREASE");
     }
@@ -68,7 +70,8 @@ export const KeyResultFormDialog = ({
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const targetValue = Number(target);
+    // Blank target is allowed — filled in later via the spreadsheet cell.
+    const targetValue = target.trim() === "" ? null : Number(target);
     if (!title.trim() || Number.isNaN(targetValue)) return;
     if (keyResult) {
       executeUpdate({
@@ -118,7 +121,7 @@ export const KeyResultFormDialog = ({
                 step="any"
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
-                required
+                placeholder="—"
               />
             </div>
             <div className="space-y-1.5">
@@ -170,7 +173,7 @@ export const KeyResultFormDialog = ({
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Hủy | Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || !title.trim() || target === ""}>
+            <Button type="submit" disabled={isLoading || !title.trim()}>
               {keyResult ? "Lưu | Save" : "Tạo | Create"}
             </Button>
           </div>

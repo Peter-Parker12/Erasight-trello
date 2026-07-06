@@ -53,12 +53,12 @@ export const KpiDashboard = ({
   const focusEntries = kpis
     .map((kpi) => {
       const entry = kpi.entries.find(
-        (e) => e.month === focusMonth && e.actual !== null && e.target > 0
+        (e) => e.month === focusMonth && e.actual !== null && e.target !== null && e.target > 0
       );
       return entry
         ? {
             kpi,
-            ratio: computeKpiAchievement(entry.target, entry.actual!, kpi.direction),
+            ratio: computeKpiAchievement(entry.target!, entry.actual!, kpi.direction),
           }
         : null;
     })

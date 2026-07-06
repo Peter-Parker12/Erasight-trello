@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { formatScore, getStatusBand } from "@/lib/okr-score";
 
 type Props = {
-  score: number;
+  score: number | null;
   showScore?: boolean;
   className?: string;
 };

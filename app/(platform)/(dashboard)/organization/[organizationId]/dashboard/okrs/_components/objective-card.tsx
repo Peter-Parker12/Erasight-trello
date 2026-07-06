@@ -100,7 +100,7 @@ export const ObjectiveCard = ({ objective, members, canManage, onEdit }: Props) 
           <div className="h-2 flex-1 rounded-full bg-neutral-100 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${band.barClass}`}
-              style={{ width: `${Math.round(score * 100)}%` }}
+              style={{ width: `${Math.round((score ?? 0) * 100)}%` }}
             />
           </div>
           <span className="text-xs font-semibold tabular-nums w-9 text-right">

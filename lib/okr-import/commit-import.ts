@@ -249,7 +249,7 @@ export const commitImport = async (
               kpiId: kpi.id,
               year,
               month: entry.month,
-              target: entry.target ?? 0,
+              target: entry.target,
               actual: entry.actual,
             },
             update: {

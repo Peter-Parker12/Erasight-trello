@@ -844,8 +844,8 @@ model KeyResult {
   id          String           @id @default(uuid())
   objectiveId String
   title       String           @db.Text
-  targetValue Float
-  actualValue Float            @default(0)
+  targetValue Float? // null = not yet set
+  actualValue Float? // null = not yet reported
   unit        String?
   direction   METRIC_DIRECTION @default(INCREASE)
   order       Int              @default(0)
@@ -898,7 +898,7 @@ model KpiEntry {
   kpiId       String
   year        Int
   month       Int // 1..12
-  target      Float
+  target      Float? // null = not yet set
   actual      Float? // null = not yet reported
   updatedById String?
 

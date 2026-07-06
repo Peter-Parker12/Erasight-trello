@@ -27,7 +27,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     data: {
       objectiveId,
       title,
-      targetValue,
+      targetValue: targetValue ?? null,
       unit: unit || null,
       direction,
       order: count,

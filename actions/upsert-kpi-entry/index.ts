@@ -27,7 +27,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       kpiId,
       year,
       month,
-      target: target ?? 0,
+      target: target ?? null,
       actual: actual ?? null,
       updatedById: userId,
     },

@@ -12,7 +12,7 @@ type Props = {
   value: number | null;
   canEdit: boolean;
   needsUpdate?: boolean;
-  onSave: (value: number) => void;
+  onSave: (value: number | null) => void;
   className?: string;
   placeholder?: string;
 };
@@ -36,7 +36,9 @@ export const EditableValueCell = ({
 
   const commit = () => {
     if (text.trim() === "") {
-      setText(value === null ? "" : String(value));
+      // Blank is a valid value — persist the clear so it's saved outside the
+      // cell too, not just reset locally. No-op if it was already blank.
+      if (value !== null) onSave(null);
       return;
     }
     const parsed = Number(text);

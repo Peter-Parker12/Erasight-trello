@@ -23,7 +23,7 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   objective: ObjectiveFull;
   canManage: boolean;
-  currentScore: number;
+  currentScore: number | null;
 };
 
 export const CheckInDialog = ({
