@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { fetcher } from "@/lib/fetcher";
 import { cn } from "@/lib/utils";
+import { todayReportDateString, shiftReportDateString } from "@/lib/daily-report";
 import { MemberTelegramEdit } from "./member-telegram-edit";
 import { ReportHistoryDialog } from "./report-history-dialog";
 
@@ -26,7 +29,15 @@ type DailyReportData = {
   members: Member[];
 };
 
-const MemberRow = ({ member, onChanged }: { member: Member; onChanged: () => void }) => (
+const MemberRow = ({
+  member,
+  isToday,
+  onChanged,
+}: {
+  member: Member;
+  isToday: boolean;
+  onChanged: () => void;
+}) => (
   <div className="flex items-start gap-3 py-3">
     <Avatar className="h-8 w-8 mt-0.5">
       <AvatarImage src={member.userImage} />
@@ -44,7 +55,9 @@ const MemberRow = ({ member, onChanged }: { member: Member; onChanged: () => voi
       {member.hasReported ? (
         <p className="text-sm text-[#cfcfcf] whitespace-pre-wrap mt-1">{member.content}</p>
       ) : (
-        <p className="text-xs text-amber-400 mt-1">Hasn&apos;t reported yet today.</p>
+        <p className="text-xs text-amber-400 mt-1">
+          {isToday ? "Hasn't reported yet today." : "Did not report on this date."}
+        </p>
       )}
     </div>
     <div className="shrink-0 flex flex-col items-end gap-1">
@@ -64,15 +77,26 @@ const MemberRow = ({ member, onChanged }: { member: Member; onChanged: () => voi
 
 export const DailyReportPanel = ({ organizationId }: { organizationId: string }) => {
   const queryClient = useQueryClient();
+  const todayStr = todayReportDateString();
+  // null = today. A "YYYY-MM-DD" string when browsing a past date.
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const dateParam = selectedDate ?? todayStr;
+  const isToday = dateParam === todayStr;
+
   const { data, isLoading, isError } = useQuery<DailyReportData>({
-    queryKey: ["daily-reports", organizationId, "today"],
-    queryFn: () => fetcher("/api/orgs/daily-reports"),
+    queryKey: ["daily-reports", organizationId, dateParam],
+    queryFn: () =>
+      fetcher(`/api/orgs/daily-reports${selectedDate ? `?date=${selectedDate}` : ""}`),
     retry: false,
   });
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ["daily-reports", organizationId, "today"] });
+    queryClient.invalidateQueries({ queryKey: ["daily-reports", organizationId, dateParam] });
   };
+
+  const goToDate = (date: string) => setSelectedDate(date === todayStr ? null : date);
+  const goPrevDay = () => goToDate(shiftReportDateString(dateParam, -1));
+  const goNextDay = () => goToDate(shiftReportDateString(dateParam, 1));
 
   if (isLoading) return <p className="text-sm text-muted-foreground py-4">Loading daily reports…</p>;
   if (isError || !data) {
@@ -89,13 +113,41 @@ export const DailyReportPanel = ({ organizationId }: { organizationId: string })
 
   return (
     <div className="space-y-6 py-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-sm font-semibold text-[#e5e5e5]">
-          Daily report — {format(new Date(data.date), "EEE, MMM d yyyy")}
+          Daily report — {format(new Date(`${data.date}T00:00:00`), "EEE, MMM d yyyy")}
         </h2>
-        <span className="text-xs text-muted-foreground">
-          {reported.length} / {data.members.length} reported
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            {reported.length} / {data.members.length} reported
+          </span>
+          <div className="flex items-center gap-1">
+            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={goPrevDay}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <input
+              type="date"
+              value={dateParam}
+              max={todayStr}
+              onChange={(e) => e.target.value && goToDate(e.target.value)}
+              className="h-7 rounded-md border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] text-xs px-1.5"
+            />
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0"
+              disabled={isToday}
+              onClick={goNextDay}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            {!isToday && (
+              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setSelectedDate(null)}>
+                Today
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Not reported — highlighted */}
@@ -103,7 +155,7 @@ export const DailyReportPanel = ({ organizationId }: { organizationId: string })
         <div className="flex items-center gap-1.5 mb-1">
           <AlertTriangle className="h-4 w-4 text-amber-400" />
           <h3 className="text-sm font-semibold text-amber-400">
-            Not reported yet ({notReported.length})
+            {isToday ? "Not reported yet" : "Did not report"} ({notReported.length})
           </h3>
         </div>
         <div
@@ -117,7 +169,9 @@ export const DailyReportPanel = ({ organizationId }: { organizationId: string })
           {notReported.length === 0 ? (
             <p className="text-sm text-muted-foreground py-3">Everyone has reported. 🎉</p>
           ) : (
-            notReported.map((m) => <MemberRow key={m.userId} member={m} onChanged={invalidate} />)
+            notReported.map((m) => (
+              <MemberRow key={m.userId} member={m} isToday={isToday} onChanged={invalidate} />
+            ))
           )}
         </div>
       </div>
@@ -130,9 +184,13 @@ export const DailyReportPanel = ({ organizationId }: { organizationId: string })
         </div>
         <div className="rounded-lg border border-[#333] px-4 divide-y divide-[#333]">
           {reported.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-3">No reports yet today.</p>
+            <p className="text-sm text-muted-foreground py-3">
+              {isToday ? "No reports yet today." : "No reports on this date."}
+            </p>
           ) : (
-            reported.map((m) => <MemberRow key={m.userId} member={m} onChanged={invalidate} />)
+            reported.map((m) => (
+              <MemberRow key={m.userId} member={m} isToday={isToday} onChanged={invalidate} />
+            ))
           )}
         </div>
       </div>
