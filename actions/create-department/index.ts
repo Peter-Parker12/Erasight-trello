@@ -16,12 +16,17 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   const admin = await isOrgAdmin(orgId);
   if (!admin) return { error: "Only admins can manage departments." };
 
-  const { name, leaderId, color } = data;
+  const { name, leaderId, color, parentId } = data;
 
   const existing = await db.department.findUnique({
     where: { orgId_name: { orgId, name } },
   });
   if (existing) return { error: "A department with this name already exists." };
+
+  if (parentId) {
+    const parent = await db.department.findFirst({ where: { id: parentId, orgId } });
+    if (!parent) return { error: "Parent department not found." };
+  }
 
   const count = await db.department.count({ where: { orgId } });
 
@@ -31,6 +36,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       name,
       leaderId: leaderId || null,
       color: color || null,
+      parentId: parentId || null,
       order: count,
     },
   });

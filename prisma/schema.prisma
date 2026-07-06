@@ -802,6 +802,10 @@ model Department {
   leaderId String?
   color    String?
   order    Int     @default(0)
+  parentId String?
+
+  parent   Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  children Department[] @relation("DepartmentHierarchy")
 
   objectives Objective[]
   kpis       Kpi[]
@@ -811,6 +815,7 @@ model Department {
 
   @@unique([orgId, name])
   @@index([orgId])
+  @@index([parentId])
 }
 
 model Objective {

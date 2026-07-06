@@ -8,6 +8,7 @@ import { useAction } from "@/hooks/use-action";
 import { createDepartment } from "@/actions/create-department";
 import { updateDepartment } from "@/actions/update-department";
 import { OrgMember } from "@/lib/org-members";
+import { descendantIds } from "@/lib/department-tree";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   department: Department | null;
+  departments: Department[];
   members: OrgMember[];
 };
 
@@ -41,11 +43,13 @@ export const DepartmentFormDialog = ({
   open,
   onOpenChange,
   department,
+  departments,
   members,
 }: Props) => {
   const [name, setName] = useState("");
   const [leaderId, setLeaderId] = useState("");
   const [color, setColor] = useState<string>(COLOR_OPTIONS[0]);
+  const [parentId, setParentId] = useState("");
 
   // reset the form each time the dialog opens (adjust-state-during-render pattern)
   const [prevOpen, setPrevOpen] = useState(false);
@@ -55,8 +59,13 @@ export const DepartmentFormDialog = ({
       setName(department?.name ?? "");
       setLeaderId(department?.leaderId ?? "");
       setColor(department?.color ?? COLOR_OPTIONS[0]);
+      setParentId(department?.parentId ?? "");
     }
   }
+
+  // A department can't be parented to itself or to any of its own descendants.
+  const excludedIds = department ? descendantIds(departments, department.id) : new Set<string>();
+  const parentOptions = departments.filter((d) => !excludedIds.has(d.id));
 
   const { execute: executeCreate, isLoading: creating } = useAction(createDepartment, {
     onSuccess: (data) => {
@@ -85,9 +94,10 @@ export const DepartmentFormDialog = ({
         name: name.trim(),
         leaderId: leaderId || null,
         color,
+        parentId: parentId || null,
       });
     } else {
-      executeCreate({ name: name.trim(), leaderId: leaderId || null, color });
+      executeCreate({ name: name.trim(), leaderId: leaderId || null, color, parentId: parentId || null });
     }
   };
 
@@ -125,6 +135,23 @@ export const DepartmentFormDialog = ({
               {members.map((member) => (
                 <option key={member.userId} value={member.userId}>
                   {member.userName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="dept-parent">Phòng ban cha | Parent department</Label>
+            <select
+              id="dept-parent"
+              value={parentId}
+              onChange={(e) => setParentId(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="">— Không có (cấp cao nhất) | None (top-level) —</option>
+              {parentOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
                 </option>
               ))}
             </select>

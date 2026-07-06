@@ -10,4 +10,5 @@ export const UpdateDepartment = z.object({
   leaderId: z.string().optional().nullable(),
   color: z.string().optional().nullable(),
   order: z.number().int().min(0).optional(),
+  parentId: z.string().optional().nullable(),
 });

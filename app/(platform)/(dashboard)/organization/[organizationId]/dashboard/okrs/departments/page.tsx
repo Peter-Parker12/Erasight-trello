@@ -22,7 +22,7 @@ const DepartmentsPage = async ({ params }: Props) => {
   const [departments, members, telegramConfig] = await Promise.all([
     db.department.findMany({
       where: { orgId },
-      include: { _count: { select: { objectives: true, kpis: true } } },
+      include: { _count: { select: { objectives: true, kpis: true, children: true } } },
       orderBy: { order: "asc" },
     }),
     getOrgMembers(orgId),

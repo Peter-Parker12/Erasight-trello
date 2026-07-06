@@ -21,6 +21,11 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   const department = await db.department.findUnique({ where: { id } });
   if (!department || department.orgId !== orgId) return { error: "Department not found." };
 
+  const childCount = await db.department.count({ where: { parentId: id } });
+  if (childCount > 0) {
+    return { error: "Delete or reassign its sub-departments first." };
+  }
+
   // relationMode = "prisma": delete related rows explicitly in one transaction
   await db.$transaction([
     db.kpiEntry.deleteMany({ where: { kpi: { departmentId: id } } }),

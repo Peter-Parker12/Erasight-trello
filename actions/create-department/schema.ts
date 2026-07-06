@@ -7,4 +7,5 @@ export const CreateDepartment = z.object({
     .max(100, { message: "Name is too long." }),
   leaderId: z.string().optional().nullable(),
   color: z.string().optional().nullable(),
+  parentId: z.string().optional().nullable(),
 });

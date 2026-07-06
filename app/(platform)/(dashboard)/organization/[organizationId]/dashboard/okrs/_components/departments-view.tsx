@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Building2, Pencil, Plus, Send, Sparkles, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Building2, ChevronDown, ChevronRight, Pencil, Plus, Send, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Department, OrgTelegramConfig } from "@prisma/client";
 
@@ -9,6 +9,7 @@ import { useAction } from "@/hooks/use-action";
 import { seedOkrDefaults } from "@/actions/seed-okr-defaults";
 import { deleteDepartment } from "@/actions/delete-department";
 import { OrgMember } from "@/lib/org-members";
+import { buildDepartmentTree, type DepartmentNode } from "@/lib/department-tree";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +24,7 @@ import { DepartmentFormDialog } from "./department-form-dialog";
 import { OrgTelegramDialog } from "./org-telegram-dialog";
 
 type DepartmentWithCounts = Department & {
-  _count: { objectives: number; kpis: number };
+  _count: { objectives: number; kpis: number; children: number };
 };
 
 type Props = {
@@ -36,6 +37,7 @@ export const DepartmentsView = ({ departments, members, telegramConfig }: Props)
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Department | null>(null);
   const [telegramOpen, setTelegramOpen] = useState(false);
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
 
   const { execute: executeSeed, isLoading: seeding } = useAction(seedOkrDefaults, {
     onSuccess: (data) =>
@@ -49,8 +51,24 @@ export const DepartmentsView = ({ departments, members, telegramConfig }: Props)
   });
 
   const memberById = new Map(members.map((m) => [m.userId, m]));
+  const tree = useMemo(() => buildDepartmentTree(departments), [departments]);
+
+  const toggleCollapse = (id: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const onDelete = (department: DepartmentWithCounts) => {
+    if (department._count.children > 0) {
+      window.alert(
+        `"${department.name}" có ${department._count.children} phòng ban con. Hãy xóa hoặc chuyển chúng trước. | This department has ${department._count.children} sub-department(s). Delete or reassign them first.`
+      );
+      return;
+    }
     const hasData = department._count.objectives > 0 || department._count.kpis > 0;
     const message = hasData
       ? `Xóa "${department.name}" sẽ xóa toàn bộ ${department._count.objectives} OKR và ${department._count.kpis} KPI của phòng này. Tiếp tục? | Deleting will remove all its OKRs & KPIs. Continue?`
@@ -58,6 +76,89 @@ export const DepartmentsView = ({ departments, members, telegramConfig }: Props)
     if (!window.confirm(message)) return;
     executeDelete({ id: department.id });
   };
+
+  const renderDepartmentRows = (
+    nodes: DepartmentNode<DepartmentWithCounts>[],
+    depth: number
+  ): React.ReactNode[] =>
+    nodes.flatMap((department) => {
+      const leader = department.leaderId ? memberById.get(department.leaderId) : undefined;
+      const hasChildren = department.children.length > 0;
+      const collapsed = collapsedIds.has(department.id);
+
+      const row = (
+        <TableRow key={department.id}>
+          <TableCell>
+            <div
+              className="flex items-center gap-x-1.5 font-medium"
+              style={{ paddingLeft: depth * 20 }}
+            >
+              {hasChildren ? (
+                <button
+                  type="button"
+                  onClick={() => toggleCollapse(department.id)}
+                  className="shrink-0 text-neutral-400 hover:text-neutral-200"
+                >
+                  {collapsed ? (
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  ) : (
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              ) : (
+                <span className="w-3.5 shrink-0" />
+              )}
+              <span
+                className="h-3 w-3 rounded-full shrink-0"
+                style={{ backgroundColor: department.color ?? "#94a3b8" }}
+              />
+              {department.name}
+            </div>
+          </TableCell>
+          <TableCell>
+            {leader ? (
+              <div className="flex items-center gap-x-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={leader.userImage} />
+                  <AvatarFallback>{leader.userName[0]}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm">{leader.userName}</span>
+              </div>
+            ) : (
+              <span className="text-sm text-neutral-400">Chưa gán | Unassigned</span>
+            )}
+          </TableCell>
+          <TableCell className="text-center">{department._count.objectives}</TableCell>
+          <TableCell className="text-center">{department._count.kpis}</TableCell>
+          <TableCell>
+            <div className="flex items-center justify-end gap-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  setEditing(department);
+                  setDialogOpen(true);
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                onClick={() => onDelete(department)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      );
+
+      if (!hasChildren || collapsed) return [row];
+      return [row, ...renderDepartmentRows(department.children, depth + 1)];
+    });
 
   return (
     <div className="space-y-4">
@@ -121,64 +222,7 @@ export const DepartmentsView = ({ departments, members, telegramConfig }: Props)
             </TableRow>
           </TableHeader>
           <TableBody>
-            {departments.map((department) => {
-              const leader = department.leaderId
-                ? memberById.get(department.leaderId)
-                : undefined;
-              return (
-                <TableRow key={department.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-x-2 font-medium">
-                      <span
-                        className="h-3 w-3 rounded-full shrink-0"
-                        style={{ backgroundColor: department.color ?? "#94a3b8" }}
-                      />
-                      {department.name}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {leader ? (
-                      <div className="flex items-center gap-x-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={leader.userImage} />
-                          <AvatarFallback>{leader.userName[0]}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm">{leader.userName}</span>
-                      </div>
-                    ) : (
-                      <span className="text-sm text-neutral-400">
-                        Chưa gán | Unassigned
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">{department._count.objectives}</TableCell>
-                  <TableCell className="text-center">{department._count.kpis}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-x-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={() => {
-                          setEditing(department);
-                          setDialogOpen(true);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                        onClick={() => onDelete(department)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {renderDepartmentRows(tree, 0)}
           </TableBody>
         </Table>
       )}
@@ -187,6 +231,7 @@ export const DepartmentsView = ({ departments, members, telegramConfig }: Props)
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         department={editing}
+        departments={departments}
         members={members}
       />
       <OrgTelegramDialog
