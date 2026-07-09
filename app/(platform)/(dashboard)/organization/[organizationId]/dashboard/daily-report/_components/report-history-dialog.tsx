@@ -12,12 +12,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetcher } from "@/lib/fetcher";
 
 type HistoryData = {
   count: number;
-  reports: { id: string; reportDate: string; content: string; updatedAt: string }[];
+  reports: {
+    id: string;
+    reportDate: string;
+    content: string;
+    projectName: string | null;
+    updatedAt: string;
+  }[];
 };
 
 type ReportHistoryDialogProps = {
@@ -63,9 +70,16 @@ export const ReportHistoryDialog = ({
           <div className="max-h-[60vh] overflow-y-auto divide-y divide-[#333]">
             {data.reports.map((r) => (
               <div key={r.id} className="py-2.5">
-                <p className="text-xs font-semibold text-violet-400">
-                  {format(new Date(r.reportDate), "EEE, MMM d yyyy")}
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-xs font-semibold text-violet-400">
+                    {format(new Date(r.reportDate), "EEE, MMM d yyyy")}
+                  </p>
+                  {r.projectName && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {r.projectName}
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-sm text-[#e5e5e5] whitespace-pre-wrap mt-0.5">{r.content}</p>
               </div>
             ))}

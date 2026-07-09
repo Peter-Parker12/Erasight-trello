@@ -936,10 +936,21 @@ model DailyReport {
   telegramUsername  String? // recorded for traceability
   telegramMessageId String?
 
+  // Parsed fields from the structured Vietnamese report format. Nullable —
+  // if a message doesn't match the expected labels, these stay null and
+  // `content` remains the only record of what was sent.
+  fullNameRaw       String?  @db.Text
+  projectNameRaw    String?  @db.Text
+  projectName       String?  @db.Text // normalized CamelCase, e.g. "EnglishCourse"
+  tasksToComplete   String?  @db.Text
+  todayPlan         String?  @db.Text
+  difficulties      String?  @db.Text
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([orgId, userId, reportDate])
   @@index([orgId, reportDate])
   @@index([orgId, userId])
+  @@index([orgId, projectName])
 }

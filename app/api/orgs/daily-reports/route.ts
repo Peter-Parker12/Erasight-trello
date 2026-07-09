@@ -35,6 +35,10 @@ export async function GET(req: Request) {
           id: r.id,
           reportDate: r.reportDate.toISOString().slice(0, 10),
           content: r.content,
+          projectName: r.projectName,
+          tasksToComplete: r.tasksToComplete,
+          todayPlan: r.todayPlan,
+          difficulties: r.difficulties,
           updatedAt: r.updatedAt.toISOString(),
         })),
       });
@@ -79,6 +83,10 @@ export async function GET(req: Request) {
           telegramUsername: telegramMap.get(uid) ?? null,
           hasReported: !!report,
           content: report?.content ?? null,
+          projectName: report?.projectName ?? null,
+          tasksToComplete: report?.tasksToComplete ?? null,
+          todayPlan: report?.todayPlan ?? null,
+          difficulties: report?.difficulties ?? null,
           reportedAt: report?.updatedAt.toISOString() ?? null,
           totalReports: countMap.get(uid) ?? 0,
         };

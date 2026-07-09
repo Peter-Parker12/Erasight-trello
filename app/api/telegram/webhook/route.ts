@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { normalizeTelegramUsername } from "@/lib/telegram";
 import { reportDateFor } from "@/lib/daily-report";
+import { parseDailyReportMessage } from "@/lib/daily-report-parser";
+import { normalizeProjectName } from "@/lib/project-name";
 
 // Inbound Telegram webhook. The bot forwards channel/group messages here; each
 // message from a member that maps to a Taskify user is stored as that user's
@@ -59,6 +61,13 @@ export async function POST(req: Request) {
       messageDate ? new Date(messageDate * 1000) : new Date()
     );
 
+    // Parse the labeled report format (Họ và tên / Nhóm dự án / ...). Falls
+    // back to null fields (raw `content` only) if the message doesn't match.
+    const parsed = parseDailyReportMessage(text);
+    const projectName = parsed?.projectNameRaw
+      ? normalizeProjectName(parsed.projectNameRaw)
+      : null;
+
     // A new/edited message replaces that day's report content with the latest.
     await db.dailyReport.upsert({
       where: {
@@ -68,6 +77,12 @@ export async function POST(req: Request) {
         content: text,
         telegramUsername: normalized,
         telegramMessageId: messageId != null ? String(messageId) : null,
+        fullNameRaw: parsed?.fullName ?? null,
+        projectNameRaw: parsed?.projectNameRaw ?? null,
+        projectName,
+        tasksToComplete: parsed?.tasksToComplete ?? null,
+        todayPlan: parsed?.todayPlan ?? null,
+        difficulties: parsed?.difficulties ?? null,
       },
       create: {
         orgId,
@@ -76,6 +91,12 @@ export async function POST(req: Request) {
         content: text,
         telegramUsername: normalized,
         telegramMessageId: messageId != null ? String(messageId) : null,
+        fullNameRaw: parsed?.fullName ?? null,
+        projectNameRaw: parsed?.projectNameRaw ?? null,
+        projectName,
+        tasksToComplete: parsed?.tasksToComplete ?? null,
+        todayPlan: parsed?.todayPlan ?? null,
+        difficulties: parsed?.difficulties ?? null,
       },
     });
 
