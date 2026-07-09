@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetcher } from "@/lib/fetcher";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,10 @@ type Member = {
   telegramUsername: string | null;
   hasReported: boolean;
   content: string | null;
+  projectName: string | null;
+  tasksToComplete: string | null;
+  todayPlan: string | null;
+  difficulties: string | null;
   reportedAt: string | null;
   totalReports: number;
 };
@@ -46,6 +51,11 @@ const MemberRow = ({
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-sm font-medium text-[#e5e5e5] truncate">{member.userName}</span>
+        {member.projectName && (
+          <Badge variant="secondary" className="text-[10px]">
+            {member.projectName}
+          </Badge>
+        )}
         <MemberTelegramEdit
           userId={member.userId}
           telegramUsername={member.telegramUsername}
