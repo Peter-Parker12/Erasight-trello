@@ -5,7 +5,13 @@ const MembersSettingsPage = () => {
     <div className="w-full py-4">
       <OrganizationProfile
         appearance={{
-          variables: { colorBackground: "#1f1f1f", colorPrimary: "#7c3aed" },
+          variables: {
+            colorBackground: "#1f1f1f",
+            colorPrimary: "#7c3aed",
+            colorForeground: "#e5e5e5",
+            colorMutedForeground: "#888",
+            colorDanger: "#ef4444",
+          },
           elements: {
             rootBox: { boxShadow: "none", width: "100%" },
             card: { backgroundColor: "#1f1f1f", border: "1px solid #333", boxShadow: "none", width: "100%" },

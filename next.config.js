@@ -5,7 +5,12 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   register: true,
   disable: !prod,
   workboxOptions: {
+    // Explicit even though these are next-pwa's own defaults — guards against
+    // a future upgrade silently changing them and reintroducing stale-build
+    // navigation failures after a deploy (see components/stale-build-recovery.tsx).
     skipWaiting: true,
+    clientsClaim: true,
+    cleanupOutdatedCaches: true,
   },
 });
 
