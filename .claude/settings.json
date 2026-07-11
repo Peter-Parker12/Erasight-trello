@@ -26,7 +26,9 @@
       "Bash(mkdir -p \"/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/knowledge-base/_components\" \"/Users/petertran/Downloads/Erasight-trello/app/\\(platform\\)/\\(dashboard\\)/organization/[organizationId]/knowledge-base/[industryId]/_components\")",
       "Bash(mkdir -p /Users/petertran/Downloads/Erasight-trello/app/api/kb/files/\\\\[filename\\\\])",
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(npm run *)",
+      "Bash(echo \"EXIT=$?\")"
     ],
     "additionalDirectories": [
       "/Users/petertran/Downloads/Erasight-trello/app/(platform)/(dashboard)/organization/[organizationId]/knowledge-base",
