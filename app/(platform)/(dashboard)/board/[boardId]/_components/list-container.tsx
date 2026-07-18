@@ -7,7 +7,6 @@ import { DragDropContext, type DropResult, Droppable } from "@hello-pangea/dnd";
 import { ListForm } from "./list-form";
 import { ListItem } from "./list-item";
 import { BoardFilterBar } from "./board-filter-bar";
-import { SubtaskGroupBoard } from "./subtask-group-board";
 import { TransitionActionModal } from "./transition-action-modal";
 import type { ListWithCards, CardPreview } from "@/types";
 import { useAction } from "@/hooks/use-action";
@@ -108,32 +107,23 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
       if (!sourceList.cards) sourceList.cards = [];
       if (!destinationList.cards) destinationList.cards = [];
 
-      const sourceGrouped = sourceList.cards.filter((card) => card.subtasks.length > 0);
-      const sourceStandalone = sourceList.cards.filter((card) => card.subtasks.length === 0);
-
       // same-list reorder — no transition rule applies
       if (source.droppableId === destination.droppableId) {
-        const reorderedCards = reorder(sourceStandalone, source.index, destination.index);
+        const reorderedCards = reorder(sourceList.cards, source.index, destination.index);
         reorderedCards.forEach((card, i) => { card.order = i; });
-        sourceList.cards = [...sourceGrouped, ...reorderedCards];
+        sourceList.cards = reorderedCards;
         setOrderedData(newOrderedData);
         executeUpdateCardOrder({ boardId, items: reorderedCards });
         return;
       }
 
       // cross-list move
-      const destinationGrouped = destinationList.cards.filter((card) => card.subtasks.length > 0);
-      const destinationStandalone = destinationList.cards.filter((card) => card.subtasks.length === 0);
-
-      const [movedCard] = sourceStandalone.splice(source.index, 1);
+      const [movedCard] = sourceList.cards.splice(source.index, 1);
       movedCard.listId = destination.droppableId;
-      destinationStandalone.splice(destination.index, 0, movedCard);
+      destinationList.cards.splice(destination.index, 0, movedCard);
 
-      sourceStandalone.forEach((card, i) => { card.order = i; });
-      destinationStandalone.forEach((card, i) => { card.order = i; });
-
-      sourceList.cards = [...sourceGrouped, ...sourceStandalone];
-      destinationList.cards = [...destinationGrouped, ...destinationStandalone];
+      sourceList.cards.forEach((card, i) => { card.order = i; });
+      destinationList.cards.forEach((card, i) => { card.order = i; });
 
       const rules = transitionRules[destination.droppableId] ?? [];
 
@@ -144,12 +134,12 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
         setPendingDrop({
           movedCard,
           destinationListId: destination.droppableId,
-          destinationItems: destinationStandalone,
+          destinationItems: destinationList.cards,
           snapshot: orderedData,
         });
       } else {
         setOrderedData(newOrderedData);
-        commitCrossListMove(destinationStandalone, boardId);
+        commitCrossListMove(destinationList.cards, boardId);
       }
     }
   };
@@ -188,15 +178,6 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
 
   const pendingActions = pendingDrop ? (transitionRules[pendingDrop.destinationListId] ?? []) : [];
 
-  const allSubtasksDone = (card: CardPreview) =>
-    card.subtasks.length > 0 &&
-    card.subtasks.every((s) => s.list.type === "DONE" || s.list.type === "CANCELLED");
-
-  const groupedParents = orderedData.flatMap((list) =>
-    list.cards.filter((card) => card.subtasks.length > 0 && !allSubtasksDone(card))
-  );
-  const filteredGroupedParents = isActive ? applyFilter(groupedParents) : groupedParents;
-
   return (
     <>
       <BoardFilterBar
@@ -205,13 +186,6 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
         update={update}
         reset={reset}
         isActive={isActive}
-      />
-
-      <SubtaskGroupBoard
-        lists={orderedData}
-        parents={filteredGroupedParents}
-        boardId={boardId}
-        transitionRules={transitionRules}
       />
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -228,9 +202,7 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
                   index={i}
                   data={{
                     ...list,
-                    cards: (isActive ? applyFilter(list.cards) : list.cards).filter(
-                      (card) => card.subtasks.length === 0 || allSubtasksDone(card)
-                    ),
+                    cards: isActive ? applyFilter(list.cards) : list.cards,
                   }}
                 />
               ))}

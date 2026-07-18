@@ -20,27 +20,47 @@ import { TranslatePanel } from "./translate-panel";
 import { Subtasks } from "./subtasks";
 import { Reason } from "./reason";
 
+// Renders one Dialog per entry in the open-card stack, so a subtask opened
+// from within its parent's modal overlays on top instead of replacing it.
+// Only the topmost instance responds to Escape/overlay-click/the X button —
+// lower instances stay mounted (state preserved) but are inert, and get
+// visually covered by the top instance's own overlay.
 export const CardModal = () => {
-  const id = useCardModal((state) => state.id);
-  const isOpen = useCardModal((state) => state.isOpen);
+  const stack = useCardModal((state) => state.stack);
+
+  return (
+    <>
+      {stack.map((cardId, index) => (
+        <CardModalInstance key={cardId} cardId={cardId} isTop={index === stack.length - 1} />
+      ))}
+    </>
+  );
+};
+
+type CardModalInstanceProps = {
+  cardId: string;
+  isTop: boolean;
+};
+
+const CardModalInstance = ({ cardId, isTop }: CardModalInstanceProps) => {
   const onClose = useCardModal((state) => state.onClose);
 
   const { data: cardData } = useQuery<CardWithFullDetail>({
-    queryKey: ["card", id],
-    queryFn: () => fetcher(`/api/cards/${id}`),
-    enabled: !!id,
+    queryKey: ["card", cardId],
+    queryFn: () => fetcher(`/api/cards/${cardId}`),
+    enabled: !!cardId,
   });
 
   const { data: auditLogsData } = useQuery<AuditLog[]>({
-    queryKey: ["card-logs", id],
-    queryFn: () => fetcher(`/api/cards/${id}/logs`),
-    enabled: !!id,
+    queryKey: ["card-logs", cardId],
+    queryFn: () => fetcher(`/api/cards/${cardId}/logs`),
+    enabled: !!cardId,
   });
 
   const coverColor = cardData?.coverColor;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open onOpenChange={isTop ? onClose : undefined}>
       <DialogContent className="max-w-6xl w-full p-0 overflow-hidden flex flex-col h-[100dvh] sm:h-[95vh] rounded-none sm:rounded-lg">
         {/* Cover color stripe — fixed at top */}
         {coverColor && (

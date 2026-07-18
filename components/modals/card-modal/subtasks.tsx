@@ -139,7 +139,7 @@ export const Subtasks = ({ data }: SubtasksProps) => {
                   </div>
                 )}
                 <button
-                  onClick={() => cardModal.onOpen(subtask.id)}
+                  onClick={() => cardModal.onOpenNested(subtask.id)}
                   className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-violet-400 transition"
                   title="Open subtask"
                 >
