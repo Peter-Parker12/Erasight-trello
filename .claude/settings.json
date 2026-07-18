@@ -34,5 +34,18 @@
       "/Users/petertran/Downloads/Erasight-trello/app/(platform)/(dashboard)/organization/[organizationId]/knowledge-base",
       "/Users/petertran/Downloads/Erasight-trello/app/api/kb/files"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // empty' | { read -r cmd; case \"$cmd\" in *\"next build\"*|*\"npm run build\"*|*\"npx tsc\"*|*\"tsc --noEmit\"*|*\"npm run typecheck\"*) rm -rf \"/Users/petertran/Downloads/Erasight-trello/.next\" \"/Users/petertran/Downloads/Erasight-trello/tsconfig.tsbuildinfo\" ;; esac; } 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
   }
 }
