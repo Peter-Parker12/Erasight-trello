@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
+import { db } from "@/lib/db";
 import { isOrgAdmin } from "@/lib/board-access";
 import { parseWorkbook } from "@/lib/okr-import/parse-workbook";
 import { computeImportPreview, commitImport } from "@/lib/okr-import/commit-import";
@@ -39,9 +40,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Could not read the uploaded file." }, { status: 400 });
   }
 
+  const departments = await db.department.findMany({ where: { orgId }, select: { name: true } });
+  const departmentNames = departments.map((d) => d.name);
+
   let parsed;
   try {
-    parsed = parseWorkbook(buffer);
+    parsed = parseWorkbook(buffer, departmentNames);
   } catch {
     return NextResponse.json({ error: "Could not parse the workbook. Is it a valid .xlsx file?" }, { status: 400 });
   }

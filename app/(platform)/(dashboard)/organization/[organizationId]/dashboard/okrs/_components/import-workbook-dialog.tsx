@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Upload } from "lucide-react";
+import { Download, Upload } from "lucide-react";
 
 import { OrgMember } from "@/lib/org-members";
 import { Button } from "@/components/ui/button";
@@ -111,14 +111,21 @@ export const ImportWorkbookDialog = ({ organizationId, members }: Props) => {
   const allResolved = unresolved.every((name) => !!nameMapping[name]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Upload className="h-4 w-4 mr-1" />
-          Nhập từ Excel | Import from Excel
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-lg">
+    <div className="flex items-center gap-x-2">
+      <Button variant="outline" size="sm" asChild>
+        <a href="/api/okrs/template" download>
+          <Download className="h-4 w-4 mr-1" />
+          Tải file mẫu | Download template
+        </a>
+      </Button>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm">
+            <Upload className="h-4 w-4 mr-1" />
+            Nhập từ Excel | Import from Excel
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Nhập OKRs & KPIs từ Excel | Import OKRs & KPIs from Excel</DialogTitle>
         </DialogHeader>
@@ -243,7 +250,8 @@ export const ImportWorkbookDialog = ({ organizationId, members }: Props) => {
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
