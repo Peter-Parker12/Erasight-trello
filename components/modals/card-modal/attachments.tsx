@@ -26,6 +26,10 @@ type UrlCheckState = "idle" | "checking" | "ok" | "failed";
 const MAX_FILE_MB = 5;
 const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 const GOOGLE_RE = /(?:docs|drive)\.google\.com\//;
+// Editor links (Canva, Figma) are private and JS-rendered — no server fetch can
+// ever read them for AI review, regardless of sharing settings. Warn up front
+// instead of letting the user find out via a cryptic error after attaching.
+const PRIVATE_EDITOR_RE = /canva\.com\/design\/.+\/edit|figma\.com\/(file|design)\//i;
 
 function getAttachmentType(url: string, name?: string): "image" | "video" | "file" {
   if (url.startsWith("data:image/")) return "image";
@@ -486,6 +490,16 @@ export const Attachments = ({ data }: AttachmentsProps) => {
                       {urlCheckState === "failed" && <XCircle className="h-3.5 w-3.5 text-destructive" />}
                     </div>
                   </div>
+
+                  {/* Private editor link (Canva/Figma) — AI review can never read these */}
+                  {PRIVATE_EDITOR_RE.test(url) && (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/10 p-2.5 flex gap-2">
+                      <AlertCircle className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
+                      <p className="text-[11px] text-destructive/90">
+                        This is a private editor link — AI Review won&apos;t be able to read it, even though attaching it will still work. Export the design (Share → Download → PDF) and attach the PDF instead, or use a public &ldquo;view&rdquo; link if available.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Google idle prompt */}
                   {GOOGLE_RE.test(url) && urlCheckState === "idle" && (
