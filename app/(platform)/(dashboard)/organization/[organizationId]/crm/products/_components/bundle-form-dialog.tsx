@@ -287,8 +287,8 @@ export const BundleFormDialog = ({
   };
 
   const cellInput = cn(
-    "w-full h-full px-3 py-2.5 text-sm bg-transparent text-[#e5e5e5] tabular-nums",
-    "focus:outline-none focus:bg-blue-500/[0.08] transition-colors"
+    "w-full h-full px-3 py-2.5 text-sm bg-transparent text-foreground tabular-nums",
+    "focus:outline-none focus:bg-primary/[0.08] transition-colors"
   );
 
   return (
@@ -297,7 +297,7 @@ export const BundleFormDialog = ({
 
       <DialogContent className="w-[min(90vw,1100px)] max-w-none p-0 gap-0 overflow-hidden">
         {/* ── Header ── */}
-        <DialogHeader className="px-7 pt-6 pb-4 border-b border-[#2e2e2e]">
+        <DialogHeader className="px-7 pt-6 pb-4 border-b border-border">
           <DialogTitle className="text-base font-semibold">
             {isEdit ? "Edit bundle" : "New bundle"}
           </DialogTitle>
@@ -313,11 +313,11 @@ export const BundleFormDialog = ({
             <div className="grid grid-cols-2 gap-5">
               <FormInput id="name" label="Bundle name" required defaultValue={bundle?.name} />
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-[#e5e5e5]">Pricing mode</Label>
+                <Label className="text-xs font-semibold text-foreground">Pricing mode</Label>
                 <select
                   value={pricingMode}
                   onChange={(e) => setPricingMode(e.target.value as typeof pricingMode)}
-                  className="w-full text-sm px-3 py-2 h-9 border rounded-md bg-[#2a2a2a] border-[#3a3a3a] text-[#e5e5e5] focus:outline-none focus:border-blue-500"
+                  className="w-full text-sm px-3 py-2 h-9 border rounded-md bg-secondary border-border text-foreground focus:outline-none focus:border-primary"
                 >
                   {PRICING_MODES.map((m) => (
                     <option key={m.value} value={m.value}>{m.label}</option>
@@ -332,23 +332,23 @@ export const BundleFormDialog = ({
             {/* ── Line items table ── */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold text-[#e5e5e5]">Line items</Label>
+                <Label className="text-xs font-semibold text-foreground">Line items</Label>
                 <span className="text-[11px] text-muted-foreground/50 select-none">
                   Tab / Enter moves between cells
                 </span>
               </div>
 
-              <div className="rounded-lg border border-[#2e2e2e] overflow-hidden">
+              <div className="rounded-lg border border-border overflow-hidden">
                 <table className="w-full text-sm border-collapse">
                   <thead>
-                    <tr className="bg-[#222] text-xs text-muted-foreground border-b border-[#2e2e2e]">
-                      <th className="w-9 px-3 py-2.5 text-center border-r border-[#2e2e2e] font-medium select-none">#</th>
-                      <th className="px-4 py-2.5 text-left border-r border-[#2e2e2e] font-medium">Item</th>
-                      <th className="w-28 px-4 py-2.5 text-center border-r border-[#2e2e2e] font-medium">Qty</th>
-                      <th className="w-52 px-4 py-2.5 text-right border-r border-[#2e2e2e] font-medium">
+                    <tr className="bg-muted text-xs text-muted-foreground border-b border-border">
+                      <th className="w-9 px-3 py-2.5 text-center border-r border-border font-medium select-none">#</th>
+                      <th className="px-4 py-2.5 text-left border-r border-border font-medium">Item</th>
+                      <th className="w-28 px-4 py-2.5 text-center border-r border-border font-medium">Qty</th>
+                      <th className="w-52 px-4 py-2.5 text-right border-r border-border font-medium">
                         Unit Price (VND)
                       </th>
-                      <th className="w-52 px-4 py-2.5 text-right border-r border-[#2e2e2e] font-medium">
+                      <th className="w-52 px-4 py-2.5 text-right border-r border-border font-medium">
                         Subtotal
                         <span className="ml-1 text-[10px] text-muted-foreground/40 font-normal">= Qty × Price</span>
                       </th>
@@ -356,7 +356,7 @@ export const BundleFormDialog = ({
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-[#262626]">
+                  <tbody className="divide-y divide-border">
                     {items.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground italic">
@@ -372,22 +372,22 @@ export const BundleFormDialog = ({
                         const rowSubtotal     = item.unitPrice * item.quantity;
 
                         return (
-                          <tr key={item.lineId} className="hover:bg-[#1c1c1c] group">
+                          <tr key={item.lineId} className="hover:bg-muted/40 group">
                             {/* # */}
-                            <td className="w-9 px-3 text-center text-xs text-muted-foreground/60 border-r border-[#262626] select-none">
+                            <td className="w-9 px-3 text-center text-xs text-muted-foreground/60 border-r border-border select-none">
                               {idx + 1}
                             </td>
 
                             {/* Item name */}
-                            <td className="px-4 py-2.5 border-r border-[#262626]">
+                            <td className="px-4 py-2.5 border-r border-border">
                               <div className="flex items-center gap-2">
                                 {isBundle && (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded shrink-0">
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-primary/20 text-primary px-1.5 py-0.5 rounded shrink-0">
                                     <Layers className="h-2.5 w-2.5" />
                                     BUNDLE
                                   </span>
                                 )}
-                                <span className="font-medium text-[#e5e5e5]">{displayName}</span>
+                                <span className="font-medium text-foreground">{displayName}</span>
                                 {!isBundle && product?.unit && (
                                   <span className="text-muted-foreground text-xs">/ {product.unit}</span>
                                 )}
@@ -395,7 +395,7 @@ export const BundleFormDialog = ({
                             </td>
 
                             {/* Qty */}
-                            <td className="w-28 p-0 border-r border-[#262626] overflow-hidden">
+                            <td className="w-28 p-0 border-r border-border overflow-hidden">
                               <input
                                 ref={(el) => { qtyRefs.current[idx] = el; }}
                                 type="number"
@@ -411,7 +411,7 @@ export const BundleFormDialog = ({
                             </td>
 
                             {/* Unit Price */}
-                            <td className="w-52 p-0 border-r border-[#262626] overflow-hidden">
+                            <td className="w-52 p-0 border-r border-border overflow-hidden">
                               <input
                                 ref={(el) => { priceRefs.current[idx] = el; }}
                                 type="number"
@@ -427,7 +427,7 @@ export const BundleFormDialog = ({
                             </td>
 
                             {/* Subtotal */}
-                            <td className="w-52 px-4 py-2.5 text-right border-r border-[#262626] text-violet-400 font-medium text-xs tabular-nums select-none">
+                            <td className="w-52 px-4 py-2.5 text-right border-r border-border text-primary font-medium text-xs tabular-nums select-none">
                               {formatVnd(rowSubtotal)} ₫
                             </td>
 
@@ -449,13 +449,13 @@ export const BundleFormDialog = ({
 
                   {/* ── Summary tfoot ── */}
                   {items.length > 0 && (
-                    <tfoot className="border-t border-[#2e2e2e]">
+                    <tfoot className="border-t border-border">
                       {/* Subtotal */}
-                      <tr className="bg-[#1c1c1c]">
-                        <td colSpan={4} className="px-4 py-2.5 text-right text-xs text-muted-foreground border-r border-[#262626]">
+                      <tr className="bg-muted/40">
+                        <td colSpan={4} className="px-4 py-2.5 text-right text-xs text-muted-foreground border-r border-border">
                           Subtotal
                         </td>
-                        <td className="px-4 py-2.5 text-right text-xs font-medium text-[#e5e5e5] border-r border-[#262626] tabular-nums">
+                        <td className="px-4 py-2.5 text-right text-xs font-medium text-foreground border-r border-border tabular-nums">
                           {formatVnd(subtotal)} ₫
                         </td>
                         <td />
@@ -463,22 +463,22 @@ export const BundleFormDialog = ({
 
                       {/* Discount % */}
                       {pricingMode === "DISCOUNT_PERCENT" && (
-                        <tr className="bg-[#1c1c1c]">
-                          <td colSpan={3} className="px-4 py-2 text-right text-xs text-muted-foreground border-r border-[#262626]">
+                        <tr className="bg-muted/40">
+                          <td colSpan={3} className="px-4 py-2 text-right text-xs text-muted-foreground border-r border-border">
                             Discount (%)
                           </td>
-                          <td className="px-3 py-1.5 border-r border-[#262626]">
+                          <td className="px-3 py-1.5 border-r border-border">
                             <div className="flex items-center justify-end gap-1.5">
                               <input
                                 type="number" min={0} max={100}
                                 value={discount}
                                 onChange={(e) => setDiscount(Number(e.target.value))}
-                                className="w-16 text-sm px-2 py-1 text-right rounded-md border border-[#333] bg-[#252525] text-[#e5e5e5] focus:outline-none focus:border-blue-500 tabular-nums"
+                                className="w-16 text-sm px-2 py-1 text-right rounded-md border border-border bg-secondary text-foreground focus:outline-none focus:border-primary tabular-nums"
                               />
                               <span className="text-xs text-muted-foreground">%</span>
                             </div>
                           </td>
-                          <td className="px-4 py-2 text-right text-xs font-medium text-red-400 border-r border-[#262626] tabular-nums">
+                          <td className="px-4 py-2 text-right text-xs font-medium text-red-400 border-r border-border tabular-nums">
                             −{formatVnd(Math.round(discountAmount))} ₫
                           </td>
                           <td />
@@ -487,19 +487,19 @@ export const BundleFormDialog = ({
 
                       {/* Discount flat */}
                       {pricingMode === "DISCOUNT_FLAT" && (
-                        <tr className="bg-[#1c1c1c]">
-                          <td colSpan={3} className="px-4 py-2 text-right text-xs text-muted-foreground border-r border-[#262626]">
+                        <tr className="bg-muted/40">
+                          <td colSpan={3} className="px-4 py-2 text-right text-xs text-muted-foreground border-r border-border">
                             Discount (VND)
                           </td>
-                          <td className="px-3 py-1.5 border-r border-[#262626]">
+                          <td className="px-3 py-1.5 border-r border-border">
                             <input
                               type="number" min={0}
                               value={discount}
                               onChange={(e) => setDiscount(Number(e.target.value))}
-                              className="w-full text-sm px-2 py-1 text-right rounded-md border border-[#333] bg-[#252525] text-[#e5e5e5] focus:outline-none focus:border-blue-500 tabular-nums"
+                              className="w-full text-sm px-2 py-1 text-right rounded-md border border-border bg-secondary text-foreground focus:outline-none focus:border-primary tabular-nums"
                             />
                           </td>
-                          <td className="px-4 py-2 text-right text-xs font-medium text-red-400 border-r border-[#262626] tabular-nums">
+                          <td className="px-4 py-2 text-right text-xs font-medium text-red-400 border-r border-border tabular-nums">
                             −{formatVnd(Math.min(discount, subtotal))} ₫
                           </td>
                           <td />
@@ -508,19 +508,19 @@ export const BundleFormDialog = ({
 
                       {/* Fixed price */}
                       {pricingMode === "FIXED" && (
-                        <tr className="bg-[#1c1c1c]">
-                          <td colSpan={3} className="px-4 py-2 text-right text-xs text-muted-foreground border-r border-[#262626]">
+                        <tr className="bg-muted/40">
+                          <td colSpan={3} className="px-4 py-2 text-right text-xs text-muted-foreground border-r border-border">
                             Fixed price
                           </td>
-                          <td className="px-3 py-1.5 border-r border-[#262626]">
+                          <td className="px-3 py-1.5 border-r border-border">
                             <input
                               type="number" min={0}
                               value={finalPrice}
                               onChange={(e) => setFinalPrice(Number(e.target.value))}
-                              className="w-full text-sm px-2 py-1 text-right rounded-md border border-[#333] bg-[#252525] text-[#e5e5e5] focus:outline-none focus:border-blue-500 tabular-nums"
+                              className="w-full text-sm px-2 py-1 text-right rounded-md border border-border bg-secondary text-foreground focus:outline-none focus:border-primary tabular-nums"
                             />
                           </td>
-                          <td className="px-4 py-2 text-right text-xs font-medium text-orange-400 border-r border-[#262626] tabular-nums">
+                          <td className="px-4 py-2 text-right text-xs font-medium text-orange-400 border-r border-border tabular-nums">
                             {formatVnd(finalPrice)} ₫
                           </td>
                           <td />
@@ -528,11 +528,11 @@ export const BundleFormDialog = ({
                       )}
 
                       {/* Total */}
-                      <tr className="bg-violet-950/40 border-t border-violet-800/20">
-                        <td colSpan={4} className="px-4 py-3.5 text-right text-sm font-semibold text-[#e5e5e5] border-r border-violet-800/20">
+                      <tr className="bg-primary/10 border-t border-primary/20">
+                        <td colSpan={4} className="px-4 py-3.5 text-right text-sm font-semibold text-foreground border-r border-primary/20">
                           Total
                         </td>
-                        <td className="px-4 py-3.5 text-right text-sm font-bold text-violet-400 border-r border-violet-800/20 tabular-nums">
+                        <td className="px-4 py-3.5 text-right text-sm font-bold text-primary border-r border-primary/20 tabular-nums">
                           {formatVnd(Math.round(total))} ₫
                         </td>
                         <td />
@@ -546,20 +546,20 @@ export const BundleFormDialog = ({
             {/* ── Product picker ── */}
             {availableToAdd.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-[#e5e5e5]">Add products</Label>
+                <Label className="text-xs font-semibold text-foreground">Add products</Label>
 
-                <div className="rounded-lg border border-[#2e2e2e] overflow-hidden">
-                  <div className="flex items-center gap-2.5 px-4 py-2.5 bg-[#222] border-b border-[#2e2e2e]">
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="flex items-center gap-2.5 px-4 py-2.5 bg-muted border-b border-border">
                     <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     <input
                       type="text"
                       placeholder="Search products…"
                       value={pickerSearch}
                       onChange={(e) => setPickerSearch(e.target.value)}
-                      className="flex-1 text-sm bg-transparent text-[#e5e5e5] focus:outline-none placeholder:text-muted-foreground/40"
+                      className="flex-1 text-sm bg-transparent text-foreground focus:outline-none placeholder:text-muted-foreground/40"
                     />
                     {pickerSelected.size > 0 && (
-                      <span className="text-xs font-medium text-violet-400 shrink-0 tabular-nums">
+                      <span className="text-xs font-medium text-primary shrink-0 tabular-nums">
                         {pickerSelected.size} selected
                       </span>
                     )}
@@ -571,7 +571,7 @@ export const BundleFormDialog = ({
                         No products found.
                       </p>
                     ) : (
-                      <div className="divide-y divide-[#262626]">
+                      <div className="divide-y divide-border">
                         {pickerFiltered.map((product) => {
                           const checked = pickerSelected.has(product.id);
                           return (
@@ -582,23 +582,23 @@ export const BundleFormDialog = ({
                               className={cn(
                                 "w-full flex items-center gap-3.5 px-4 py-2.5 text-left transition-colors",
                                 checked
-                                  ? "bg-violet-600/10 hover:bg-violet-600/[0.14]"
-                                  : "hover:bg-[#222]"
+                                  ? "bg-primary/10 hover:bg-primary/[0.14]"
+                                  : "hover:bg-muted"
                               )}
                             >
                               <div className={cn(
                                 "w-4 h-4 rounded border shrink-0 flex items-center justify-center transition-colors",
-                                checked ? "bg-violet-600 border-violet-600" : "border-[#555]"
+                                checked ? "bg-primary border-primary" : "border-input"
                               )}>
                                 {checked && <Check className="h-2.5 w-2.5 text-white" />}
                               </div>
-                              <span className="flex-1 text-sm text-[#e5e5e5] truncate">
+                              <span className="flex-1 text-sm text-foreground truncate">
                                 {product.name}
                               </span>
-                              <span className="text-[11px] text-muted-foreground/70 bg-[#2a2a2a] px-1.5 py-0.5 rounded shrink-0">
+                              <span className="text-[11px] text-muted-foreground/70 bg-secondary px-1.5 py-0.5 rounded shrink-0">
                                 {product.unit}
                               </span>
-                              <span className="text-xs text-violet-400 tabular-nums shrink-0 min-w-[90px] text-right">
+                              <span className="text-xs text-primary tabular-nums shrink-0 min-w-[90px] text-right">
                                 {formatVnd(Number(product.unitPrice))} ₫
                               </span>
                             </button>
@@ -608,12 +608,12 @@ export const BundleFormDialog = ({
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between px-4 py-2.5 bg-[#222] border-t border-[#2e2e2e]">
+                  <div className="flex items-center justify-between px-4 py-2.5 bg-muted border-t border-border">
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <button
                         type="button"
                         onClick={() => setPickerSelected(new Set(pickerFiltered.map((p) => p.id)))}
-                        className="hover:text-[#e5e5e5] transition-colors"
+                        className="hover:text-foreground transition-colors"
                       >
                         Select all
                       </button>
@@ -623,7 +623,7 @@ export const BundleFormDialog = ({
                           <button
                             type="button"
                             onClick={() => setPickerSelected(new Set())}
-                            className="hover:text-[#e5e5e5] transition-colors"
+                            className="hover:text-foreground transition-colors"
                           >
                             Clear
                           </button>
@@ -648,29 +648,29 @@ export const BundleFormDialog = ({
             {/* ── Bundle picker ── */}
             {availableBundles.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-[#e5e5e5]">Add bundles</Label>
+                <Label className="text-xs font-semibold text-foreground">Add bundles</Label>
                 <p className="text-[11px] text-muted-foreground/60">
                   Nest another bundle as a line item. Unit price defaults to the bundle total and can be overridden.
                 </p>
 
-                <div className="rounded-lg border border-[#2e2e2e] overflow-hidden">
-                  <div className="flex items-center gap-2.5 px-4 py-2.5 bg-[#222] border-b border-[#2e2e2e]">
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="flex items-center gap-2.5 px-4 py-2.5 bg-muted border-b border-border">
                     <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     <input
                       type="text"
                       placeholder="Search bundles…"
                       value={bundleSearch}
                       onChange={(e) => setBundleSearch(e.target.value)}
-                      className="flex-1 text-sm bg-transparent text-[#e5e5e5] focus:outline-none placeholder:text-muted-foreground/40"
+                      className="flex-1 text-sm bg-transparent text-foreground focus:outline-none placeholder:text-muted-foreground/40"
                     />
                     {bundleSelected.size > 0 && (
-                      <span className="text-xs font-medium text-violet-400 shrink-0 tabular-nums">
+                      <span className="text-xs font-medium text-primary shrink-0 tabular-nums">
                         {bundleSelected.size} selected
                       </span>
                     )}
                   </div>
 
-                  <div className="max-h-40 overflow-y-auto divide-y divide-[#262626]">
+                  <div className="max-h-40 overflow-y-auto divide-y divide-border">
                     {bundlesFiltered.length === 0 ? (
                       <p className="px-4 py-5 text-xs text-muted-foreground text-center italic">
                         No bundles found.
@@ -686,18 +686,18 @@ export const BundleFormDialog = ({
                             onClick={() => toggleBundlePicker(b.id)}
                             className={cn(
                               "w-full flex items-center gap-3.5 px-4 py-2.5 text-left transition-colors",
-                              checked ? "bg-violet-600/10 hover:bg-violet-600/[0.14]" : "hover:bg-[#222]"
+                              checked ? "bg-primary/10 hover:bg-primary/[0.14]" : "hover:bg-muted"
                             )}
                           >
                             <div className={cn(
                               "w-4 h-4 rounded border shrink-0 flex items-center justify-center transition-colors",
-                              checked ? "bg-violet-600 border-violet-600" : "border-[#555]"
+                              checked ? "bg-primary border-primary" : "border-input"
                             )}>
                               {checked && <Check className="h-2.5 w-2.5 text-white" />}
                             </div>
-                            <Layers className="h-3.5 w-3.5 text-violet-400/70 shrink-0" />
-                            <span className="flex-1 text-sm text-[#e5e5e5] truncate">{b.name}</span>
-                            <span className="text-xs text-violet-400 tabular-nums shrink-0 min-w-[90px] text-right">
+                            <Layers className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                            <span className="flex-1 text-sm text-foreground truncate">{b.name}</span>
+                            <span className="text-xs text-primary tabular-nums shrink-0 min-w-[90px] text-right">
                               {formatVnd(bTotal)} ₫
                             </span>
                           </button>
@@ -706,7 +706,7 @@ export const BundleFormDialog = ({
                     )}
                   </div>
 
-                  <div className="flex items-center justify-end px-4 py-2.5 bg-[#222] border-t border-[#2e2e2e]">
+                  <div className="flex items-center justify-end px-4 py-2.5 bg-muted border-t border-border">
                     <Button
                       type="button"
                       size="sm"
@@ -726,7 +726,7 @@ export const BundleFormDialog = ({
         </div>
 
         {/* ── Sticky footer ── */}
-        <div className="px-7 py-4 border-t border-[#2e2e2e] flex justify-end bg-[#161616]">
+        <div className="px-7 py-4 border-t border-border flex justify-end bg-background">
           <Button type="submit" form="bundle-form" size="sm">
             {isEdit ? "Save changes" : "Create bundle"}
           </Button>

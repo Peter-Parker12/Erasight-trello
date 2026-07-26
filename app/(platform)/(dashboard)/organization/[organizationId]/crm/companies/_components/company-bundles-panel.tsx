@@ -76,7 +76,7 @@ export const CompanyBundlesPanel = ({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold flex items-center gap-2">
-          <Layers className="h-4 w-4 text-violet-400" />
+          <Layers className="h-4 w-4 text-primary" />
           Bundles
         </h2>
         {unassigned.length > 0 && (
@@ -84,7 +84,7 @@ export const CompanyBundlesPanel = ({
             <select
               value={selectedBundleId}
               onChange={(e) => setSelectedBundleId(e.target.value)}
-              className="text-sm px-2 py-1 h-7 border rounded-md bg-[#2a2a2a] border-[#333] text-[#e5e5e5]"
+              className="text-sm px-2 py-1 h-7 border rounded-md bg-secondary border-border text-foreground"
             >
               <option value="">Pick a bundle…</option>
               {unassigned.map((b) => (
@@ -107,11 +107,11 @@ export const CompanyBundlesPanel = ({
       {assignedBundles.length === 0 ? (
         <p className="text-sm text-muted-foreground">No bundles assigned yet.</p>
       ) : (
-        <div className="divide-y divide-[#333] rounded-md border border-[#333]">
+        <div className="divide-y divide-border rounded-md border border-border">
           {assignedBundles.map((bundle) => (
             <div key={bundle.id} className="px-4 py-3 flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-medium text-[#e5e5e5]">{bundle.name}</p>
+                <p className="text-sm font-medium text-foreground">{bundle.name}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {bundle.items.map((i) => {
                     const name = i.childBundle ? `${i.childBundle.name} (bundle)` : (i.product?.name ?? "Unknown");
@@ -120,7 +120,7 @@ export const CompanyBundlesPanel = ({
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-sm font-semibold text-violet-400">
+                <span className="text-sm font-semibold text-primary">
                   {formatVnd(Math.round(bundleTotal(bundle)))} ₫
                 </span>
                 <button
@@ -140,7 +140,7 @@ export const CompanyBundlesPanel = ({
       {allBundles.length === 0 && (
         <p className="text-xs text-muted-foreground">
           No bundles exist yet — create one in the{" "}
-          <a href={`/organization/${organizationId}/crm/products`} className="underline hover:text-violet-400">
+          <a href={`/organization/${organizationId}/crm/products`} className="underline hover:text-primary">
             Products page
           </a>.
         </p>

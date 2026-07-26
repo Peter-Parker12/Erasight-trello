@@ -56,10 +56,10 @@ export const CheckInDialog = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="rounded-md bg-[#1f1f1f] p-3 text-sm">
+          <div className="rounded-md bg-card p-3 text-sm">
             <p className="font-medium leading-snug">{objective.title}</p>
             <div className="mt-2 flex items-center gap-x-2">
-              <span className="text-neutral-400">
+              <span className="text-muted-foreground">
                 Điểm hiện tại | Current score:
               </span>
               <ScoreBadge score={currentScore} />
@@ -83,11 +83,11 @@ export const CheckInDialog = ({
           )}
 
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-neutral-300">
+            <p className="text-sm font-semibold text-foreground">
               Lịch sử | History ({objective.checkIns.length})
             </p>
             {objective.checkIns.length === 0 ? (
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-muted-foreground">
                 Chưa có check-in nào | No check-ins yet.
               </p>
             ) : (
@@ -98,7 +98,7 @@ export const CheckInDialog = ({
                     <li key={checkIn.id} className="rounded-md border p-2.5 text-sm">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-medium">{checkIn.userName}</span>
-                        <span className="text-xs text-neutral-400">
+                        <span className="text-xs text-muted-foreground">
                           {format(new Date(checkIn.createdAt), "dd/MM/yyyy HH:mm")}
                         </span>
                       </div>
@@ -109,7 +109,7 @@ export const CheckInDialog = ({
                           {band.emoji} {formatScore(checkIn.scoreAtCheckIn)}
                         </span>
                         {checkIn.note && (
-                          <span className="text-neutral-300">{checkIn.note}</span>
+                          <span className="text-foreground">{checkIn.note}</span>
                         )}
                       </div>
                     </li>

@@ -90,7 +90,7 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
               id="title"
               placeholder="Enter list title.."
               defaultValue={title}
-              className="text-sm px-[7px] py-1 h-7 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-[#2a2a2a]"
+              className="text-sm px-[7px] py-1 h-7 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-secondary"
             />
             <button type="button" hidden aria-disabled />
           </form>
@@ -106,7 +106,7 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
                   "text-[10px] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wide shrink-0",
                   data.type === "DONE" && "bg-green-500/20 text-green-400",
                   data.type === "FAILED" && "bg-red-500/20 text-red-400",
-                  data.type === "CANCELLED" && "bg-[#333] text-[#888]"
+                  data.type === "CANCELLED" && "bg-muted text-muted-foreground"
                 )}
               >
                 {data.type}
@@ -129,7 +129,7 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
               value={wipInput}
               onChange={(e) => setWipInput(e.target.value)}
               placeholder="No limit"
-              className="w-20 text-xs border border-[#333] rounded px-1.5 py-0.5 bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1 focus:ring-violet-500"
+              className="w-20 text-xs border border-input rounded px-1.5 py-0.5 bg-input text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               onKeyDown={(e) => { if (e.key === "Enter") saveWip(); if (e.key === "Escape") setWipEditing(false); }}
               autoFocus
             />

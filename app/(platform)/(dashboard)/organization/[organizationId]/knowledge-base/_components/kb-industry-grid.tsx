@@ -49,7 +49,7 @@ export const KbIndustryGrid = ({ industries, organizationId, onDeleted }: KbIndu
 
   if (industries.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-[#333] p-12 text-center text-sm text-muted-foreground">
+      <div className="rounded-md border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
         No industries yet. Create your first one to get started.
       </div>
     );
@@ -60,18 +60,18 @@ export const KbIndustryGrid = ({ industries, organizationId, onDeleted }: KbIndu
       {industries.map((industry) => (
         <div
           key={industry.id}
-          className="relative group rounded-lg border border-[#333] bg-[#1f1f1f] p-4 hover:border-violet-500/50 transition-colors flex flex-col gap-3"
+          className="relative group rounded-lg border border-border bg-card p-4 hover:border-primary/50 transition-colors flex flex-col gap-3"
         >
           <Link
             href={`/organization/${organizationId}/knowledge-base/${industry.id}`}
             className="flex-1"
           >
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-md bg-violet-500/15 p-2 shrink-0">
-                <Folder className="h-5 w-5 text-violet-400" />
+              <div className="mt-0.5 rounded-md bg-primary/15 p-2 shrink-0">
+                <Folder className="h-5 w-5 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-[#e5e5e5] truncate">{industry.name}</h3>
+                <h3 className="font-semibold text-card-foreground truncate">{industry.name}</h3>
                 {industry.description && (
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
                     {industry.description}
@@ -95,7 +95,7 @@ export const KbIndustryGrid = ({ industries, organizationId, onDeleted }: KbIndu
           <div className="flex items-center justify-between">
             <Link
               href={`/organization/${organizationId}/knowledge-base/${industry.id}`}
-              className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-0.5"
+              className="text-xs text-primary hover:text-primary/80 flex items-center gap-0.5"
             >
               Open <ChevronRight className="h-3 w-3" />
             </Link>

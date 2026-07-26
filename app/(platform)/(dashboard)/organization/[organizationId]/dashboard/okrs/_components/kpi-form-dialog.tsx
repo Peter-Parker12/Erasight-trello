@@ -164,12 +164,12 @@ export const KpiFormDialog = ({
                   "rounded-md border px-3 py-2 text-sm text-left transition",
                   direction === "INCREASE"
                     ? "border-primary bg-primary/5 font-medium"
-                    : "border-input text-neutral-400 hover:bg-[#333]"
+                    : "border-input text-muted-foreground hover:bg-muted"
                 )}
               >
                 📈 Càng cao càng tốt
                 <br />
-                <span className="text-xs text-neutral-400">Higher is better</span>
+                <span className="text-xs text-muted-foreground">Higher is better</span>
               </button>
               <button
                 type="button"
@@ -178,12 +178,12 @@ export const KpiFormDialog = ({
                   "rounded-md border px-3 py-2 text-sm text-left transition",
                   direction === "DECREASE"
                     ? "border-primary bg-primary/5 font-medium"
-                    : "border-input text-neutral-400 hover:bg-[#333]"
+                    : "border-input text-muted-foreground hover:bg-muted"
                 )}
               >
                 📉 Càng thấp càng tốt
                 <br />
-                <span className="text-xs text-neutral-400">Lower is better</span>
+                <span className="text-xs text-muted-foreground">Lower is better</span>
               </button>
             </div>
           </div>

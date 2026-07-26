@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 import { siteConfig } from "@/config/site";
+import { clerkAppearance } from "@/lib/clerk-appearance";
 import { StaleBuildRecovery } from "@/components/stale-build-recovery";
 
 import "./globals.css";
@@ -33,7 +34,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
     <html lang="en">
       <body className={inter.className}>
         <StaleBuildRecovery />
-        <ClerkProvider>
+        <ClerkProvider appearance={clerkAppearance}>
           {children}
         </ClerkProvider>
       </body>

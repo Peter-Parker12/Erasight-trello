@@ -53,12 +53,12 @@ export const BoardOptions = ({ id, lists = [] }: BoardOptionsProps) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">
-          <div className="text-sm font-medium text-center text-[#e5e5e5]">
+          <div className="text-sm font-medium text-center text-foreground">
             Board actions
           </div>
           <PopoverClose asChild>
             <Button
-              className="h-auto w-auto p-2 absolute top-2 right-2 text-[#e5e5e5]"
+              className="h-auto w-auto p-2 absolute top-2 right-2 text-foreground"
               variant="ghost"
             >
               <X className="h-4 w-4" />

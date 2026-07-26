@@ -56,14 +56,14 @@ export const AiSettingsManager = ({ orgId, initialSkills, initialPartners }: AiS
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1 border-b border-[#333]">
+      <div className="flex gap-1 border-b border-border">
         {(["skills", "partners"] as Tab[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "px-3 py-2 text-sm font-medium text-[#888] hover:text-[#e5e5e5] border-b-2 border-transparent -mb-px capitalize",
-              activeTab === tab && "text-violet-400 border-violet-500"
+              "px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent -mb-px capitalize",
+              activeTab === tab && "text-primary border-primary"
             )}
           >
             {tab === "skills" ? `Skills (${skills.length})` : `Partners (${partners.length})`}
@@ -209,7 +209,7 @@ const SkillsTab = ({ orgId, skills, setSkills, seeding, onSeedDefaults }: Skills
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#666]">
+        <p className="text-xs text-muted-foreground">
           Claude picks the best skill automatically based on file content.
         </p>
         <div className="flex gap-2">
@@ -231,30 +231,30 @@ const SkillsTab = ({ orgId, skills, setSkills, seeding, onSeedDefaults }: Skills
       </div>
 
       {showForm && (
-        <div className="rounded-md border border-[#333] p-4 space-y-3 bg-[#1a1a1a]">
+        <div className="rounded-md border border-border p-4 space-y-3 bg-card">
           <h3 className="text-sm font-medium">{editingId ? "Edit skill" : "New skill"}</h3>
           <div className="space-y-2">
-            <label className="text-xs text-[#888]">Name (slug)</label>
+            <label className="text-xs text-muted-foreground">Name (slug)</label>
             <input
-              className="w-full bg-[#111] border border-[#333] rounded px-3 py-1.5 text-sm text-[#e5e5e5] focus:outline-none focus:border-violet-500"
+              className="w-full bg-input border border-border rounded px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary"
               placeholder="e.g. business-brief-review"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs text-[#888]">Description (shown to Claude when choosing a skill)</label>
+            <label className="text-xs text-muted-foreground">Description (shown to Claude when choosing a skill)</label>
             <input
-              className="w-full bg-[#111] border border-[#333] rounded px-3 py-1.5 text-sm text-[#e5e5e5] focus:outline-none focus:border-violet-500"
+              className="w-full bg-input border border-border rounded px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary"
               placeholder="One-line description of what this skill reviews"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs text-[#888]">Prompt (full skill instructions)</label>
+            <label className="text-xs text-muted-foreground">Prompt (full skill instructions)</label>
             <textarea
-              className="w-full bg-[#111] border border-[#333] rounded px-3 py-1.5 text-sm text-[#e5e5e5] focus:outline-none focus:border-violet-500 resize-y min-h-[200px] font-mono"
+              className="w-full bg-input border border-border rounded px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary resize-y min-h-[200px] font-mono"
               placeholder="You are a senior... ## Checklist..."
               value={form.prompt}
               onChange={(e) => setForm({ ...form, prompt: e.target.value })}
@@ -266,9 +266,9 @@ const SkillsTab = ({ orgId, skills, setSkills, seeding, onSeedDefaults }: Skills
               id="skill-enabled"
               checked={form.enabled}
               onChange={(e) => setForm({ ...form, enabled: e.target.checked })}
-              className="accent-violet-500 w-4 h-4 cursor-pointer"
+              className="accent-primary w-4 h-4 cursor-pointer"
             />
-            <label htmlFor="skill-enabled" className="text-xs text-[#888] cursor-pointer">Enabled</label>
+            <label htmlFor="skill-enabled" className="text-xs text-muted-foreground cursor-pointer">Enabled</label>
           </div>
           <div className="flex gap-2 justify-end">
             <Button variant="ghost" size="sm" onClick={cancelForm}>Cancel</Button>
@@ -281,30 +281,30 @@ const SkillsTab = ({ orgId, skills, setSkills, seeding, onSeedDefaults }: Skills
       )}
 
       {skills.length === 0 && !showForm && (
-        <p className="text-sm text-[#666] py-4 text-center">
+        <p className="text-sm text-muted-foreground py-4 text-center">
           No skills yet. Click &ldquo;Load defaults&rdquo; to add the 17 built-in review skills, or add your own.
         </p>
       )}
 
       <div className="space-y-2">
         {skills.map((skill) => (
-          <div key={skill.id} className={cn("rounded-md border border-[#333] bg-[#1a1a1a]", !skill.enabled && "opacity-50")}>
+          <div key={skill.id} className={cn("rounded-md border border-border bg-card", !skill.enabled && "opacity-50")}>
             <div className="flex items-center gap-3 px-4 py-3">
               <input
                 type="checkbox"
                 checked={skill.enabled}
                 onChange={() => handleToggleEnabled(skill)}
-                className="accent-violet-500 w-4 h-4 cursor-pointer shrink-0"
+                className="accent-primary w-4 h-4 cursor-pointer shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#e5e5e5] truncate">{skill.name}</p>
-                <p className="text-xs text-[#666] truncate">{skill.description}</p>
+                <p className="text-sm font-medium text-foreground truncate">{skill.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{skill.description}</p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-[#666] hover:text-[#e5e5e5]"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
                   onClick={() => toggleExpand(skill.id)}
                 >
                   {expandedIds.has(skill.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -312,7 +312,7 @@ const SkillsTab = ({ orgId, skills, setSkills, seeding, onSeedDefaults }: Skills
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-[#666] hover:text-[#e5e5e5]"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
                   onClick={() => startEdit(skill)}
                 >
                   <Pencil className="h-3.5 w-3.5" />
@@ -320,7 +320,7 @@ const SkillsTab = ({ orgId, skills, setSkills, seeding, onSeedDefaults }: Skills
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-[#666] hover:text-red-400"
+                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
                   onClick={() => handleDelete(skill.id)}
                   disabled={deletingId === skill.id}
                 >
@@ -331,8 +331,8 @@ const SkillsTab = ({ orgId, skills, setSkills, seeding, onSeedDefaults }: Skills
               </div>
             </div>
             {expandedIds.has(skill.id) && (
-              <div className="px-4 pb-3 border-t border-[#333] pt-3">
-                <pre className="text-xs text-[#aaa] whitespace-pre-wrap font-mono leading-relaxed max-h-[300px] overflow-y-auto">{skill.prompt}</pre>
+              <div className="px-4 pb-3 border-t border-border pt-3">
+                <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-mono leading-relaxed max-h-[300px] overflow-y-auto">{skill.prompt}</pre>
               </div>
             )}
           </div>
@@ -451,7 +451,7 @@ const PartnersTab = ({ orgId, partners, setPartners }: PartnersTabProps) => {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#666]">
+        <p className="text-xs text-muted-foreground">
           Partner knowledge is applied when a reviewer selects a partner on the attachment.
         </p>
         <Button size="sm" onClick={startCreate} className="text-xs gap-1">
@@ -461,13 +461,13 @@ const PartnersTab = ({ orgId, partners, setPartners }: PartnersTabProps) => {
       </div>
 
       {showForm && (
-        <div className="rounded-md border border-[#333] p-4 space-y-3 bg-[#1a1a1a]">
+        <div className="rounded-md border border-border p-4 space-y-3 bg-card">
           <h3 className="text-sm font-medium">{editingId ? "Edit partner" : "New partner"}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <label className="text-xs text-[#888]">Name</label>
+              <label className="text-xs text-muted-foreground">Name</label>
               <input
-                className="w-full bg-[#111] border border-[#333] rounded px-3 py-1.5 text-sm text-[#e5e5e5] focus:outline-none focus:border-violet-500"
+                className="w-full bg-input border border-border rounded px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary"
                 placeholder="e.g. Acme Corp"
                 value={form.name}
                 onChange={(e) => {
@@ -477,9 +477,9 @@ const PartnersTab = ({ orgId, partners, setPartners }: PartnersTabProps) => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs text-[#888]">Slug (used in reviewer dropdown)</label>
+              <label className="text-xs text-muted-foreground">Slug (used in reviewer dropdown)</label>
               <input
-                className="w-full bg-[#111] border border-[#333] rounded px-3 py-1.5 text-sm text-[#e5e5e5] focus:outline-none focus:border-violet-500"
+                className="w-full bg-input border border-border rounded px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary"
                 placeholder="e.g. acme-corp"
                 value={form.slug}
                 onChange={(e) => setForm({ ...form, slug: toSlug(e.target.value) })}
@@ -487,9 +487,9 @@ const PartnersTab = ({ orgId, partners, setPartners }: PartnersTabProps) => {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-xs text-[#888]">Context (pain points, style preferences, background)</label>
+            <label className="text-xs text-muted-foreground">Context (pain points, style preferences, background)</label>
             <textarea
-              className="w-full bg-[#111] border border-[#333] rounded px-3 py-1.5 text-sm text-[#e5e5e5] focus:outline-none focus:border-violet-500 resize-y min-h-[150px]"
+              className="w-full bg-input border border-border rounded px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary resize-y min-h-[150px]"
               placeholder="Client background, pain points, preferred communication style, design preferences..."
               value={form.context}
               onChange={(e) => setForm({ ...form, context: e.target.value })}
@@ -506,24 +506,24 @@ const PartnersTab = ({ orgId, partners, setPartners }: PartnersTabProps) => {
       )}
 
       {partners.length === 0 && !showForm && (
-        <p className="text-sm text-[#666] py-4 text-center">
+        <p className="text-sm text-muted-foreground py-4 text-center">
           No partners yet. Add one to enable partner-specific AI context in reviews.
         </p>
       )}
 
       <div className="space-y-2">
         {partners.map((partner) => (
-          <div key={partner.id} className="rounded-md border border-[#333] bg-[#1a1a1a]">
+          <div key={partner.id} className="rounded-md border border-border bg-card">
             <div className="flex items-center gap-3 px-4 py-3">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#e5e5e5]">{partner.name}</p>
-                <p className="text-xs text-[#666]">slug: {partner.slug}</p>
+                <p className="text-sm font-medium text-foreground">{partner.name}</p>
+                <p className="text-xs text-muted-foreground">slug: {partner.slug}</p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-[#666] hover:text-[#e5e5e5]"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
                   onClick={() => toggleExpand(partner.id)}
                 >
                   {expandedIds.has(partner.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -531,7 +531,7 @@ const PartnersTab = ({ orgId, partners, setPartners }: PartnersTabProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-[#666] hover:text-[#e5e5e5]"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
                   onClick={() => startEdit(partner)}
                 >
                   <Pencil className="h-3.5 w-3.5" />
@@ -539,7 +539,7 @@ const PartnersTab = ({ orgId, partners, setPartners }: PartnersTabProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-[#666] hover:text-red-400"
+                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
                   onClick={() => handleDelete(partner.id)}
                   disabled={deletingId === partner.id}
                 >
@@ -550,7 +550,7 @@ const PartnersTab = ({ orgId, partners, setPartners }: PartnersTabProps) => {
               </div>
             </div>
             {expandedIds.has(partner.id) && (
-              <div className="px-4 pb-3 border-t border-[#333] pt-3">
+              <div className="px-4 pb-3 border-t border-border pt-3">
                 <PartnerContextPreview orgId={orgId} partnerId={partner.id} />
               </div>
             )}
@@ -584,8 +584,8 @@ const PartnerContextPreview = ({ orgId, partnerId }: { orgId: string; partnerId:
   }
 
   return loading ? (
-    <Loader2 className="h-4 w-4 animate-spin text-[#666]" />
+    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
   ) : (
-    <pre className="text-xs text-[#aaa] whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto">{context}</pre>
+    <pre className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto">{context}</pre>
   );
 };

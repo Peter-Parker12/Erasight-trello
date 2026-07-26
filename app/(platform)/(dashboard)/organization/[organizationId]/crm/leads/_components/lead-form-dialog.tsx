@@ -146,7 +146,7 @@ export const LeadFormDialog = ({
             />
 
             <div className="space-y-1">
-              <Label htmlFor="stageId" className="text-xs font-semibold text-[#e5e5e5]">
+              <Label htmlFor="stageId" className="text-xs font-semibold text-foreground">
                 Stage
               </Label>
               <select
@@ -167,7 +167,7 @@ export const LeadFormDialog = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label htmlFor="companyId" className="text-xs font-semibold text-[#e5e5e5]">
+              <Label htmlFor="companyId" className="text-xs font-semibold text-foreground">
                 Company
               </Label>
               <select
@@ -186,7 +186,7 @@ export const LeadFormDialog = ({
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="contactId" className="text-xs font-semibold text-[#e5e5e5]">
+              <Label htmlFor="contactId" className="text-xs font-semibold text-foreground">
                 Contact
               </Label>
               <select
@@ -213,7 +213,7 @@ export const LeadFormDialog = ({
 
           {products.length > 0 && (
             <div className="space-y-2">
-              <Label className="text-xs font-semibold text-[#e5e5e5]">Products / Services</Label>
+              <Label className="text-xs font-semibold text-foreground">Products / Services</Label>
               <div className="flex flex-wrap gap-2">
                 {products.map((product) => {
                   const selected = selectedProductIds.includes(product.id);
@@ -224,8 +224,8 @@ export const LeadFormDialog = ({
                       onClick={() => toggleProduct(product.id)}
                       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition ${
                         selected
-                          ? "bg-violet-600/20 border-violet-600/60 text-violet-400"
-                          : "bg-[#2a2a2a] border-[#333] text-muted-foreground hover:border-violet-600/40"
+                          ? "bg-primary/20 border-primary/60 text-primary"
+                          : "bg-secondary border-border text-muted-foreground hover:border-primary/40"
                       }`}
                     >
                       {product.name}

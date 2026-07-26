@@ -26,7 +26,7 @@ const AiSettingsPage = async ({ params }: AiSettingsPageProps) => {
   return (
     <div className="space-y-4 py-4">
       <div className="rounded-md border p-4 space-y-1">
-        <p className="text-sm text-[#e5e5e5]">
+        <p className="text-sm text-foreground">
           Manage review skills and partner knowledge bases used by the AI when reviewing file
           attachments. Skills define <em>how</em> files are reviewed; partners add client-specific
           context. Both are applied automatically — Claude picks the best-matching skill for each

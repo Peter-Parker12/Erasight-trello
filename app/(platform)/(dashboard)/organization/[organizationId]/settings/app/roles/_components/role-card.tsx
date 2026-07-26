@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
 import type { Role } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fetcher } from "@/lib/fetcher";
 import { useAction } from "@/hooks/use-action";
@@ -72,7 +73,7 @@ export const RoleCard = ({ role }: RoleCardProps) => {
   const isMutating = isAdding || isRemoving;
 
   return (
-    <div className="rounded-md border">
+    <Card className="overflow-hidden">
       <button
         type="button"
         className="w-full flex items-center justify-between p-4 text-left"
@@ -90,7 +91,7 @@ export const RoleCard = ({ role }: RoleCardProps) => {
               role.actions.map((action) => (
                 <span
                   key={action}
-                  className="rounded px-1.5 py-0.5 text-[10px] font-mono bg-violet-500/20 text-violet-300"
+                  className="rounded px-1.5 py-0.5 text-[10px] font-mono bg-primary/20 text-primary"
                 >
                   {action}
                 </span>
@@ -161,6 +162,6 @@ export const RoleCard = ({ role }: RoleCardProps) => {
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 };

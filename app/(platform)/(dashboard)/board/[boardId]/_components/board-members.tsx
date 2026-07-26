@@ -80,12 +80,12 @@ export const BoardMembers = ({ boardId, compact = false }: BoardMembersProps) =>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 max-w-[calc(100vw-1.5rem)] pt-3 pb-3 px-0" side="bottom" align="start">
-        <div className="text-sm font-medium text-center text-[#e5e5e5] pb-2 px-3">
+        <div className="text-sm font-medium text-center text-foreground pb-2 px-3">
           Board Members
         </div>
         <PopoverClose asChild>
           <Button
-            className="h-auto w-auto p-2 absolute top-2 right-2 text-[#e5e5e5]"
+            className="h-auto w-auto p-2 absolute top-2 right-2 text-foreground"
             variant="ghost"
           >
             <X className="h-4 w-4" />
@@ -95,7 +95,7 @@ export const BoardMembers = ({ boardId, compact = false }: BoardMembersProps) =>
         {isLoading ? (
           <div className="px-3 py-4 text-sm text-muted-foreground text-center">Loading...</div>
         ) : isError ? (
-          <div className="px-3 py-4 text-sm text-red-500 text-center">
+          <div className="px-3 py-4 text-sm text-destructive text-center">
             Failed to load members. Make sure the database schema is up to date (<code>prisma db push</code>).
           </div>
         ) : (
@@ -120,7 +120,7 @@ export const BoardMembers = ({ boardId, compact = false }: BoardMembersProps) =>
                     <span className="flex-1 text-sm truncate">{m.userName}</span>
                     <button
                       disabled={isRemoving}
-                      className="text-xs text-red-500 hover:underline shrink-0"
+                      className="text-xs text-destructive hover:underline shrink-0"
                       onClick={() => execRemove({ boardId, userId: m.userId } as any)}
                     >
                       Remove
@@ -146,7 +146,7 @@ export const BoardMembers = ({ boardId, compact = false }: BoardMembersProps) =>
                     </span>
                     <button
                       disabled={isAdding}
-                      className="text-xs text-violet-400 hover:underline shrink-0"
+                      className="text-xs text-primary hover:underline shrink-0"
                       onClick={() => execAdd({ boardId, userId: m.userId, userName: m.userName, userImage: m.userImage } as any)}
                     >
                       Add

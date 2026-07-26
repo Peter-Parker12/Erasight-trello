@@ -116,13 +116,13 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
                 <LayoutTemplate className="h-3 w-3" /> Dùng template
               </button>
               {showTemplates && (
-                <div className="absolute z-50 bottom-full mb-1 bg-[#1f1f1f] border border-[#333] rounded w-56 max-h-48 overflow-y-auto text-sm">
+                <div className="absolute z-50 bottom-full mb-1 bg-popover border border-border rounded w-56 max-h-48 overflow-y-auto text-sm">
                   {templates.map((t) => (
                     <button
                       key={t.id}
                       type="button"
                       onClick={() => applyTemplate(t)}
-                      className="w-full text-left px-3 py-2 hover:bg-[#2a2a2a] border-b border-[#333] last:border-b-0 truncate text-[#e5e5e5]"
+                      className="w-full text-left px-3 py-2 hover:bg-secondary border-b border-border last:border-b-0 truncate text-foreground"
                     >
                       {t.title}
                     </button>

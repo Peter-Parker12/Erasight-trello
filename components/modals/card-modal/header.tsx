@@ -72,7 +72,7 @@ export const Header = ({ data }: HeaderProps) => {
 
   return (
     <div className="flex items-start gap-x-3 mb-6 w-full">
-      <Layout className="h-5 w-5 mt-1 text-[#e5e5e5]" />
+      <Layout className="h-5 w-5 mt-1 text-foreground" />
       <div className="w-full">
         <form action={onSubmit}>
           <FormInput
@@ -80,7 +80,7 @@ export const Header = ({ data }: HeaderProps) => {
             onBlur={onBlur}
             ref={inputRef}
             defaultValue={title}
-            className="font-semibold text-lg px-1 text-[#e5e5e5] bg-transparent border-transparent relative -left-1.5 w-full pr-8 focus-visible:bg-[#2a2a2a] focus-visible:border-input mb-0.5 truncate"
+            className="font-semibold text-lg px-1 text-foreground bg-transparent border-transparent relative -left-1.5 w-full pr-8 focus-visible:bg-secondary focus-visible:border-input mb-0.5 truncate"
           />
         </form>
         <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
@@ -103,7 +103,7 @@ export const Header = ({ data }: HeaderProps) => {
                 "flex items-center gap-1 text-xs font-medium rounded-full px-2 py-0.5 transition-colors",
                 data.completed
                   ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
-                  : "bg-[#333] text-[#888] hover:bg-[#444] hover:text-[#e5e5e5]"
+                  : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground"
               )}
             >
               {data.completed ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
@@ -119,10 +119,10 @@ export const Header = ({ data }: HeaderProps) => {
 Header.Skeleton = function HeaderSkeleton() {
   return (
     <div className="flex items-start gap-x-3 mb-6">
-      <Skeleton className="h-6 w-6 mt-1 bg-[#333]" />
+      <Skeleton className="h-6 w-6 mt-1 bg-muted" />
       <div>
-        <Skeleton className="w-24 h-6 mb-1 bg-[#333]" />
-        <Skeleton className="w-12 h-4 bg-[#333]" />
+        <Skeleton className="w-24 h-6 mb-1 bg-muted" />
+        <Skeleton className="w-12 h-4 bg-muted" />
       </div>
     </div>
   );

@@ -79,9 +79,9 @@ export const LeadsBoard = ({
             });
           }}
           renderColumn={(column, itemsNode) => (
-            <div className="bg-[#1f1f1f] border border-[#333] rounded-md w-[272px] shrink-0 flex flex-col max-h-full">
+            <div className="bg-card border border-border rounded-md w-[272px] shrink-0 flex flex-col max-h-full">
               <div className="px-3 py-2 flex items-center justify-between">
-                <h3 className="font-semibold text-sm text-[#e5e5e5]">
+                <h3 className="font-semibold text-sm text-card-foreground">
                   {column.name}
                   {(column.isWon || column.isLost) && (
                     <span
@@ -110,7 +110,7 @@ export const LeadsBoard = ({
                   products={products}
                   onCreated={onLeadCreated}
                   trigger={
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground hover:text-[#e5e5e5]">
+                    <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground hover:text-foreground">
                       <Plus className="h-4 w-4 mr-2" />
                       Add lead
                     </Button>

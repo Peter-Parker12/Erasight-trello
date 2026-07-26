@@ -63,15 +63,15 @@ export const ReportHistoryDialog = ({
         {isLoading ? (
           <p className="text-sm text-muted-foreground py-4">Loading history…</p>
         ) : isError ? (
-          <p className="text-sm text-red-500 py-4">Failed to load history.</p>
+          <p className="text-sm text-destructive py-4">Failed to load history.</p>
         ) : !data || data.reports.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4">No reports yet.</p>
         ) : (
-          <div className="max-h-[60vh] overflow-y-auto divide-y divide-[#333]">
+          <div className="max-h-[60vh] overflow-y-auto divide-y divide-border">
             {data.reports.map((r) => (
               <div key={r.id} className="py-2.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-xs font-semibold text-violet-400">
+                  <p className="text-xs font-semibold text-primary">
                     {format(new Date(r.reportDate), "EEE, MMM d yyyy")}
                   </p>
                   {r.projectName && (
@@ -80,7 +80,7 @@ export const ReportHistoryDialog = ({
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-[#e5e5e5] whitespace-pre-wrap mt-0.5">{r.content}</p>
+                <p className="text-sm text-foreground whitespace-pre-wrap mt-0.5">{r.content}</p>
               </div>
             ))}
           </div>

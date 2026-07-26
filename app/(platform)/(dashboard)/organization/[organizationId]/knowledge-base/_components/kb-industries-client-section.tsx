@@ -46,7 +46,7 @@ export const KbIndustriesClientSection = ({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold flex items-center gap-2">
-            <Library className="h-5 w-5 text-violet-400" />
+            <Library className="h-5 w-5 text-primary" />
             Knowledge Base
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -65,10 +65,10 @@ export const KbIndustriesClientSection = ({
         ].map(({ label, value, icon: Icon }) => (
           <div
             key={label}
-            className="rounded-lg border border-[#333] bg-[#1f1f1f] p-4 flex items-center gap-3"
+            className="rounded-lg border border-border bg-card p-4 flex items-center gap-3"
           >
-            <div className="rounded-md bg-violet-500/15 p-2">
-              <Icon className="h-4 w-4 text-violet-400" />
+            <div className="rounded-md bg-primary/15 p-2">
+              <Icon className="h-4 w-4 text-primary" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">{label}</p>

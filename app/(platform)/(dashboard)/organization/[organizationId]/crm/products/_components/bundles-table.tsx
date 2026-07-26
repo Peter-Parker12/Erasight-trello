@@ -63,16 +63,16 @@ export const BundlesTable = ({ bundles, products, onBundleUpdated, onBundleDelet
 
   if (bundles.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-muted-foreground">
+      <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
         No bundles yet. Create a bundle to start quoting services.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border border-[#333]">
+    <div className="overflow-x-auto rounded-md border border-border">
       <table className="w-full text-sm">
-        <thead className="bg-[#2a2a2a] text-left text-xs font-semibold uppercase text-muted-foreground">
+        <thead className="bg-muted text-left text-xs font-semibold uppercase text-muted-foreground">
           <tr>
             <th className="px-4 py-2">Bundle name</th>
             <th className="px-4 py-2">Products</th>
@@ -82,7 +82,7 @@ export const BundlesTable = ({ bundles, products, onBundleUpdated, onBundleDelet
             <th className="px-4 py-2 w-24">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#333]">
+        <tbody className="divide-y divide-border">
           {bundles.map((bundle) => {
             // Filter out stale items (cascade timing edge case)
             const activeItems = bundle.items.filter((i) => i.product != null || i.childBundle != null);
@@ -93,8 +93,8 @@ export const BundlesTable = ({ bundles, products, onBundleUpdated, onBundleDelet
             ).join(", ");
 
             return (
-              <tr key={bundle.id} className="hover:bg-[#2a2a2a]">
-                <td className="px-4 py-2 font-medium text-[#e5e5e5]">
+              <tr key={bundle.id} className="hover:bg-muted">
+                <td className="px-4 py-2 font-medium text-foreground">
                   {bundle.name}
                   {bundle.description && (
                     <p className="text-xs text-muted-foreground truncate max-w-[200px]">{bundle.description}</p>
@@ -104,11 +104,11 @@ export const BundlesTable = ({ bundles, products, onBundleUpdated, onBundleDelet
                   {productNames || <span className="italic">No products</span>}
                 </td>
                 <td className="px-4 py-2">
-                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-violet-500/20 text-violet-400">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-primary/20 text-primary">
                     {PRICING_LABEL[bundle.pricingMode]}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-violet-400 font-semibold">
+                <td className="px-4 py-2 text-primary font-semibold">
                   {formatVnd(Math.round(bundleTotal({ ...bundle, items: activeItems })))} ₫
                 </td>
                 <td className="px-4 py-2 text-muted-foreground">

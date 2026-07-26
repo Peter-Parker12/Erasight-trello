@@ -29,9 +29,9 @@ type DetailRowProps = {
 };
 
 const DetailRow = ({ label, children }: DetailRowProps) => (
-  <div className="grid grid-cols-[120px_1fr] gap-2 py-2 border-b border-[#2e2e2e] last:border-0">
+  <div className="grid grid-cols-[120px_1fr] gap-2 py-2 border-b border-border last:border-0">
     <span className="text-xs text-muted-foreground pt-0.5">{label}</span>
-    <div className="text-sm text-[#e5e5e5]">{children}</div>
+    <div className="text-sm text-foreground">{children}</div>
   </div>
 );
 
@@ -68,11 +68,11 @@ export const ProductDetailSheet = ({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full max-w-md bg-[#1a1a1a] border-[#2e2e2e] overflow-y-auto"
+        className="w-full max-w-md bg-background border-border overflow-y-auto"
       >
-        <SheetHeader className="pb-4 border-b border-[#2e2e2e]">
+        <SheetHeader className="pb-4 border-b border-border">
           <div className="flex items-start justify-between gap-3 pr-6">
-            <SheetTitle className="text-[#e5e5e5] text-lg font-semibold leading-snug">
+            <SheetTitle className="text-foreground text-lg font-semibold leading-snug">
               {product.name || <span className="text-muted-foreground italic">Untitled</span>}
             </SheetTitle>
             <ProductFormDialog
@@ -80,7 +80,7 @@ export const ProductDetailSheet = ({
                 <button
                   type="button"
                   onClick={() => setEditOpen(true)}
-                  className="shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-[#e5e5e5] border border-[#333] hover:border-[#555] rounded px-2 py-1 transition-colors"
+                  className="shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:border-muted-foreground/40 rounded px-2 py-1 transition-colors"
                 >
                   <Pencil className="h-3 w-3" />
                   Edit
@@ -105,7 +105,7 @@ export const ProductDetailSheet = ({
                 "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
                 product.status === "ACTIVE"
                   ? "bg-emerald-500/15 text-emerald-400"
-                  : "bg-[#333] text-[#888]"
+                  : "bg-muted text-muted-foreground"
               )}
             >
               {product.status === "ACTIVE" ? "Active" : "Inactive"}
@@ -114,7 +114,7 @@ export const ProductDetailSheet = ({
 
           {product.description && (
             <DetailRow label="Description">
-              <p className="whitespace-pre-wrap text-[#ccc]">{product.description}</p>
+              <p className="whitespace-pre-wrap text-foreground">{product.description}</p>
             </DetailRow>
           )}
 
@@ -131,7 +131,7 @@ export const ProductDetailSheet = ({
           </DetailRow>
 
           <DetailRow label="Unit price">
-            <span className="text-violet-400 font-medium tabular-nums">
+            <span className="text-primary font-medium tabular-nums">
               {formatVnd(product.unitPrice)} ₫
             </span>
           </DetailRow>
@@ -141,7 +141,7 @@ export const ProductDetailSheet = ({
           </DetailRow>
 
           {definitions.length > 0 && (
-            <div className="pt-3 mt-3 border-t border-[#2e2e2e]">
+            <div className="pt-3 mt-3 border-t border-border">
               <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
                 Custom fields
               </p>

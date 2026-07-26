@@ -15,8 +15,7 @@ type FormSubmitProps = {
     | "outline"
     | "secondary"
     | "ghost"
-    | "link"
-    | "primary";
+    | "link";
 };
 
 export const FormSubmit = ({

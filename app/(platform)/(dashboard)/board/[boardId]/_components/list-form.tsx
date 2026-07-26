@@ -67,7 +67,7 @@ export const ListForm = () => {
         <form
           action={onSubmit}
           ref={formRef}
-          className="w-full p-3 rounded-md bg-[#1f1f1f] border border-[#333] space-y-4 shadow-md"
+          className="w-full p-3 rounded-md bg-card border border-border space-y-4 shadow-md"
         >
           <FormInput
             ref={inputRef}

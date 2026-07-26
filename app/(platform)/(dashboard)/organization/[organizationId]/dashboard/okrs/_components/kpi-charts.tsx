@@ -99,38 +99,44 @@ export const KpiCharts = ({ departments, kpis, months, focusMonth }: Props) => {
       {hasLineData && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               % đạt KPI theo tháng | Monthly achievement by department
             </CardTitle>
           </CardHeader>
           <CardContent className="pl-0">
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={lineData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                 <XAxis
                   dataKey="month"
-                  tick={{ fontSize: 11, fill: "#737373" }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                   tickLine={false}
-                  axisLine={{ stroke: "#d4d4d4" }}
+                  axisLine={{ stroke: "hsl(var(--border))" }}
                 />
                 <YAxis
                   unit="%"
-                  tick={{ fontSize: 11, fill: "#737373" }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                   tickLine={false}
                   axisLine={false}
                   width={44}
                 />
                 <Tooltip
                   formatter={(value) => [`${value ?? "—"}%`]}
-                  labelStyle={{ fontSize: 12 }}
-                  contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                  labelStyle={{ fontSize: 12, color: "hsl(var(--popover-foreground))" }}
+                  contentStyle={{
+                    fontSize: 12,
+                    borderRadius: 8,
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    color: "hsl(var(--popover-foreground))",
+                  }}
                 />
                 <ChartLegend wrapperStyle={{ fontSize: 12 }} />
                 <ReferenceLine
                   y={100}
-                  stroke="#a3a3a3"
+                  stroke="hsl(var(--muted-foreground))"
                   strokeDasharray="4 4"
-                  label={{ value: "100%", fontSize: 10, fill: "#a3a3a3", position: "right" }}
+                  label={{ value: "100%", fontSize: 10, fill: "hsl(var(--muted-foreground))", position: "right" }}
                 />
                 {series.map((s) => (
                   <Line
@@ -153,7 +159,7 @@ export const KpiCharts = ({ departments, kpis, months, focusMonth }: Props) => {
       {barData.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               % đạt từng KPI — T{focusMonth} | Per-KPI achievement
             </CardTitle>
           </CardHeader>
@@ -167,28 +173,34 @@ export const KpiCharts = ({ departments, kpis, months, focusMonth }: Props) => {
                 layout="vertical"
                 margin={{ top: 8, right: 40, bottom: 0, left: 8 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
                 <XAxis
                   type="number"
                   unit="%"
-                  tick={{ fontSize: 11, fill: "#737373" }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                   tickLine={false}
-                  axisLine={{ stroke: "#d4d4d4" }}
+                  axisLine={{ stroke: "hsl(var(--border))" }}
                 />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={150}
-                  tick={{ fontSize: 11, fill: "#404040" }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }}
                   tickLine={false}
                   axisLine={false}
                 />
                 <Tooltip
                   formatter={(value) => [`${value ?? "—"}%`, "Đạt | Achieved"]}
-                  labelStyle={{ fontSize: 12 }}
-                  contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                  labelStyle={{ fontSize: 12, color: "hsl(var(--popover-foreground))" }}
+                  contentStyle={{
+                    fontSize: 12,
+                    borderRadius: 8,
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    color: "hsl(var(--popover-foreground))",
+                  }}
                 />
-                <ReferenceLine x={100} stroke="#a3a3a3" strokeDasharray="4 4" />
+                <ReferenceLine x={100} stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" />
                 <Bar dataKey="percent" barSize={16} radius={[0, 4, 4, 0]}>
                   {barData.map((item) => (
                     <Cell key={item.name} fill={item.color} />
@@ -197,7 +209,7 @@ export const KpiCharts = ({ departments, kpis, months, focusMonth }: Props) => {
                     dataKey="percent"
                     position="right"
                     formatter={(value) => `${value}%`}
-                    style={{ fontSize: 11, fill: "#404040", fontWeight: 600 }}
+                    style={{ fontSize: 11, fill: "hsl(var(--foreground))", fontWeight: 600 }}
                   />
                 </Bar>
               </BarChart>

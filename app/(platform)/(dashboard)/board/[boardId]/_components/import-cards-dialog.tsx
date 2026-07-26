@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PRIORITY_BADGE_CLASS } from "@/lib/priority";
 
 type List = { id: string; title: string };
 
@@ -69,13 +70,6 @@ function parseFile(file: File): Promise<ParsedRow[]> {
     reader.readAsArrayBuffer(file);
   });
 }
-
-const PRIORITY_COLORS: Record<string, string> = {
-  LOW: "bg-blue-500/20 text-blue-400",
-  MEDIUM: "bg-yellow-500/20 text-yellow-400",
-  HIGH: "bg-orange-500/20 text-orange-400",
-  URGENT: "bg-red-500/20 text-red-400",
-};
 
 const TEMPLATE_CSV = [
   "title,description,priority,due date",
@@ -197,8 +191,8 @@ export const ImportCardsDialog = ({ open, onClose, boardId, lists }: ImportCards
             className={cn(
               "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition",
               isDragging
-                ? "border-violet-500 bg-violet-600/10"
-                : "border-[#333] hover:border-violet-500/50 hover:bg-violet-600/5"
+                ? "border-primary bg-primary/10"
+                : "border-border hover:border-primary/50 hover:bg-primary/5"
             )}
           >
             <input
@@ -209,14 +203,14 @@ export const ImportCardsDialog = ({ open, onClose, boardId, lists }: ImportCards
               onChange={onFileChange}
             />
             <FileSpreadsheet className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm text-[#e5e5e5] font-medium">
+            <p className="text-sm text-foreground font-medium">
               {fileName ? fileName : "Drop a file here or click to browse"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Supports .csv, .xlsx, .xls — columns: <code className="bg-[#333] px-1 rounded">title</code>{" "}
-              (required), <code className="bg-[#333] px-1 rounded">description</code>,{" "}
-              <code className="bg-[#333] px-1 rounded">priority</code>,{" "}
-              <code className="bg-[#333] px-1 rounded">due date</code>
+              Supports .csv, .xlsx, .xls — columns: <code className="bg-muted px-1 rounded">title</code>{" "}
+              (required), <code className="bg-muted px-1 rounded">description</code>,{" "}
+              <code className="bg-muted px-1 rounded">priority</code>,{" "}
+              <code className="bg-muted px-1 rounded">due date</code>
             </p>
             {fileName && !parseError && rows.length > 0 && (
               <p className="text-xs text-green-400 mt-2 flex items-center justify-center gap-1">
@@ -231,7 +225,7 @@ export const ImportCardsDialog = ({ open, onClose, boardId, lists }: ImportCards
             <button
               type="button"
               onClick={downloadTemplate}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-violet-400 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
             >
               <Download className="h-3.5 w-3.5" />
               Download template (.csv)
@@ -240,7 +234,7 @@ export const ImportCardsDialog = ({ open, onClose, boardId, lists }: ImportCards
 
           {/* Parse error */}
           {parseError && (
-            <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/30 rounded-md p-3 text-sm text-red-400">
+            <div className="flex items-start gap-2 bg-destructive/10 border border-destructive/30 rounded-md p-3 text-sm text-destructive">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               {parseError}
             </div>
@@ -253,29 +247,29 @@ export const ImportCardsDialog = ({ open, onClose, boardId, lists }: ImportCards
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Preview</p>
                 <button
                   onClick={() => { setRows([]); setFileName(""); }}
-                  className="text-xs text-muted-foreground hover:text-[#e5e5e5] flex items-center gap-1"
+                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
                 >
                   <X className="h-3 w-3" /> Clear
                 </button>
               </div>
-              <div className="rounded-md border border-[#333] overflow-hidden">
+              <div className="rounded-md border border-border overflow-hidden">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-[#2a2a2a] text-muted-foreground">
+                    <tr className="bg-secondary text-muted-foreground">
                       <th className="text-left px-3 py-2 font-medium w-[40%]">Title</th>
                       <th className="text-left px-3 py-2 font-medium w-[30%]">Description</th>
                       <th className="text-left px-3 py-2 font-medium w-[15%]">Priority</th>
                       <th className="text-left px-3 py-2 font-medium w-[15%]">Due date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#333]">
+                  <tbody className="divide-y divide-border">
                     {previewRows.map((row, i) => (
-                      <tr key={i} className="hover:bg-[#2a2a2a]">
-                        <td className="px-3 py-1.5 text-[#e5e5e5] truncate max-w-[200px]">{row.title}</td>
+                      <tr key={i} className="hover:bg-secondary">
+                        <td className="px-3 py-1.5 text-foreground truncate max-w-[200px]">{row.title}</td>
                         <td className="px-3 py-1.5 text-muted-foreground truncate max-w-[150px]">{row.description || "—"}</td>
                         <td className="px-3 py-1.5">
                           {row.priority && PRIORITY_VALUES.includes(row.priority) ? (
-                            <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-semibold", PRIORITY_COLORS[row.priority] ?? "bg-[#333] text-[#888]")}>
+                            <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-semibold", PRIORITY_BADGE_CLASS[row.priority as keyof typeof PRIORITY_BADGE_CLASS] ?? PRIORITY_BADGE_CLASS.NONE)}>
                               {row.priority}
                             </span>
                           ) : (
@@ -288,7 +282,7 @@ export const ImportCardsDialog = ({ open, onClose, boardId, lists }: ImportCards
                   </tbody>
                 </table>
                 {hiddenCount > 0 && (
-                  <p className="text-xs text-muted-foreground text-center py-2 border-t border-[#333]">
+                  <p className="text-xs text-muted-foreground text-center py-2 border-t border-border">
                     + {hiddenCount} more row{hiddenCount === 1 ? "" : "s"} not shown
                   </p>
                 )}
@@ -303,7 +297,7 @@ export const ImportCardsDialog = ({ open, onClose, boardId, lists }: ImportCards
               <select
                 value={selectedListId}
                 onChange={(e) => setSelectedListId(e.target.value)}
-                className="w-full text-sm px-3 py-2 rounded-md border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] focus:outline-none focus:ring-1 focus:ring-violet-500"
+                className="w-full text-sm px-3 py-2 rounded-md border border-border bg-secondary text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 {lists.map((l) => (
                   <option key={l.id} value={l.id}>{l.title}</option>

@@ -47,7 +47,7 @@ export const CompaniesTable = ({ companies, definitions, allBundles, organizatio
 
   if (companies.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-muted-foreground">
+      <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
         No companies yet. Create your first one to get started.
       </div>
     );
@@ -56,7 +56,7 @@ export const CompaniesTable = ({ companies, definitions, allBundles, organizatio
   return (
     <div className="overflow-x-auto rounded-md border">
       <table className="w-full text-sm">
-        <thead className="bg-[#2a2a2a] text-left text-xs font-semibold uppercase text-muted-foreground">
+        <thead className="bg-muted text-left text-xs font-semibold uppercase text-muted-foreground">
           <tr>
             <th className="px-4 py-2">Name</th>
             <th className="px-4 py-2">Domain</th>
@@ -67,14 +67,14 @@ export const CompaniesTable = ({ companies, definitions, allBundles, organizatio
         </thead>
         <tbody className="divide-y">
           {companies.map((company) => (
-            <tr key={company.id} className="hover:bg-[#2a2a2a]">
+            <tr key={company.id} className="hover:bg-muted">
               <td className="px-4 py-2 font-medium">
                 <CompanyDetailDialog
                   companyId={company.id}
                   companyName={company.name}
                   organizationId={organizationId}
                 >
-                  <span className="hover:underline hover:text-violet-400 cursor-pointer transition-colors">
+                  <span className="hover:underline hover:text-primary cursor-pointer transition-colors">
                     {company.name}
                   </span>
                 </CompanyDetailDialog>

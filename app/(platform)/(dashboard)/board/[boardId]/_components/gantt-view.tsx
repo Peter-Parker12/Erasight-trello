@@ -73,9 +73,9 @@ const GanttRowItem = ({ row, rangeStart, trackWidth, onOpen }: GanttRowProps) =>
   }
 
   return (
-    <div className="flex border-b border-gray-100 hover:bg-muted/30 group" style={{ height: ROW_HEIGHT }}>
+    <div className="flex border-b border-border hover:bg-muted/30 group" style={{ height: ROW_HEIGHT }}>
       <div
-        className="sticky left-0 z-10 flex items-center gap-1.5 px-2 bg-[#1f1f1f] group-hover:bg-[#2a2a2a] border-r cursor-pointer overflow-hidden"
+        className="sticky left-0 z-10 flex items-center gap-1.5 px-2 bg-card group-hover:bg-secondary border-r cursor-pointer overflow-hidden"
         style={{ width: NAME_COL_WIDTH, minWidth: NAME_COL_WIDTH }}
         onClick={onOpen}
       >
@@ -83,7 +83,7 @@ const GanttRowItem = ({ row, rangeStart, trackWidth, onOpen }: GanttRowProps) =>
         <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
         <span className={cn(
           "truncate text-xs",
-          card.completed ? "line-through text-muted-foreground" : depth === 1 ? "text-muted-foreground" : "text-[#e5e5e5] font-medium"
+          card.completed ? "line-through text-muted-foreground" : depth === 1 ? "text-muted-foreground" : "text-foreground font-medium"
         )}>
           {card.title}
         </span>
@@ -97,7 +97,7 @@ const GanttRowItem = ({ row, rangeStart, trackWidth, onOpen }: GanttRowProps) =>
             title={`${card.title}: ${format(barStart, "MMM d")} – ${format(barEnd, "MMM d")}`}
             className={cn(
               "absolute top-1.5 rounded-md flex items-center px-1 overflow-hidden",
-              overdue && "ring-2 ring-red-500"
+              overdue && "ring-2 ring-destructive"
             )}
             style={{ left: barLeft, width: Math.max(barWidth, 8), height: ROW_HEIGHT - 12, backgroundColor: `${color}33` }}
           >
@@ -184,20 +184,20 @@ export const GanttView = ({ lists }: GanttViewProps) => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#171717]/90 rounded-lg overflow-hidden border border-[#333] shadow-sm">
+    <div className="flex flex-col h-full bg-background/90 rounded-lg overflow-hidden border border-border shadow-sm">
       <div ref={scrollRef} className="flex-1 overflow-auto">
         <div className="relative" style={{ width: NAME_COL_WIDTH + trackWidth }}>
           {showTodayMarker && (
             <div
-              className="absolute top-0 bottom-0 w-px bg-violet-400 pointer-events-none"
+              className="absolute top-0 bottom-0 w-px bg-primary pointer-events-none"
               style={{ left: NAME_COL_WIDTH + todayOffset + DAY_WIDTH / 2 }}
             />
           )}
 
           {/* Header */}
-          <div className="flex sticky top-0 z-20 bg-[#171717]">
+          <div className="flex sticky top-0 z-20 bg-background">
             <div
-              className="sticky left-0 z-30 flex items-center px-2 bg-[#171717] border-r border-b text-xs font-semibold text-muted-foreground"
+              className="sticky left-0 z-30 flex items-center px-2 bg-background border-r border-b text-xs font-semibold text-muted-foreground"
               style={{ width: NAME_COL_WIDTH, minWidth: NAME_COL_WIDTH }}
             >
               Task
@@ -207,7 +207,7 @@ export const GanttView = ({ lists }: GanttViewProps) => {
                 {monthGroups.map((g, i) => (
                   <div
                     key={i}
-                    className="text-center text-[10px] font-medium text-muted-foreground py-0.5 border-r border-gray-100"
+                    className="text-center text-[10px] font-medium text-muted-foreground py-0.5 border-r border-border"
                     style={{ width: g.width }}
                   >
                     {g.label}
@@ -219,8 +219,8 @@ export const GanttView = ({ lists }: GanttViewProps) => {
                   <div
                     key={day.toISOString()}
                     className={cn(
-                      "shrink-0 text-center text-[10px] py-0.5 border-r border-gray-50",
-                      isToday(day) ? "text-violet-400 font-bold bg-violet-600/10" : "text-muted-foreground"
+                      "shrink-0 text-center text-[10px] py-0.5 border-r border-border",
+                      isToday(day) ? "text-primary font-bold bg-primary/10" : "text-muted-foreground"
                     )}
                     style={{ width: DAY_WIDTH }}
                   >

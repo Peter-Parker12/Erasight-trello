@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -82,7 +83,7 @@ export const OrgTelegramDialog = ({ open, onOpenChange, config }: Props) => {
         <DialogHeader>
           <DialogTitle>Nhắc OKR/KPI qua Telegram | Telegram reminders</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-neutral-400">
+        <p className="text-sm text-muted-foreground">
           Nhắc leader cập nhật KPI (thứ 2 hàng tuần) và check-in OKR (đầu tháng)
           vào nhóm Telegram của công ty. | Weekly KPI and monthly OKR check-in
           reminders posted to your company group.
@@ -117,11 +118,9 @@ export const OrgTelegramDialog = ({ open, onOpenChange, config }: Props) => {
             />
           </div>
           <label className="flex items-center gap-x-2 text-sm">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={enabled}
-              onChange={(e) => setEnabled(e.target.checked)}
-              className="rounded border-gray-300"
+              onCheckedChange={(checked) => setEnabled(checked === true)}
             />
             Bật nhắc nhở | Enabled
           </label>
@@ -131,7 +130,7 @@ export const OrgTelegramDialog = ({ open, onOpenChange, config }: Props) => {
               <Button
                 type="button"
                 variant="ghost"
-                className="text-red-600 hover:text-red-700"
+                className="text-destructive hover:text-destructive/80"
                 disabled={removing}
                 onClick={() => {
                   if (window.confirm("Gỡ cấu hình Telegram? | Remove config?")) {

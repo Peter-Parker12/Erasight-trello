@@ -77,14 +77,14 @@ export const KbFolderPanel = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-[#333]">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Folders
         </span>
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 w-6 p-0 text-muted-foreground hover:text-[#e5e5e5]"
+          className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
           onClick={() => setAdding(true)}
         >
           <Plus className="h-3.5 w-3.5" />
@@ -118,8 +118,8 @@ export const KbFolderPanel = ({
             className={cn(
               "group flex items-center gap-2 px-3 py-2 rounded-md mx-1 cursor-pointer transition-colors",
               selectedFolderId === folder.id
-                ? "bg-violet-600/20 text-violet-400"
-                : "text-[#888] hover:bg-[#2a2a2a] hover:text-[#e5e5e5]"
+                ? "bg-primary/20 text-primary"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
             )}
             onClick={() => onSelect(folder.id)}
           >
@@ -149,7 +149,7 @@ export const KbFolderPanel = ({
       </div>
 
       {creating && (
-        <div className="px-3 py-2 flex items-center gap-2 text-xs text-muted-foreground border-t border-[#333]">
+        <div className="px-3 py-2 flex items-center gap-2 text-xs text-muted-foreground border-t border-border">
           <Loader2 className="h-3 w-3 animate-spin" />
           Creating…
         </div>

@@ -56,13 +56,13 @@ const DashboardPage = async ({
       <Separator className="my-4" />
       <div className="px-2 md:px-4 space-y-6">
         <div>
-          <h2 className="text-sm font-semibold text-red-400 mb-2">
+          <h2 className="text-sm font-semibold text-destructive mb-2">
             Overdue ({overdue.length})
           </h2>
           <DueOverdueList cards={overdue} variant="overdue" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-[#e5e5e5] mb-2">
+          <h2 className="text-sm font-semibold text-foreground mb-2">
             Upcoming ({upcoming.length})
           </h2>
           <DueOverdueList cards={upcoming} variant="upcoming" />

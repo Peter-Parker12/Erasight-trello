@@ -47,7 +47,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
           {label && (
             <Label
               htmlFor={id}
-              className="text-xs font-semibold text-[#e5e5e5]"
+              className="text-xs font-semibold text-foreground"
             >
               {label}
             </Label>

@@ -114,7 +114,7 @@ export const KpiDashboard = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card>
           <CardHeader className="pb-1">
-            <CardTitle className="text-sm text-neutral-500 font-medium">
+            <CardTitle className="text-sm text-muted-foreground font-medium">
               % đạt trung bình T{focusMonth} | Avg achievement
             </CardTitle>
           </CardHeader>
@@ -126,14 +126,14 @@ export const KpiDashboard = ({
         </Card>
         <Card>
           <CardHeader className="pb-1">
-            <CardTitle className="text-sm text-neutral-500 font-medium">
+            <CardTitle className="text-sm text-muted-foreground font-medium">
               ✅ Đúng tiến độ | On track
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold tabular-nums">
               {onTrackCount}
-              <span className="text-sm font-normal text-neutral-400">
+              <span className="text-sm font-normal text-muted-foreground">
                 {" "}
                 / {focusEntries.length} KPI
               </span>
@@ -142,14 +142,14 @@ export const KpiDashboard = ({
         </Card>
         <Card>
           <CardHeader className="pb-1">
-            <CardTitle className="text-sm text-neutral-500 font-medium">
+            <CardTitle className="text-sm text-muted-foreground font-medium">
               🔴 Chậm | Behind
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold tabular-nums">
               {behindCount}
-              <span className="text-sm font-normal text-neutral-400">
+              <span className="text-sm font-normal text-muted-foreground">
                 {" "}
                 / {focusEntries.length} KPI
               </span>
@@ -172,7 +172,7 @@ export const KpiDashboard = ({
         return (
           <section key={group.key} className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="flex items-center gap-x-2 font-semibold text-[#e5e5e5]">
+              <h3 className="flex items-center gap-x-2 font-semibold text-foreground">
                 {group.color ? (
                   <span
                     className="h-3 w-3 rounded-full"
@@ -195,7 +195,7 @@ export const KpiDashboard = ({
               )}
             </div>
             {group.items.length === 0 ? (
-              <p className="text-sm text-neutral-400 pl-5">
+              <p className="text-sm text-muted-foreground pl-5">
                 Chưa có KPI | No KPIs yet.
               </p>
             ) : (

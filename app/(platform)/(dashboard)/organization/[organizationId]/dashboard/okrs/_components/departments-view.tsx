@@ -97,7 +97,7 @@ export const DepartmentsView = ({ departments, members, telegramConfig }: Props)
                 <button
                   type="button"
                   onClick={() => toggleCollapse(department.id)}
-                  className="shrink-0 text-neutral-400 hover:text-neutral-200"
+                  className="shrink-0 text-muted-foreground hover:text-foreground"
                 >
                   {collapsed ? (
                     <ChevronRight className="h-3.5 w-3.5" />
@@ -125,7 +125,7 @@ export const DepartmentsView = ({ departments, members, telegramConfig }: Props)
                 <span className="text-sm">{leader.userName}</span>
               </div>
             ) : (
-              <span className="text-sm text-neutral-400">Chưa gán | Unassigned</span>
+              <span className="text-sm text-muted-foreground">Chưa gán | Unassigned</span>
             )}
           </TableCell>
           <TableCell className="text-center">{department._count.objectives}</TableCell>
@@ -146,7 +146,7 @@ export const DepartmentsView = ({ departments, members, telegramConfig }: Props)
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive/80"
                 onClick={() => onDelete(department)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -204,7 +204,7 @@ export const DepartmentsView = ({ departments, members, telegramConfig }: Props)
       </div>
 
       {departments.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center text-sm text-neutral-500">
+        <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
           Chưa có phòng ban nào. Tạo phòng ban mẫu (ECOM Services, Remote Works,
           Education, Tech) hoặc thêm thủ công.
           <br />

@@ -53,7 +53,7 @@ export const ContactsTable = ({
 
   if (contacts.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-muted-foreground">
+      <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
         No contacts yet. Create your first one to get started.
       </div>
     );
@@ -62,7 +62,7 @@ export const ContactsTable = ({
   return (
     <div className="overflow-x-auto rounded-md border">
       <table className="w-full text-sm">
-        <thead className="bg-[#2a2a2a] text-left text-xs font-semibold uppercase text-muted-foreground">
+        <thead className="bg-muted text-left text-xs font-semibold uppercase text-muted-foreground">
           <tr>
             <th className="px-4 py-2">Name</th>
             <th className="px-4 py-2">Email</th>
@@ -73,7 +73,7 @@ export const ContactsTable = ({
         </thead>
         <tbody className="divide-y">
           {contacts.map((contact) => (
-            <tr key={contact.id} className="hover:bg-[#2a2a2a]">
+            <tr key={contact.id} className="hover:bg-muted">
               <td className="px-4 py-2 font-medium">
                 <Link
                   href={`/organization/${organizationId}/crm/contacts/${contact.id}`}
@@ -112,7 +112,7 @@ export const ContactsTable = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
+                    className="h-7 w-7 p-0 text-destructive hover:text-destructive/80"
                     disabled={isLoading}
                     onClick={() => onDelete(contact)}
                   >

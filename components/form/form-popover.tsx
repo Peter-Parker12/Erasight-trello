@@ -63,14 +63,14 @@ export const FormPopover = ({
         side={side}
         sideOffset={sideOffset}
       >
-        <div className="text-sm font-medium text-center text-[#e5e5e5] pb-4">
+        <div className="text-sm font-medium text-center text-popover-foreground pb-4">
           Create board
         </div>
 
         <PopoverClose ref={closeRef} asChild>
           <Button
             variant="ghost"
-            className="h-auto w-auto p-2 absolute top-2 right-2 text-[#e5e5e5]"
+            className="h-auto w-auto p-2 absolute top-2 right-2 text-popover-foreground"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -87,17 +87,17 @@ export const FormPopover = ({
             />
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-neutral-400">Board Template / Workflow</label>
+              <label className="text-xs font-semibold text-muted-foreground">Board Template / Workflow</label>
               <div className="grid grid-cols-2 gap-2">
-                <label className="flex flex-col items-center justify-between p-3 rounded-lg border border-[#333] bg-[#2a2a2a] hover:bg-[#333] cursor-pointer [&:has(input:checked)]:border-violet-500 [&:has(input:checked)]:bg-violet-600/10 transition">
+                <label className="flex flex-col items-center justify-between p-3 rounded-lg border border-border bg-secondary hover:bg-muted cursor-pointer [&:has(input:checked)]:border-primary [&:has(input:checked)]:bg-primary/10 transition">
                   <input type="radio" name="workflowType" value="DEFAULT" defaultChecked className="sr-only" />
-                  <span className="text-xs font-medium text-white">Default</span>
-                  <span className="text-[10px] text-neutral-400 text-center mt-1">Done, Failed, Cancelled lists</span>
+                  <span className="text-xs font-medium text-foreground">Default</span>
+                  <span className="text-[10px] text-muted-foreground text-center mt-1">Done, Failed, Cancelled lists</span>
                 </label>
-                <label className="flex flex-col items-center justify-between p-3 rounded-lg border border-[#333] bg-[#2a2a2a] hover:bg-[#333] cursor-pointer [&:has(input:checked)]:border-violet-500 [&:has(input:checked)]:bg-violet-600/10 transition">
+                <label className="flex flex-col items-center justify-between p-3 rounded-lg border border-border bg-secondary hover:bg-muted cursor-pointer [&:has(input:checked)]:border-primary [&:has(input:checked)]:bg-primary/10 transition">
                   <input type="radio" name="workflowType" value="KANBAN" className="sr-only" />
-                  <span className="text-xs font-medium text-white">Kanban</span>
-                  <span className="text-[10px] text-neutral-400 text-center mt-1">Full workflow with rules pre-configured</span>
+                  <span className="text-xs font-medium text-foreground">Kanban</span>
+                  <span className="text-[10px] text-muted-foreground text-center mt-1">Full workflow with rules pre-configured</span>
                 </label>
               </div>
             </div>

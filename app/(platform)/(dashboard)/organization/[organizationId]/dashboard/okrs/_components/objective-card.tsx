@@ -55,7 +55,7 @@ export const ObjectiveCard = ({ objective, members, canManage, onEdit }: Props) 
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <p className="font-semibold leading-snug">{objective.title}</p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-neutral-500">
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
               {owner && (
                 <span className="flex items-center gap-x-1.5">
                   <Avatar className="h-5 w-5">
@@ -97,7 +97,7 @@ export const ObjectiveCard = ({ objective, members, canManage, onEdit }: Props) 
         </div>
         {/* computed progress bar (black text convention: not editable) */}
         <div className="mt-2 flex items-center gap-x-2">
-          <div className="h-2 flex-1 rounded-full bg-neutral-100 overflow-hidden">
+          <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${band.barClass}`}
               style={{ width: `${Math.round((score ?? 0) * 100)}%` }}
@@ -110,7 +110,7 @@ export const ObjectiveCard = ({ objective, members, canManage, onEdit }: Props) 
       </CardHeader>
       <CardContent className="space-y-1">
         {objective.keyResults.length > 0 && (
-          <div className="hidden sm:grid grid-cols-[1fr_5.5rem_5.5rem_3.5rem_6rem_auto] gap-x-2 px-1 text-xs font-medium text-neutral-400">
+          <div className="hidden sm:grid grid-cols-[1fr_5.5rem_5.5rem_3.5rem_6rem_auto] gap-x-2 px-1 text-xs font-medium text-muted-foreground">
             <span>Key Result</span>
             <span>Target</span>
             <span>Thực tế | Actual</span>
@@ -137,7 +137,7 @@ export const ObjectiveCard = ({ objective, members, canManage, onEdit }: Props) 
             <Button
               variant="ghost"
               size="sm"
-              className="text-neutral-500"
+              className="text-muted-foreground"
               onClick={() => {
                 setEditingKr(null);
                 setKrDialogOpen(true);
@@ -150,7 +150,7 @@ export const ObjectiveCard = ({ objective, members, canManage, onEdit }: Props) 
           <Button
             variant="ghost"
             size="sm"
-            className="text-neutral-500"
+            className="text-muted-foreground"
             onClick={() => setCheckInOpen(true)}
           >
             <CalendarCheck className="h-4 w-4 mr-1" />

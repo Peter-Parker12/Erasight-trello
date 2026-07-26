@@ -14,7 +14,7 @@ export const Legend = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-[#e5e5e5]">
+        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
           <Info className="h-4 w-4 mr-1.5" />
           Quy ước | Legend
         </Button>
@@ -28,10 +28,10 @@ export const Legend = () => {
                 <span className={`shrink-0 w-10 text-center ${item.swatchClass}`}>
                   {item.sample}
                 </span>
-                <span className="text-neutral-300">
+                <span className="text-foreground">
                   {item.vi}
                   <br />
-                  <span className="text-neutral-500">{item.en}</span>
+                  <span className="text-muted-foreground">{item.en}</span>
                 </span>
               </li>
             ))}
@@ -45,10 +45,10 @@ export const Legend = () => {
                 <span className="shrink-0 w-16 font-mono text-xs pt-0.5">
                   {row.emoji} {row.range}
                 </span>
-                <span className="text-neutral-600">
+                <span className="text-muted-foreground">
                   {row.vi}
                   <br />
-                  <span className="text-neutral-400">{row.en}</span>
+                  <span className="text-muted-foreground">{row.en}</span>
                 </span>
               </li>
             ))}

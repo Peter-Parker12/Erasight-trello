@@ -75,14 +75,14 @@ export const BoardFilterBar = ({ lists, filter, update, reset, isActive }: Board
           className={cn(
             "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors",
             expanded || totalActive > 0
-              ? "bg-[#e5e5e5] text-[#171717]"
+              ? "bg-foreground text-background"
               : "bg-white/15 text-white hover:bg-white/25 border border-white/20"
           )}
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filters
           {totalActive > 0 && (
-            <span className="bg-violet-500 text-white rounded-full px-1.5 py-0.5 text-[10px] leading-none">{totalActive}</span>
+            <span className="bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 text-[10px] leading-none">{totalActive}</span>
           )}
         </button>
 
@@ -107,7 +107,7 @@ export const BoardFilterBar = ({ lists, filter, update, reset, isActive }: Board
                   className={cn(
                     "flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium transition-colors",
                     filter.priority === p.value
-                      ? "bg-[#e5e5e5] text-[#171717]"
+                      ? "bg-foreground text-background"
                       : "bg-white/15 text-white hover:bg-white/25 border border-white/20"
                   )}
                 >
@@ -129,7 +129,7 @@ export const BoardFilterBar = ({ lists, filter, update, reset, isActive }: Board
                   className={cn(
                     "px-2 py-0.5 rounded text-xs font-medium transition-colors",
                     filter.dueFilter === d.value
-                      ? "bg-[#e5e5e5] text-[#171717]"
+                      ? "bg-foreground text-background"
                       : "bg-white/15 text-white hover:bg-white/25 border border-white/20"
                   )}
                 >
@@ -173,7 +173,7 @@ export const BoardFilterBar = ({ lists, filter, update, reset, isActive }: Board
                     className={cn(
                       "px-2 py-0.5 rounded text-xs font-medium transition-colors",
                       filter.memberId === m.userId
-                        ? "bg-[#e5e5e5] text-[#171717]"
+                        ? "bg-foreground text-background"
                         : "bg-white/15 text-white hover:bg-white/25 border border-white/20"
                     )}
                   >

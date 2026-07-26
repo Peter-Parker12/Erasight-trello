@@ -104,8 +104,8 @@ export const TransitionActionModal = ({
                     onClick={() => setSelectedAssignee(selectedAssignee?.userId === m.userId ? null : m)}
                     className={`flex items-center gap-2 rounded px-2 py-1.5 text-sm text-left transition ${
                       selectedAssignee?.userId === m.userId
-                        ? "bg-violet-600/20 text-violet-300"
-                        : "hover:bg-[#2a2a2a]"
+                        ? "bg-primary/20 text-primary"
+                        : "hover:bg-secondary"
                     }`}
                   >
                     <Avatar className="h-6 w-6">
@@ -132,7 +132,7 @@ export const TransitionActionModal = ({
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full rounded-md border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-md border border-input bg-input text-foreground px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
           )}

@@ -145,7 +145,7 @@ export const ProductsTable = ({
 
   if (products.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-muted-foreground">
+      <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
         No products yet. Create your first product to get started.
       </div>
     );
@@ -153,24 +153,24 @@ export const ProductsTable = ({
 
   const cellInputCls = cn(
     "w-full h-full px-3 py-[9px] text-sm border-0 focus:outline-none",
-    "bg-blue-500/10 ring-2 ring-inset ring-blue-500/60 text-[#e5e5e5]"
+    "bg-primary/10 ring-2 ring-inset ring-primary/60 text-foreground"
   );
 
   return (
-    <div className="rounded-md border border-[#333] overflow-visible">
+    <div className="rounded-md border border-border overflow-visible">
       <table className="w-full text-sm border-collapse">
-        <thead className="bg-[#252525] border-b border-[#333]">
+        <thead className="bg-secondary border-b border-border">
           <tr className="text-xs font-semibold uppercase text-muted-foreground">
-            <th className="w-8 px-2 py-2 text-center border-r border-[#333] select-none">#</th>
-            <th className="px-3 py-2 text-left border-r border-[#333]">Name</th>
-            <th className="px-3 py-2 text-left border-r border-[#333]">Categories</th>
-            <th className="px-3 py-2 text-right border-r border-[#333] w-48">Unit price (VND)</th>
-            <th className="px-3 py-2 text-center border-r border-[#333] w-24">Unit</th>
-            <th className="px-3 py-2 text-center border-r border-[#333] w-24">Status</th>
+            <th className="w-8 px-2 py-2 text-center border-r border-border select-none">#</th>
+            <th className="px-3 py-2 text-left border-r border-border">Name</th>
+            <th className="px-3 py-2 text-left border-r border-border">Categories</th>
+            <th className="px-3 py-2 text-right border-r border-border w-48">Unit price (VND)</th>
+            <th className="px-3 py-2 text-center border-r border-border w-24">Unit</th>
+            <th className="px-3 py-2 text-center border-r border-border w-24">Status</th>
             <th className="w-10" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#2e2e2e]">
+        <tbody className="divide-y divide-border">
           {products.map((product, idx) => {
             const isEditPrice = edit?.id === product.id && edit.field === "unitPrice";
             const isSaving    = saving === product.id;
@@ -184,21 +184,21 @@ export const ProductsTable = ({
               <tr
                 key={product.id}
                 className={cn(
-                  "group hover:bg-[#1e1e1e]",
-                  (isEditPrice || isCatOpen) && "bg-[#1e1e1e]",
+                  "group hover:bg-muted",
+                  (isEditPrice || isCatOpen) && "bg-muted",
                   isSaving && "opacity-60"
                 )}
               >
                 {/* # */}
-                <td className="w-8 px-2 text-center text-xs text-muted-foreground border-r border-[#2e2e2e] select-none">
+                <td className="w-8 px-2 text-center text-xs text-muted-foreground border-r border-border select-none">
                   {idx + 1}
                 </td>
 
                 {/* Name — click to open detail sheet */}
-                <td className="p-0 border-r border-[#2e2e2e] min-w-[160px]">
+                <td className="p-0 border-r border-border min-w-[160px]">
                   <button
                     type="button"
-                    className="w-full text-left px-3 py-[9px] font-medium text-[#e5e5e5] hover:text-violet-400 transition-colors"
+                    className="w-full text-left px-3 py-[9px] font-medium text-foreground hover:text-primary transition-colors"
                     onClick={() => setDetailProduct(product)}
                   >
                     {product.name || <span className="text-muted-foreground italic">Untitled</span>}
@@ -206,7 +206,7 @@ export const ProductsTable = ({
                 </td>
 
                 {/* Categories — inline multi-select */}
-                <td className="p-0 border-r border-[#2e2e2e] min-w-[180px] relative">
+                <td className="p-0 border-r border-border min-w-[180px] relative">
                   {isCatOpen ? (
                     <div className="px-2 py-1">
                       <CategorySelect
@@ -245,7 +245,7 @@ export const ProductsTable = ({
 
                 {/* Unit Price */}
                 <td
-                  className={cn("p-0 border-r border-[#2e2e2e] w-48", !isEditPrice && "cursor-text")}
+                  className={cn("p-0 border-r border-border w-48", !isEditPrice && "cursor-text")}
                   onClick={() => !isEditPrice && startEdit(product, "unitPrice")}
                 >
                   {isEditPrice ? (
@@ -267,31 +267,31 @@ export const ProductsTable = ({
                       className={cn(cellInputCls, "text-right tabular-nums")}
                     />
                   ) : (
-                    <div className="px-3 py-[9px] text-right text-violet-400 font-medium tabular-nums">
+                    <div className="px-3 py-[9px] text-right text-primary font-medium tabular-nums">
                       {formatVnd(product.unitPrice)} ₫
                     </div>
                   )}
                 </td>
 
                 {/* Unit */}
-                <td className="p-0 border-r border-[#2e2e2e] w-24">
+                <td className="p-0 border-r border-border w-24">
                   <select
                     value={product.unit}
                     onChange={(e) => saveField(product, "unit", e.target.value)}
-                    className="w-full h-full px-3 py-[9px] text-sm bg-transparent text-muted-foreground hover:bg-[#2a2a2a] cursor-pointer focus:outline-none appearance-none"
+                    className="w-full h-full px-3 py-[9px] text-sm bg-transparent text-muted-foreground hover:bg-secondary cursor-pointer focus:outline-none appearance-none"
                   >
                     {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
                   </select>
                 </td>
 
                 {/* Status */}
-                <td className="p-0 border-r border-[#2e2e2e] w-24">
+                <td className="p-0 border-r border-border w-24">
                   <select
                     value={product.status}
                     onChange={(e) => saveField(product, "status", e.target.value)}
                     className={cn(
                       "w-full h-full px-3 py-[9px] text-sm bg-transparent cursor-pointer focus:outline-none appearance-none",
-                      product.status === "ACTIVE" ? "text-emerald-400" : "text-[#888]"
+                      product.status === "ACTIVE" ? "text-emerald-400" : "text-muted-foreground"
                     )}
                   >
                     <option value="ACTIVE">Active</option>
@@ -314,7 +314,7 @@ export const ProductsTable = ({
           })}
         </tbody>
       </table>
-      <div className="px-4 py-2 bg-[#1a1a1a] border-t border-[#2e2e2e] text-[11px] text-muted-foreground/50 select-none">
+      <div className="px-4 py-2 bg-secondary border-t border-border text-[11px] text-muted-foreground/50 select-none">
         Click name to view details · Click price to edit · Click categories to select tags · Unit &amp; Status save on change
       </div>
 

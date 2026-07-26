@@ -73,7 +73,7 @@ export const Sidebar = ({ storageKey = "t-sidebar-state" }: SidebarProps) => {
 
   return (
     <>
-      <div className="text-[10px] font-semibold uppercase tracking-widest text-[#888] flex items-center mb-1">
+      <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center mb-1">
         <span className="pl-4">Workspaces</span>
         <Link
           href="/select-org"
@@ -82,7 +82,7 @@ export const Sidebar = ({ storageKey = "t-sidebar-state" }: SidebarProps) => {
               size: "icon",
               variant: "ghost",
             }),
-            "ml-auto text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]"
+            "ml-auto text-muted-foreground hover:text-foreground hover:bg-secondary"
           )}
         >
           <Plus className="h-4 w-4" />

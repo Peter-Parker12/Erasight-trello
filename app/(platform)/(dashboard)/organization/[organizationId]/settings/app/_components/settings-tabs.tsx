@@ -24,7 +24,7 @@ export const SettingsTabs = ({ organizationId, isAdmin }: SettingsTabsProps) => 
   const tabs = isAdmin ? [...ADMIN_TABS, MEMBERS_TAB] : [MEMBERS_TAB];
 
   return (
-    <div className="flex gap-1 border-b border-[#333]">
+    <div className="flex gap-1 border-b border-border">
       {tabs.map((tab) => {
         const href = `/organization/${organizationId}/settings/app/${tab.href}`;
         const isActive = pathname === href;
@@ -34,8 +34,8 @@ export const SettingsTabs = ({ organizationId, isAdmin }: SettingsTabsProps) => 
             key={tab.href}
             href={href}
             className={cn(
-              "px-3 py-2 text-sm font-medium text-[#888] hover:text-[#e5e5e5] border-b-2 border-transparent -mb-px",
-              isActive && "text-violet-400 border-violet-500"
+              "px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent -mb-px",
+              isActive && "text-primary border-primary"
             )}
           >
             {tab.label}

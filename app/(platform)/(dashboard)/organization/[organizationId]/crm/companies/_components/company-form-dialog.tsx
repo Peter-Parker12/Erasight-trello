@@ -302,7 +302,7 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
           />
 
           <div className="space-y-2">
-            <Label className="text-xs font-semibold text-[#e5e5e5]">Bundles</Label>
+            <Label className="text-xs font-semibold text-foreground">Bundles</Label>
 
             {selectedBundleIds.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -313,7 +313,7 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
                       key={id}
                       type="button"
                       onClick={() => toggleBundle(id)}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-violet-600/20 border-violet-600/60 text-violet-400 transition hover:border-violet-400"
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-primary/20 border-primary/60 text-primary transition hover:border-primary"
                     >
                       {bundle.name}
                       <X className="h-3 w-3" />
@@ -334,7 +334,7 @@ export const CompanyFormDialog = ({ trigger, definitions, company, allBundles = 
                 }
                 e.target.value = "";
               }}
-              className="w-full text-sm px-2 py-1 h-8 border rounded-md bg-[#2a2a2a] border-[#333] text-[#e5e5e5]"
+              className="w-full text-sm px-2 py-1 h-8 border rounded-md bg-secondary border-border text-foreground"
             >
               <option value="" disabled>
                 {localBundles.filter((b) => !selectedBundleIds.includes(b.id)).length === 0

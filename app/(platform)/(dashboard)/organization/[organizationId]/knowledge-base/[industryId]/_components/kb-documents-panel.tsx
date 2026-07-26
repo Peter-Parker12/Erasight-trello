@@ -44,7 +44,7 @@ function fileTypeLabel(fileType: string | null): string {
 }
 
 function fileIcon(fileType: string | null, isLink: boolean) {
-  if (isLink) return <LinkIcon className="h-4 w-4 text-violet-400" />;
+  if (isLink) return <LinkIcon className="h-4 w-4 text-primary" />;
   if (!fileType) return <File className="h-4 w-4 text-muted-foreground" />;
   if (fileType.includes("pdf") || fileType.includes("word") || fileType.includes("document"))
     return <FileText className="h-4 w-4 text-blue-400" />;
@@ -103,8 +103,8 @@ export const KbDocumentsPanel = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#333]">
-        <span className="text-sm font-medium text-[#e5e5e5]">{folderName}</span>
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
+        <span className="text-sm font-medium text-foreground">{folderName}</span>
         <KbDocumentFormDialog folderId={folderId} onCreated={onDocumentCreated} />
       </div>
 
@@ -117,21 +117,21 @@ export const KbDocumentsPanel = ({
               folderId={folderId}
               onCreated={onDocumentCreated}
               trigger={
-                <button className="text-sm text-violet-400 hover:text-violet-300 underline underline-offset-2">
+                <Button variant="link" size="inline" className="text-sm">
                   Add the first document
-                </button>
+                </Button>
               }
             />
           </div>
         ) : (
-          <div className="divide-y divide-[#2a2a2a]">
+          <div className="divide-y divide-border">
             {documents.map((doc) => {
               const isLink = !doc.url.startsWith("/api/kb/files/");
               const label = isLink ? "Link" : fileTypeLabel(doc.fileType);
               return (
                 <div
                   key={doc.id}
-                  className="group flex items-start gap-3 px-4 py-3 hover:bg-[#2a2a2a] transition-colors"
+                  className="group flex items-start gap-3 px-4 py-3 hover:bg-secondary transition-colors"
                 >
                   <div className="mt-0.5 shrink-0">{fileIcon(doc.fileType, isLink)}</div>
                   <div className="flex-1 min-w-0">
@@ -139,7 +139,7 @@ export const KbDocumentsPanel = ({
                       href={doc.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-[#e5e5e5] hover:text-violet-400 truncate block"
+                      className="text-sm font-medium text-foreground hover:text-primary truncate block"
                     >
                       {doc.name}
                     </a>
@@ -150,7 +150,7 @@ export const KbDocumentsPanel = ({
                     )}
                     <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                       {label && (
-                        <span className="font-medium text-[#aaa]">{label}</span>
+                        <span className="font-medium text-muted-foreground/80">{label}</span>
                       )}
                       {doc.fileSize != null && <span>{formatSize(doc.fileSize)}</span>}
                       <span>
@@ -163,7 +163,7 @@ export const KbDocumentsPanel = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 text-muted-foreground hover:text-[#e5e5e5]"
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
                         title="Open"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />

@@ -156,9 +156,9 @@ export const Comments = ({ cardId }: CommentsProps) => {
       )}
 
       <div className="flex items-start gap-x-3 w-full">
-        <MessageSquare className="h-5 w-5 mt-0.5 text-[#e5e5e5] shrink-0" />
+        <MessageSquare className="h-5 w-5 mt-0.5 text-foreground shrink-0" />
         <div className="w-full">
-          <p className="font-semibold text-[#e5e5e5] mb-3">Comments</p>
+          <p className="font-semibold text-foreground mb-3">Comments</p>
 
           <div className="mb-4 relative">
             <textarea
@@ -168,7 +168,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
               onKeyDown={handleKeyDown}
               placeholder="Write a comment… (@name to mention, Ctrl+Enter to submit)"
               maxLength={10000}
-              className="w-full text-sm border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] rounded-md p-3 resize-none focus:outline-none focus:ring-1 focus:ring-violet-500 transition-[min-height] duration-150 min-h-[42px] focus:min-h-[120px]"
+              className="w-full text-sm border border-input bg-input text-foreground rounded-md p-3 resize-none focus:outline-none focus:ring-1 focus:ring-ring transition-[min-height] duration-150 min-h-[42px] focus:min-h-[120px]"
               rows={2}
             />
             <div className="flex justify-end mt-0.5">
@@ -188,9 +188,9 @@ export const Comments = ({ cardId }: CommentsProps) => {
                 <button
                   type="button"
                   onClick={() => setImagePreview(null)}
-                  className="absolute -top-1.5 -right-1.5 bg-[#1f1f1f] border border-[#333] rounded-full p-0.5 hover:bg-red-900/30"
+                  className="absolute -top-1.5 -right-1.5 bg-card border border-border rounded-full p-0.5 hover:bg-red-900/30"
                 >
-                  <X className="h-3 w-3 text-[#888]" />
+                  <X className="h-3 w-3 text-muted-foreground" />
                 </button>
               </div>
             )}
@@ -198,7 +198,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
             {mentionQuery !== null && mentionSuggestions.length > 0 && (
               <div
                 ref={dropdownRef}
-                className="absolute z-50 bg-[#1f1f1f] border border-[#333] rounded-lg w-56 overflow-hidden bottom-full mb-1"
+                className="absolute z-50 bg-popover border border-border rounded-lg w-56 overflow-hidden bottom-full mb-1"
               >
                 {mentionSuggestions.map((m, i) => (
                   <button
@@ -206,7 +206,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
                     onMouseDown={(e) => { e.preventDefault(); insertMention(m); }}
                     className={cn(
                       "w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition",
-                      i === mentionIndex && "bg-violet-600/20"
+                      i === mentionIndex && "bg-primary/20"
                     )}
                   >
                     <Avatar className="h-6 w-6 shrink-0">
@@ -240,7 +240,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-violet-400 transition px-1 py-0.5 rounded hover:bg-[#2a2a2a]"
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition px-1 py-0.5 rounded hover:bg-secondary"
                 >
                   <ImageIcon className="h-3.5 w-3.5" />
                   Attach image
@@ -254,7 +254,7 @@ export const Comments = ({ cardId }: CommentsProps) => {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-violet-400 transition px-1 py-0.5 rounded hover:bg-[#2a2a2a]"
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition px-1 py-0.5 rounded hover:bg-secondary"
                 >
                   <ImageIcon className="h-3.5 w-3.5" />
                   {imagePreview ? "Change image" : "Attach image"}
@@ -290,9 +290,9 @@ export const Comments = ({ cardId }: CommentsProps) => {
                         {format(new Date(comment.createdAt), "MMM d 'at' h:mm a")}
                       </span>
                     </div>
-                    <div className="mt-0.5 text-sm bg-[#2a2a2a] rounded-md px-3 py-2">
+                    <div className="mt-0.5 text-sm bg-secondary rounded-md px-3 py-2">
                       {comment.content && (
-                        <div className="prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-code:bg-[#333] prose-code:px-1 prose-code:rounded [&_strong]:text-violet-400 prose-invert">
+                        <div className="prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-code:bg-muted prose-code:px-1 prose-code:rounded [&_strong]:text-primary prose-invert">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {renderWithMentions(comment.content)}
                           </ReactMarkdown>

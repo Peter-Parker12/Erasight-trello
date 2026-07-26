@@ -51,7 +51,7 @@ const CompanyDetailPage = async ({ params }: CompanyDetailPageProps) => {
     <div className="w-full p-4 md:p-6 space-y-6 max-w-4xl">
       <Link
         href={`/organization/${organizationId}/crm/companies`}
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-[#e5e5e5]"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4 mr-1" />
         Back to companies

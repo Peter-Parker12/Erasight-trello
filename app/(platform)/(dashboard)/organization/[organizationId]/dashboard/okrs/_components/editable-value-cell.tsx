@@ -55,7 +55,7 @@ export const EditableValueCell = ({
         className={cn(
           "inline-block px-1.5 py-0.5 text-sm tabular-nums",
           needsUpdate && "bg-yellow-100 rounded",
-          value === null && "text-neutral-400",
+          value === null && "text-muted-foreground",
           className
         )}
       >
@@ -82,7 +82,7 @@ export const EditableValueCell = ({
       className={cn(
         "w-20 rounded border border-transparent bg-transparent px-1.5 py-0.5 text-sm tabular-nums",
         "text-blue-600 font-semibold",
-        "hover:border-[#555] focus:border-blue-400 focus:outline-none focus:bg-[#333]",
+        "hover:border-border focus:border-blue-400 focus:outline-none focus:bg-muted",
         needsUpdate && "bg-yellow-100",
         className
       )}

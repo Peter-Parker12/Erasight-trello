@@ -100,7 +100,7 @@ export const CompanyDetailDialog = ({
         {data && (
           <div className="space-y-5">
             {/* Core fields */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-[#333] p-4">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-border p-4">
               {data.company.industry && (
                 <DetailField label="Industry" value={data.company.industry} />
               )}
@@ -123,13 +123,13 @@ export const CompanyDetailDialog = ({
                   <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
                     <AlignLeft className="h-3.5 w-3.5" /> Description
                   </p>
-                  <p className="text-sm text-[#e5e5e5] whitespace-pre-wrap">{data.company.description}</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{data.company.description}</p>
                 </div>
               )}
 
               {/* Custom fields */}
               {data.definitions.length > 0 && (
-                <div className="col-span-2 border-t border-[#333] pt-3 grid grid-cols-2 gap-3">
+                <div className="col-span-2 border-t border-border pt-3 grid grid-cols-2 gap-3">
                   {data.definitions.map((def) => {
                     const value = (data.company.customFields as Record<string, unknown>)[def.key];
                     const display = value === undefined || value === null || value === ""
@@ -146,12 +146,12 @@ export const CompanyDetailDialog = ({
               {data.company.contacts.length === 0 ? (
                 <Empty>No contacts linked yet.</Empty>
               ) : (
-                <ul className="divide-y divide-[#333] rounded-md border border-[#333]">
+                <ul className="divide-y divide-border rounded-md border border-border">
                   {data.company.contacts.map((c) => (
                     <li key={c.id} className="px-4 py-2 text-sm flex items-center gap-2">
                       <Link
                         href={`/organization/${organizationId}/crm/contacts/${c.id}`}
-                        className="text-[#e5e5e5] hover:underline hover:text-violet-400"
+                        className="text-foreground hover:underline hover:text-primary"
                         onClick={() => setOpen(false)}
                       >
                         {c.firstName} {c.lastName ?? ""}
@@ -168,12 +168,12 @@ export const CompanyDetailDialog = ({
               {data.company.leads.length === 0 ? (
                 <Empty>No leads linked yet.</Empty>
               ) : (
-                <ul className="divide-y divide-[#333] rounded-md border border-[#333]">
+                <ul className="divide-y divide-border rounded-md border border-border">
                   {data.company.leads.map((lead) => (
                     <li key={lead.id} className="px-4 py-2 text-sm flex items-center justify-between">
                       <Link
                         href={`/organization/${organizationId}/crm/leads`}
-                        className="text-[#e5e5e5] hover:underline hover:text-violet-400"
+                        className="text-foreground hover:underline hover:text-primary"
                         onClick={() => setOpen(false)}
                       >
                         {lead.title}
@@ -215,15 +215,15 @@ const DetailField = ({
     <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1">
       {icon}{label}
     </p>
-    <p className="text-sm text-[#e5e5e5]">{value || "—"}</p>
+    <p className="text-sm text-foreground">{value || "—"}</p>
   </div>
 );
 
 const Section = ({ title, count, children }: { title: string; count: number; children: React.ReactNode }) => (
   <div className="space-y-2">
-    <h3 className="text-sm font-semibold text-[#e5e5e5] flex items-center gap-2">
+    <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
       {title}
-      <span className="text-xs font-normal text-muted-foreground bg-[#2a2a2a] rounded-full px-2 py-0.5">{count}</span>
+      <span className="text-xs font-normal text-muted-foreground bg-secondary rounded-full px-2 py-0.5">{count}</span>
     </h3>
     {children}
   </div>

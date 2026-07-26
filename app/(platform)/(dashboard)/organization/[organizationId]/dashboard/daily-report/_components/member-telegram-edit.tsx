@@ -75,7 +75,7 @@ export const MemberTelegramEdit = ({
       className={cn(
         "inline-flex items-center gap-1 text-xs rounded px-1.5 py-0.5 transition-colors",
         telegramUsername
-          ? "text-muted-foreground hover:text-[#e5e5e5] hover:bg-[#2a2a2a]"
+          ? "text-muted-foreground hover:text-foreground hover:bg-muted"
           : "text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
       )}
     >

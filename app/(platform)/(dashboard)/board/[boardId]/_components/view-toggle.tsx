@@ -39,7 +39,7 @@ export const ViewToggle = () => {
           className={cn(
             "flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded text-xs font-medium transition-colors",
             currentView === value
-              ? "bg-[#e5e5e5] text-[#171717] shadow-sm"
+              ? "bg-foreground text-background shadow-sm"
               : "text-white/80 hover:text-white"
           )}
         >

@@ -36,7 +36,7 @@ const ApiDocsPage = async ({ params, searchParams }: ApiDocsPageProps) => {
   return (
     <div className="space-y-6 py-4">
       <div className="rounded-md border p-4 space-y-1">
-        <p className="text-sm text-[#e5e5e5]">
+        <p className="text-sm text-foreground">
           Explore the Erasight CRM API. Code examples below are pre-filled for the selected API key
           and update dynamically based on your custom fields configuration.
         </p>

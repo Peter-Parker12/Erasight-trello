@@ -101,7 +101,7 @@ export const OkrView = ({
       </div>
 
       {departments.length === 0 && role.isAdmin && (
-        <div className="rounded-lg border border-dashed p-6 text-center text-sm text-neutral-500">
+        <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
           Chưa có phòng ban. Vào tab &quot;Phòng ban | Departments&quot; để tạo trước.
           <br />
           No departments yet — set them up in the Departments tab first.
@@ -115,7 +115,7 @@ export const OkrView = ({
         return (
           <section key={group.key} className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="flex items-center gap-x-2 font-semibold text-[#e5e5e5]">
+              <h3 className="flex items-center gap-x-2 font-semibold text-foreground">
                 {group.color ? (
                   <span
                     className="h-3 w-3 rounded-full"
@@ -138,7 +138,7 @@ export const OkrView = ({
               )}
             </div>
             {group.items.length === 0 ? (
-              <p className="text-sm text-neutral-400 pl-5">
+              <p className="text-sm text-muted-foreground pl-5">
                 Chưa có mục tiêu cho Quý {quarter}/{year} | No objectives for Q{quarter} {year}.
               </p>
             ) : (

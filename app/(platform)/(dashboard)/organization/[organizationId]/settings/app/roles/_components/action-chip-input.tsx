@@ -53,13 +53,13 @@ export const ActionChipInput = ({ value, onChange }: ActionChipInputProps) => {
       <div
         className={cn(
           "w-full min-h-[32px] flex flex-wrap items-center gap-1.5 px-2 py-1",
-          "rounded-md border border-[#333] bg-[#2a2a2a]"
+          "rounded-md border border-border bg-secondary"
         )}
       >
         {value.map((action) => (
           <span
             key={action}
-            className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-mono bg-violet-500/20 text-violet-300"
+            className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-mono bg-primary/20 text-primary"
           >
             {action}
             <button type="button" onClick={() => remove(action)} className="hover:opacity-70">
@@ -81,19 +81,19 @@ export const ActionChipInput = ({ value, onChange }: ActionChipInputProps) => {
             if (e.key === "Escape") setOpen(false);
           }}
           placeholder={value.length === 0 ? "e.g. board:create" : ""}
-          className="flex-1 min-w-[120px] text-sm bg-transparent text-[#e5e5e5] focus:outline-none placeholder:text-muted-foreground/50"
+          className="flex-1 min-w-[120px] text-sm bg-transparent text-foreground focus:outline-none placeholder:text-muted-foreground/50"
         />
       </div>
 
       {open && (search.length > 0 || filtered.length > 0) && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-[#333] bg-[#1f1f1f] shadow-xl overflow-hidden">
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-xl overflow-hidden">
           <ul className="max-h-48 overflow-y-auto py-1">
             {filtered.map((action) => (
               <li key={action}>
                 <button
                   type="button"
                   onClick={() => add(action)}
-                  className="w-full text-left px-3 py-1.5 text-xs font-mono hover:bg-[#2a2a2a] transition-colors"
+                  className="w-full text-left px-3 py-1.5 text-xs font-mono hover:bg-secondary transition-colors"
                 >
                   {action}
                 </button>
@@ -104,7 +104,7 @@ export const ActionChipInput = ({ value, onChange }: ActionChipInputProps) => {
                 <button
                   type="button"
                   onClick={() => add(search)}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-violet-400 hover:bg-violet-600/10"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-primary hover:bg-primary/10"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add &ldquo;{search.trim()}&rdquo;

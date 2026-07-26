@@ -61,7 +61,7 @@ export const KpiTable = ({
     <div className="rounded-lg border">
       <Table>
         <TableHeader>
-          <TableRow className="bg-[#242424]">
+          <TableRow className="bg-muted">
             <TableHead className="min-w-44">KPI</TableHead>
             {months.map((month) => (
               <TableHead key={month} className="text-center min-w-24">
@@ -77,14 +77,14 @@ export const KpiTable = ({
               <TableCell className="align-top">
                 <div className="flex items-start gap-x-1.5">
                   {kpi.direction === "DECREASE" ? (
-                    <TrendingDown className="h-3.5 w-3.5 mt-0.5 shrink-0 text-neutral-400" />
+                    <TrendingDown className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
                   ) : (
-                    <TrendingUp className="h-3.5 w-3.5 mt-0.5 shrink-0 text-neutral-400" />
+                    <TrendingUp className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
                   )}
                   <div>
                     <p className="font-medium leading-snug">{kpi.name}</p>
                     {kpi.unit && (
-                      <p className="text-xs text-neutral-400">{kpi.unit}</p>
+                      <p className="text-xs text-muted-foreground">{kpi.unit}</p>
                     )}
                   </div>
                 </div>
@@ -109,7 +109,7 @@ export const KpiTable = ({
                 return (
                   <TableCell key={month} className="text-center align-top">
                     <div className="flex flex-col items-center gap-y-0.5">
-                      <div className="flex items-center gap-x-1 text-xs text-neutral-400">
+                      <div className="flex items-center gap-x-1 text-xs text-muted-foreground">
                         <span>KH|Plan</span>
                         <EditableValueCell
                           value={entry?.target ?? null}
@@ -120,7 +120,7 @@ export const KpiTable = ({
                           className="w-14 text-center"
                         />
                       </div>
-                      <div className="flex items-center gap-x-1 text-xs text-neutral-400">
+                      <div className="flex items-center gap-x-1 text-xs text-muted-foreground">
                         <span>TT|Act</span>
                         <EditableValueCell
                           value={entry?.actual ?? null}
@@ -140,7 +140,7 @@ export const KpiTable = ({
                           {band.emoji} {formatPercent(ratio)}
                         </span>
                       ) : (
-                        <span className="text-xs text-neutral-300">—</span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </div>
                   </TableCell>
@@ -152,7 +152,7 @@ export const KpiTable = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 w-7 p-0 text-neutral-400 hover:text-[#e5e5e5]"
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
                       onClick={() => onEdit(kpi)}
                     >
                       <Pencil className="h-3.5 w-3.5" />
@@ -160,7 +160,7 @@ export const KpiTable = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 w-7 p-0 text-neutral-400 hover:text-red-600"
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
                       onClick={() => onDelete(kpi)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />

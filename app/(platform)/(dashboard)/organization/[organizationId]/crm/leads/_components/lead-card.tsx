@@ -6,6 +6,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import type { Lead, PipelineStage } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useAction } from "@/hooks/use-action";
 import { deleteLead } from "@/actions/delete-lead";
 import type { CustomFieldDefinitionDTO } from "@/lib/custom-fields";
@@ -51,9 +52,9 @@ export const LeadCard = ({ lead, stages, definitions, companies, contacts, produ
   };
 
   return (
-    <div className="bg-[#2a2a2a] rounded-md border border-[#333] hover:border-violet-600/40 p-3 mb-2 space-y-1.5 text-sm transition">
+    <Card className="hover:border-primary/40 p-3 mb-2 space-y-1.5 text-sm transition">
       <div className="flex items-start justify-between gap-2">
-        <p className="font-medium leading-snug text-[#e5e5e5]">{lead.title}</p>
+        <p className="font-medium leading-snug">{lead.title}</p>
         <div className="flex items-center gap-0.5 shrink-0">
           <LeadFormDialog
             lead={lead}
@@ -82,7 +83,7 @@ export const LeadCard = ({ lead, stages, definitions, companies, contacts, produ
       </div>
 
       {lead.value != null && (
-        <p className="text-xs text-violet-400 font-medium">${Number(lead.value).toLocaleString()}</p>
+        <p className="text-xs text-primary font-medium">${Number(lead.value).toLocaleString()}</p>
       )}
 
       {lead.company && <p className="text-xs text-muted-foreground">{lead.company.name}</p>}
@@ -92,6 +93,6 @@ export const LeadCard = ({ lead, stages, definitions, companies, contacts, produ
           {lead.contact.firstName} {lead.contact.lastName ?? ""}
         </p>
       )}
-    </div>
+    </Card>
   );
 };

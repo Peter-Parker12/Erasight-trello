@@ -85,14 +85,14 @@ export const KbIndustryDetailClient = ({
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link
           href={`/organization/${organizationId}/knowledge-base`}
-          className="flex items-center gap-1 hover:text-[#e5e5e5] transition-colors"
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
         >
           <Library className="h-3.5 w-3.5" />
           Knowledge Base
         </Link>
         <ChevronLeft className="h-3.5 w-3.5 rotate-180" />
-        <span className="text-[#e5e5e5] font-medium flex items-center gap-1.5">
-          <Folder className="h-3.5 w-3.5 text-violet-400" />
+        <span className="text-foreground font-medium flex items-center gap-1.5">
+          <Folder className="h-3.5 w-3.5 text-primary" />
           {industry.name}
         </span>
       </div>
@@ -102,9 +102,9 @@ export const KbIndustryDetailClient = ({
       )}
 
       {/* Two-panel layout */}
-      <div className="flex gap-0 flex-1 min-h-0 rounded-lg border border-[#333] overflow-hidden">
+      <div className="flex gap-0 flex-1 min-h-0 rounded-lg border border-border overflow-hidden">
         {/* Left: folder list */}
-        <div className="w-56 shrink-0 border-r border-[#333] bg-[#1a1a1a]">
+        <div className="w-56 shrink-0 border-r border-border bg-background">
           <KbFolderPanel
             industryId={industry.id}
             folders={folders.map(({ documents: _docs, ...f }) => f)}
@@ -116,7 +116,7 @@ export const KbIndustryDetailClient = ({
         </div>
 
         {/* Right: document list */}
-        <div className="flex-1 min-w-0 bg-[#1f1f1f]">
+        <div className="flex-1 min-w-0 bg-card">
           {selectedFolder ? (
             <KbDocumentsPanel
               folderId={selectedFolder.id}

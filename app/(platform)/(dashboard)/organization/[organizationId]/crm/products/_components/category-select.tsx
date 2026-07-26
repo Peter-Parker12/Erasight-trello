@@ -124,8 +124,8 @@ export const CategorySelect = ({
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "w-full min-h-[32px] flex flex-wrap items-center gap-1.5 px-2 py-1",
-          "rounded-md border border-[#333] bg-[#2a2a2a] text-left",
-          "hover:border-[#555] focus:outline-none focus:border-blue-500 transition-colors"
+          "rounded-md border border-border bg-secondary text-left",
+          "hover:border-muted-foreground/40 focus:outline-none focus:border-blue-500 transition-colors"
         )}
       >
         {selected.length > 0 ? (
@@ -145,9 +145,9 @@ export const CategorySelect = ({
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-[#333] bg-[#1f1f1f] shadow-xl overflow-hidden">
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-xl overflow-hidden">
           {/* Search / create input */}
-          <div className="px-2 py-1.5 border-b border-[#333]">
+          <div className="px-2 py-1.5 border-b border-border">
             <input
               ref={inputRef}
               type="text"
@@ -158,7 +158,7 @@ export const CategorySelect = ({
                 if (e.key === "Escape") setOpen(false);
               }}
               placeholder="Search or create…"
-              className="w-full text-sm bg-transparent text-[#e5e5e5] focus:outline-none placeholder:text-muted-foreground/50"
+              className="w-full text-sm bg-transparent text-foreground focus:outline-none placeholder:text-muted-foreground/50"
             />
           </div>
 
@@ -176,7 +176,7 @@ export const CategorySelect = ({
                   <button
                     type="button"
                     onClick={() => toggle(cat.name)}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[#2a2a2a] transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-secondary transition-colors"
                     style={isSelected ? { backgroundColor: cat.color + "18" } : undefined}
                   >
                     <CategoryBadge name={cat.name} color={cat.color} />
@@ -194,7 +194,7 @@ export const CategorySelect = ({
                   type="button"
                   onClick={handleCreate}
                   disabled={creating}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-violet-400 hover:bg-violet-600/10"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-primary hover:bg-primary/10"
                 >
                   {creating ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

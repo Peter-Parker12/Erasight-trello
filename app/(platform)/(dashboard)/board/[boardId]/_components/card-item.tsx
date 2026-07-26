@@ -9,27 +9,12 @@ import { CardPreview } from "@/types";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { cn } from "@/lib/utils";
 import { getEffectiveDueDate } from "@/lib/due-date";
+import { PRIORITY_DOT_CLASS } from "@/lib/priority";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 type CardItemProps = {
   data: CardPreview;
   index: number;
-};
-
-const PRIORITY_DOT: Record<string, string> = {
-  NONE: "",
-  LOW: "bg-blue-400",
-  MEDIUM: "bg-yellow-400",
-  HIGH: "bg-orange-400",
-  URGENT: "bg-red-500",
-};
-
-const PRIORITY_COLOR: Record<string, string> = {
-  NONE: "",
-  LOW: "text-blue-500",
-  MEDIUM: "text-yellow-500",
-  HIGH: "text-orange-500",
-  URGENT: "text-red-500",
 };
 
 export const CardItem = ({ data, index }: CardItemProps) => {
@@ -41,7 +26,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
 
   const { date: due, isReview, overdue, dueSoon } = getEffectiveDueDate(data);
 
-  const priorityDot = PRIORITY_DOT[data.priority];
+  const priorityDot = PRIORITY_DOT_CLASS[data.priority];
   const hasSubtasks = data.subtasks && data.subtasks.length > 0;
   const doneSubtasks = data.subtasks?.filter((s) => s.completed).length ?? 0;
   const totalSubtasks = data.subtasks?.length ?? 0;
@@ -53,7 +38,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
-          className="border-2 border-transparent hover:border-violet-600/60 text-sm bg-[#2a2a2a] rounded-md shadow-sm overflow-hidden"
+          className="border-2 border-transparent hover:border-primary/60 text-sm bg-secondary rounded-md shadow-sm overflow-hidden"
           style={provided.draggableProps.style as CSSProperties | undefined}
         >
           {/* Main card body */}
@@ -126,7 +111,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
                 {data.members.length > 0 && (
                   <div className="flex -space-x-1 ml-auto">
                     {data.members.slice(0, 3).map((m) => (
-                      <Avatar key={m.id} className="h-5 w-5 border border-[#2a2a2a]">
+                      <Avatar key={m.id} className="h-5 w-5 border border-secondary">
                         <AvatarImage src={m.userImage} alt={m.userName} />
                         <AvatarFallback className="text-[9px]">{m.userName.charAt(0)}</AvatarFallback>
                       </Avatar>

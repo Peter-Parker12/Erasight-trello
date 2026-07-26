@@ -243,7 +243,7 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: Props) =>
         </DialogHeader>
 
         {/* Tab toggle */}
-        <div className="flex rounded-md overflow-hidden border border-[#333] w-fit">
+        <div className="flex rounded-md overflow-hidden border border-border w-fit">
           {(["upload", "link"] as const).map((t) => (
             <button
               key={t}
@@ -251,8 +251,8 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: Props) =>
               onClick={() => { setTab(t); resetForm(); }}
               className={`flex items-center gap-1.5 px-4 py-1.5 text-sm transition ${
                 tab === t
-                  ? "bg-violet-600 text-white"
-                  : "bg-[#1f1f1f] text-muted-foreground hover:text-[#e5e5e5]"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card text-muted-foreground hover:text-foreground"
               }`}
             >
               {t === "upload" ? <Upload className="h-3.5 w-3.5" /> : <LinkIcon className="h-3.5 w-3.5" />}
@@ -269,7 +269,7 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: Props) =>
                 <span className="text-muted-foreground font-normal text-xs">(max 50 MB)</span>
               </Label>
               <label
-                className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#333] px-4 py-6 cursor-pointer hover:border-violet-500/50 transition-colors"
+                className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border px-4 py-6 cursor-pointer hover:border-primary/50 transition-colors"
                 onDrop={onDrop}
                 onDragOver={(e) => e.preventDefault()}
               >
@@ -277,19 +277,19 @@ export const KbDocumentFormDialog = ({ folderId, onCreated, trigger }: Props) =>
                   <div className="w-full space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground truncate max-w-[220px]">{selectedFile?.name}</span>
-                      <span className="text-violet-400 tabular-nums">{uploadProgress}%</span>
+                      <span className="text-primary tabular-nums">{uploadProgress}%</span>
                     </div>
-                    <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-violet-500 transition-all duration-150"
+                        className="h-full bg-primary transition-all duration-150"
                         style={{ width: `${uploadProgress}%` }}
                       />
                     </div>
                   </div>
                 ) : selectedFile ? (
                   <>
-                    <Upload className="h-5 w-5 text-violet-400" />
-                    <span className="text-sm text-[#e5e5e5] text-center break-all">{selectedFile.name}</span>
+                    <Upload className="h-5 w-5 text-primary" />
+                    <span className="text-sm text-foreground text-center break-all">{selectedFile.name}</span>
                     <span className="text-xs text-muted-foreground">
                       {(selectedFile.size / 1024 / 1024).toFixed(1)} MB — click to change
                     </span>

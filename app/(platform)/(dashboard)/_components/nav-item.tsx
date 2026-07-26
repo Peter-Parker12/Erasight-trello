@@ -148,8 +148,8 @@ export const NavItem = ({
       <AccordionTrigger
         onClick={() => onExpand(organization.id)}
         className={cn(
-          "flex items-center gap-x-2 p-1.5 text-[#e5e5e5] rounded-md hover:bg-[#2a2a2a] transition text-start no-underline hover:no-underline",
-          isActive && !isExpanded && "bg-violet-600/20 text-violet-400"
+          "flex items-center gap-x-2 p-1.5 text-foreground rounded-md hover:bg-secondary transition text-start no-underline hover:no-underline",
+          isActive && !isExpanded && "bg-primary/20 text-primary"
         )}
       >
         <div className="flex items-center gap-x-2">
@@ -174,8 +174,8 @@ export const NavItem = ({
             size="sm"
             onClick={() => onClick(route.href)}
             className={cn(
-              "w-full font-normal justify-start pl-10 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
-              pathname === route.href && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+              "w-full font-normal justify-start pl-10 mb-1 text-muted-foreground hover:text-foreground hover:bg-secondary",
+              pathname === route.href && "bg-primary/20 text-primary hover:text-primary"
             )}
             variant="ghost"
           >
@@ -187,13 +187,13 @@ export const NavItem = ({
         {/* Dashboard collapsible group */}
         {showDashboard && (
           <>
-            <div className="my-1.5 h-px bg-[#333]" />
+            <div className="my-1.5 h-px bg-border" />
             <button
               onClick={() => setDashboardExpanded((v) => !v)}
               className={cn(
                 "w-full flex items-center pl-10 pr-2 py-1.5 rounded-md text-[10px] font-semibold uppercase tracking-widest transition",
-                isDashboardActive ? "text-violet-400" : "text-[#888]",
-                "hover:bg-[#2a2a2a] hover:text-[#e5e5e5]"
+                isDashboardActive ? "text-primary" : "text-muted-foreground",
+                "hover:bg-secondary hover:text-foreground"
               )}
             >
               <LayoutDashboard className="h-3.5 w-3.5 mr-2 shrink-0" />
@@ -212,9 +212,9 @@ export const NavItem = ({
                   size="sm"
                   onClick={() => onClick(route.href)}
                   className={cn(
-                    "w-full font-normal justify-start pl-14 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
+                    "w-full font-normal justify-start pl-14 mb-1 text-muted-foreground hover:text-foreground hover:bg-secondary",
                     (route.exact ? pathname === route.href : pathname?.startsWith(route.href)) &&
-                      "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+                      "bg-primary/20 text-primary hover:text-primary"
                   )}
                   variant="ghost"
                 >
@@ -222,20 +222,20 @@ export const NavItem = ({
                   {route.label}
                 </Button>
               ))}
-            <div className="my-1.5 h-px bg-[#333]" />
+            <div className="my-1.5 h-px bg-border" />
           </>
         )}
 
         {/* CRM collapsible group */}
         {showCRM && (
           <>
-            <div className="my-1.5 h-px bg-[#333]" />
+            <div className="my-1.5 h-px bg-border" />
             <button
               onClick={() => setCrmExpanded((v) => !v)}
               className={cn(
                 "w-full flex items-center pl-10 pr-2 py-1.5 rounded-md text-[10px] font-semibold uppercase tracking-widest transition",
-                isCRMActive ? "text-violet-400" : "text-[#888]",
-                "hover:bg-[#2a2a2a] hover:text-[#e5e5e5]"
+                isCRMActive ? "text-primary" : "text-muted-foreground",
+                "hover:bg-secondary hover:text-foreground"
               )}
             >
               <span className="flex-1 text-left">CRM</span>
@@ -256,8 +256,8 @@ export const NavItem = ({
                   size="sm"
                   onClick={() => onClick(route.href)}
                   className={cn(
-                    "w-full font-normal justify-start pl-14 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
-                    pathname === route.href && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+                    "w-full font-normal justify-start pl-14 mb-1 text-muted-foreground hover:text-foreground hover:bg-secondary",
+                    pathname === route.href && "bg-primary/20 text-primary hover:text-primary"
                   )}
                   variant="ghost"
                 >
@@ -265,27 +265,27 @@ export const NavItem = ({
                   {route.label}
                 </Button>
               ))}
-            <div className="my-1.5 h-px bg-[#333]" />
+            <div className="my-1.5 h-px bg-border" />
           </>
         )}
 
         {/* Knowledge Base */}
         {showKB && (
           <>
-            <div className="my-1.5 h-px bg-[#333]" />
+            <div className="my-1.5 h-px bg-border" />
             <Button
               size="sm"
               onClick={() => onClick(`/organization/${organization.id}/knowledge-base`)}
               className={cn(
-                "w-full font-normal justify-start pl-10 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
-                isKBActive && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+                "w-full font-normal justify-start pl-10 mb-1 text-muted-foreground hover:text-foreground hover:bg-secondary",
+                isKBActive && "bg-primary/20 text-primary hover:text-primary"
               )}
               variant="ghost"
             >
               <Library className="h-4 w-4 mr-2" />
               Knowledge Base
             </Button>
-            <div className="my-1.5 h-px bg-[#333]" />
+            <div className="my-1.5 h-px bg-border" />
           </>
         )}
 
@@ -296,10 +296,10 @@ export const NavItem = ({
             size="sm"
             onClick={() => onClick(route.href)}
             className={cn(
-              "w-full font-normal justify-start pl-10 mb-1 text-[#888] hover:text-[#e5e5e5] hover:bg-[#2a2a2a]",
+              "w-full font-normal justify-start pl-10 mb-1 text-muted-foreground hover:text-foreground hover:bg-secondary",
               ("matchPrefix" in route && route.matchPrefix
                 ? pathname?.startsWith(route.href)
-                : pathname === route.href) && "bg-violet-600/20 text-violet-400 hover:text-violet-400"
+                : pathname === route.href) && "bg-primary/20 text-primary hover:text-primary"
             )}
             variant="ghost"
           >

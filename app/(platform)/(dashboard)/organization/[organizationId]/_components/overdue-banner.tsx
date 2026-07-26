@@ -51,7 +51,7 @@ export const OverdueBanner = () => {
       </div>
 
       {/* Card list */}
-      <div className="divide-y divide-red-100">
+      <div className="divide-y divide-red-900/40">
         {shown.map((card) => {
           const isReview = !card.dueDate && !!card.reviewDeadline;
           const due = new Date(card.dueDate ?? card.reviewDeadline!);
@@ -67,7 +67,7 @@ export const OverdueBanner = () => {
                 <CalendarDays className="h-3.5 w-3.5 text-red-500 shrink-0" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#e5e5e5] truncate">{card.title}</p>
+                <p className="text-sm font-medium text-foreground truncate">{card.title}</p>
                 <p className="text-xs text-muted-foreground truncate">
                   {card.list.board.title} › {card.list.title}
                   {isReview && " · Review deadline"}

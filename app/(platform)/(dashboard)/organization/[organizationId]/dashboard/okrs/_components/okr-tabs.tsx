@@ -60,7 +60,7 @@ export const OkrTabs = ({ organizationId, isAdmin }: Props) => {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "flex items-center gap-x-1.5 whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-neutral-400 hover:text-[#e5e5e5] transition",
+                "flex items-center gap-x-1.5 whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground transition",
                 active && "border-primary text-primary"
               )}
             >

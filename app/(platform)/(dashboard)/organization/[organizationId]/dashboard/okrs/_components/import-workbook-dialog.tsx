@@ -137,7 +137,7 @@ export const ImportWorkbookDialog = ({ organizationId, members }: Props) => {
               <a
                 href="/api/okrs/template"
                 download
-                className="inline-flex items-center gap-1 text-xs text-violet-400 hover:underline"
+                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
               >
                 <Download className="h-3 w-3" />
                 Chưa có file mẫu? Tải file mẫu tại đây | No template yet? Download one here

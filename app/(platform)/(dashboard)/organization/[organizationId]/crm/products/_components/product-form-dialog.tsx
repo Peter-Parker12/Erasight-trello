@@ -119,7 +119,7 @@ export const ProductFormDialog = ({
 
           {/* Category multi-select */}
           <div className="space-y-1">
-            <Label className="text-xs font-semibold text-[#e5e5e5]">Categories</Label>
+            <Label className="text-xs font-semibold text-foreground">Categories</Label>
             <CategorySelect
               value={selectedCategories}
               onChange={setSelectedCategories}
@@ -132,14 +132,14 @@ export const ProductFormDialog = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label htmlFor="status" className="text-xs font-semibold text-[#e5e5e5]">
+              <Label htmlFor="status" className="text-xs font-semibold text-foreground">
                 Status
               </Label>
               <select
                 id="status"
                 name="status"
                 defaultValue={product?.status ?? "ACTIVE"}
-                className="w-full text-sm px-2 py-1 h-8 border rounded-md bg-[#2a2a2a] border-[#333] text-[#e5e5e5]"
+                className="w-full text-sm px-2 py-1 h-8 border rounded-md bg-background border-input text-foreground"
               >
                 <option value="ACTIVE">Active</option>
                 <option value="INACTIVE">Inactive</option>
@@ -147,14 +147,14 @@ export const ProductFormDialog = ({
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="unit" className="text-xs font-semibold text-[#e5e5e5]">
+              <Label htmlFor="unit" className="text-xs font-semibold text-foreground">
                 Unit
               </Label>
               <select
                 id="unit"
                 name="unit"
                 defaultValue={product?.unit ?? "item"}
-                className="w-full text-sm px-2 py-1 h-8 border rounded-md bg-[#2a2a2a] border-[#333] text-[#e5e5e5]"
+                className="w-full text-sm px-2 py-1 h-8 border rounded-md bg-background border-input text-foreground"
               >
                 {UNITS.map((u) => (
                   <option key={u} value={u}>{u}</option>
@@ -164,7 +164,7 @@ export const ProductFormDialog = ({
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="unitPrice" className="text-xs font-semibold text-[#e5e5e5]">
+            <Label htmlFor="unitPrice" className="text-xs font-semibold text-foreground">
               Unit price (VND)
             </Label>
             <FormInput

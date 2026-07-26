@@ -105,12 +105,12 @@ export const CustomFieldsManager = ({ entityType, label, fields }: CustomFieldsM
                 Default fields
               </p>
               {DEFAULT_FIELDS_BY_ENTITY[entityType]!.map((f) => (
-                <div key={f.key} className="flex items-center gap-2 border border-[#2e2e2e] rounded-md px-3 py-2 bg-[#1a1a1a]">
+                <div key={f.key} className="flex items-center gap-2 border border-border rounded-md px-3 py-2 bg-muted">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#e5e5e5] truncate">{f.label}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{f.label}</p>
                     <p className="text-xs text-muted-foreground">
                       {f.key} · {f.type}
-                      {f.note ? <span className="ml-1 text-violet-400/80">· {f.note}</span> : null}
+                      {f.note ? <span className="ml-1 text-primary/80">· {f.note}</span> : null}
                     </p>
                   </div>
                   <span className="text-[11px] text-muted-foreground/50 italic shrink-0">built-in</span>
@@ -184,7 +184,7 @@ const FieldRow = ({ field }: { field: CustomFieldDefinitionDTO }) => {
 
   if (editing) {
     return (
-      <div className="border border-violet-600/40 rounded-md p-3 space-y-2 bg-[#1f1f1f]">
+      <div className="border border-primary/40 rounded-md p-3 space-y-2 bg-card">
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Label</p>
@@ -214,7 +214,7 @@ const FieldRow = ({ field }: { field: CustomFieldDefinitionDTO }) => {
         )}
 
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-1.5 text-xs text-[#e5e5e5]">
+          <label className="flex items-center gap-1.5 text-xs text-foreground">
             <input
               type="checkbox"
               checked={requiredValue}
@@ -244,7 +244,7 @@ const FieldRow = ({ field }: { field: CustomFieldDefinitionDTO }) => {
           {field.options?.length ? ` · ${field.options.join(", ")}` : ""}
         </p>
       </div>
-      <label className="flex items-center gap-1 text-xs text-[#e5e5e5] whitespace-nowrap">
+      <label className="flex items-center gap-1 text-xs text-foreground whitespace-nowrap">
         <input
           type="checkbox"
           checked={requiredValue}
@@ -258,7 +258,7 @@ const FieldRow = ({ field }: { field: CustomFieldDefinitionDTO }) => {
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 w-7 p-0 text-muted-foreground hover:text-[#e5e5e5]"
+        className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
         onClick={() => setEditing(true)}
       >
         <Pencil className="h-3.5 w-3.5" />
@@ -266,7 +266,7 @@ const FieldRow = ({ field }: { field: CustomFieldDefinitionDTO }) => {
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 w-7 p-0 text-red-500 hover:text-red-400"
+        className="h-7 w-7 p-0 text-destructive hover:text-destructive/80"
         disabled={isDeleting}
         onClick={onDelete}
       >
@@ -374,7 +374,7 @@ const AddFieldRow = ({
             className="h-8 text-sm"
           />
         ) : (
-          <label className="flex items-center gap-1 text-xs text-[#e5e5e5]">
+          <label className="flex items-center gap-1 text-xs text-foreground">
             <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} />
             Required
           </label>
@@ -382,7 +382,7 @@ const AddFieldRow = ({
       </div>
 
       {needsOptions && (
-        <label className="flex items-center gap-1 text-xs text-[#e5e5e5]">
+        <label className="flex items-center gap-1 text-xs text-foreground">
           <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} />
           Required
         </label>

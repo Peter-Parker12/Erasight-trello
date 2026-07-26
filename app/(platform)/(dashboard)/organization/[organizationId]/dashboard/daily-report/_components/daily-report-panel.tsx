@@ -50,7 +50,7 @@ const MemberRow = ({
     </Avatar>
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm font-medium text-[#e5e5e5] truncate">{member.userName}</span>
+        <span className="text-sm font-medium text-foreground truncate">{member.userName}</span>
         {member.projectName && (
           <Badge variant="secondary" className="text-[10px]">
             {member.projectName}
@@ -63,7 +63,7 @@ const MemberRow = ({
         />
       </div>
       {member.hasReported ? (
-        <p className="text-sm text-[#cfcfcf] whitespace-pre-wrap mt-1">{member.content}</p>
+        <p className="text-sm text-foreground whitespace-pre-wrap mt-1">{member.content}</p>
       ) : (
         <p className="text-xs text-amber-400 mt-1">
           {isToday ? "Hasn't reported yet today." : "Did not report on this date."}
@@ -111,7 +111,7 @@ export const DailyReportPanel = ({ organizationId }: { organizationId: string })
   if (isLoading) return <p className="text-sm text-muted-foreground py-4">Loading daily reports…</p>;
   if (isError || !data) {
     return (
-      <p className="text-sm text-red-500 py-4">
+      <p className="text-sm text-destructive py-4">
         Failed to load daily reports. Make sure the database schema is up to date (
         <code>prisma db push</code>).
       </p>
@@ -124,7 +124,7 @@ export const DailyReportPanel = ({ organizationId }: { organizationId: string })
   return (
     <div className="space-y-6 py-2">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-sm font-semibold text-[#e5e5e5]">
+        <h2 className="text-sm font-semibold text-foreground">
           Daily report — {format(new Date(`${data.date}T00:00:00`), "EEE, MMM d yyyy")}
         </h2>
         <div className="flex items-center gap-2">
@@ -140,7 +140,7 @@ export const DailyReportPanel = ({ organizationId }: { organizationId: string })
               value={dateParam}
               max={todayStr}
               onChange={(e) => e.target.value && goToDate(e.target.value)}
-              className="h-7 rounded-md border border-[#333] bg-[#2a2a2a] text-[#e5e5e5] text-xs px-1.5"
+              className="h-7 rounded-md border border-border bg-input text-foreground text-xs px-1.5"
             />
             <Button
               size="sm"
@@ -173,7 +173,7 @@ export const DailyReportPanel = ({ organizationId }: { organizationId: string })
             "rounded-lg border px-4 divide-y",
             notReported.length > 0
               ? "border-amber-500/30 bg-amber-500/5 divide-amber-500/20"
-              : "border-[#333] divide-[#333]"
+              : "border-border divide-border"
           )}
         >
           {notReported.length === 0 ? (
@@ -190,9 +190,9 @@ export const DailyReportPanel = ({ organizationId }: { organizationId: string })
       <div>
         <div className="flex items-center gap-1.5 mb-1">
           <CheckCircle2 className="h-4 w-4 text-green-500" />
-          <h3 className="text-sm font-semibold text-[#e5e5e5]">Reported ({reported.length})</h3>
+          <h3 className="text-sm font-semibold text-foreground">Reported ({reported.length})</h3>
         </div>
-        <div className="rounded-lg border border-[#333] px-4 divide-y divide-[#333]">
+        <div className="rounded-lg border border-border px-4 divide-y divide-border">
           {reported.length === 0 ? (
             <p className="text-sm text-muted-foreground py-3">
               {isToday ? "No reports yet today." : "No reports on this date."}

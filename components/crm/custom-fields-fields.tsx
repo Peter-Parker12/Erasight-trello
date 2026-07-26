@@ -30,9 +30,9 @@ export const CustomFieldsFields = ({
 
         return (
           <div key={def.key} className="space-y-1">
-            <Label htmlFor={name} className="text-xs font-semibold text-[#e5e5e5]">
+            <Label htmlFor={name} className="text-xs font-semibold text-foreground">
               {def.label}
-              {def.required && <span className="text-red-500"> *</span>}
+              {def.required && <span className="text-destructive"> *</span>}
             </Label>
 
             {def.type === "BOOLEAN" ? (

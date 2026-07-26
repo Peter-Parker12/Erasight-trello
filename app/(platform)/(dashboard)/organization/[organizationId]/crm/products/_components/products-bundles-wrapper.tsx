@@ -63,7 +63,7 @@ export const ProductsBundlesWrapper = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard label="Total products" value={products.length} icon={Package} />
         <KpiCard label="Active"         value={activeCount}     icon={Package} iconColor="text-emerald-400" />
-        <KpiCard label="Bundles"        value={bundles.length}  icon={Layers}  iconColor="text-violet-400" />
+        <KpiCard label="Bundles"        value={bundles.length}  icon={Layers}  iconColor="text-primary" />
       </div>
 
       {/* ── Products section ── */}

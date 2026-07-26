@@ -93,7 +93,7 @@ export const RoleFormDialog = ({ trigger, role }: RoleFormDialogProps) => {
           />
 
           <div className="space-y-1">
-            <Label className="text-xs font-semibold text-[#e5e5e5]">Actions</Label>
+            <Label className="text-xs font-semibold text-foreground">Actions</Label>
             <ActionChipInput value={actions} onChange={setActions} />
           </div>
 
