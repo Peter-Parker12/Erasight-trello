@@ -111,21 +111,14 @@ export const ImportWorkbookDialog = ({ organizationId, members }: Props) => {
   const allResolved = unresolved.every((name) => !!nameMapping[name]);
 
   return (
-    <div className="flex items-center gap-x-2">
-      <Button variant="outline" size="sm" asChild>
-        <a href="/api/okrs/template" download>
-          <Download className="h-4 w-4 mr-1" />
-          Tải file mẫu | Download template
-        </a>
-      </Button>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Upload className="h-4 w-4 mr-1" />
-            Nhập từ Excel | Import from Excel
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-lg">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Upload className="h-4 w-4 mr-1" />
+          Nhập từ Excel | Import from Excel
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Nhập OKRs & KPIs từ Excel | Import OKRs & KPIs from Excel</DialogTitle>
         </DialogHeader>
@@ -141,6 +134,14 @@ export const ImportWorkbookDialog = ({ organizationId, members }: Props) => {
                 accept=".xlsx"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               />
+              <a
+                href="/api/okrs/template"
+                download
+                className="inline-flex items-center gap-1 text-xs text-violet-400 hover:underline"
+              >
+                <Download className="h-3 w-3" />
+                Chưa có file mẫu? Tải file mẫu tại đây | No template yet? Download one here
+              </a>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="import-year">Năm | Year</Label>
@@ -250,8 +251,7 @@ export const ImportWorkbookDialog = ({ organizationId, members }: Props) => {
             </div>
           </div>
         )}
-        </DialogContent>
-      </Dialog>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
