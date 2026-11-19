@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
-import { sendDueTodayReminder } from "@/lib/board-telegram";
+import { sendBoardDueTodayReminder } from "@/lib/board-notify";
 
 // Triggered by an external scheduler (e.g. cron-job.org, GitHub Actions, Vercel Cron)
 // at 7:00 AM, secured with a shared secret header.
@@ -12,7 +12,12 @@ export async function POST(req: Request) {
   }
 
   try {
-    const configs = await db.boardTelegramConfig.findMany({ where: { enabled: true } });
+    // Route name predates Zalo; it now covers every board chat channel.
+    const [telegramConfigs, zaloConfigs] = await Promise.all([
+      db.boardTelegramConfig.findMany({ where: { enabled: true }, select: { boardId: true } }),
+      db.boardZaloConfig.findMany({ where: { enabled: true }, select: { boardId: true } }),
+    ]);
+    const boardIds = [...new Set([...telegramConfigs, ...zaloConfigs].map((c) => c.boardId))];
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
@@ -21,10 +26,10 @@ export async function POST(req: Request) {
 
     let notified = 0;
 
-    for (const config of configs) {
+    for (const boardId of boardIds) {
       const cards = await db.card.findMany({
         where: {
-          list: { boardId: config.boardId },
+          list: { boardId },
           completed: false,
           dueDate: { gte: startOfDay, lte: endOfDay },
         },
@@ -34,14 +39,14 @@ export async function POST(req: Request) {
 
       if (cards.length === 0) continue;
 
-      await sendDueTodayReminder({
-        boardId: config.boardId,
+      await sendBoardDueTodayReminder({
+        boardId,
         cards: cards.map((c) => ({ id: c.id, title: c.title, listTitle: c.list.title })),
       });
       notified++;
     }
 
-    return NextResponse.json({ ok: true, boardsChecked: configs.length, boardsNotified: notified });
+    return NextResponse.json({ ok: true, boardsChecked: boardIds.length, boardsNotified: notified });
   } catch (e) {
     console.error("[TELEGRAM_DAILY_REMINDER_ERROR]", e);
     return new NextResponse("Internal Server Error", { status: 500 });

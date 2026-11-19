@@ -5,6 +5,7 @@ import { BoardTitleForm } from "./board-title-form";
 import { BoardOptions } from "./board-options";
 import { BoardMembers } from "./board-members";
 import { TelegramSettings } from "./telegram-settings";
+import { ZaloSettings } from "./zalo-settings";
 import { AiReviewSettings } from "./ai-review-settings";
 import { ViewToggle } from "./view-toggle";
 import { BoardBackgroundPicker } from "./board-background-picker";
@@ -35,6 +36,7 @@ export const BoardNavbar = async ({ data, isAdmin }: BoardNavbarProps) => {
         {isAdmin && <BoardMembers boardId={data.id} />}
         {isAdmin && <AiReviewSettings boardId={data.id} />}
         {isAdmin && <TelegramSettings boardId={data.id} />}
+        {isAdmin && <ZaloSettings boardId={data.id} />}
         {isAdmin && <BoardSettingsSheet boardId={data.id} lists={lists} />}
         <BoardOptions id={data.id} lists={lists} />
       </div>

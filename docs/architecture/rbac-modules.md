@@ -30,7 +30,7 @@ Free-form action strings (e.g. `"crm:lead:delete"`) stored on `Role.actions`, as
 
 | Domain | Models |
 |---|---|
-| Kanban/Boards | `Board`, `BoardTelegramConfig`, `BoardAiConfig`, `ReviewSkill`, `ReviewPartner`, `BoardMember`, `List`, `ListTransitionRule`, `Card`, `Label`, `CardLabel`, `Checklist`, `ChecklistItem`, `Comment`, `Attachment`, `CardMember`, `CardWatcher`, `CardTemplate` |
+| Kanban/Boards | `Board`, `BoardTelegramConfig`, `BoardZaloConfig`, `BoardAiConfig`, `ReviewSkill`, `ReviewPartner`, `BoardMember`, `List`, `ListTransitionRule`, `Card`, `Label`, `CardLabel`, `Checklist`, `ChecklistItem`, `Comment`, `Attachment`, `CardMember`, `CardWatcher`, `CardTemplate` |
 | Auditing/Notifications | `AuditLog`, `Notification` |
 | Access control | `ModuleAccess`, `Role`, `UserRoleAssignment`, `ApiKey`, `CustomFieldDefinition` |
 | CRM | `Company`, `Contact`, `PipelineStage`, `Lead`, `Product`, `ProductCategory`, `ProductBundle`, `ProductBundleItem`, `CompanyBundle`, `LeadProduct` |

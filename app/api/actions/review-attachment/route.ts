@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { extractFileContent } from "@/lib/extract-file-content";
 import { runClaudeReview } from "@/lib/claude-cli-review";
-import { notifyReviewReady } from "@/lib/board-telegram";
+import { notifyBoardReviewReady } from "@/lib/board-notify";
 
 export async function POST(req: Request) {
   try {
@@ -53,8 +53,8 @@ export async function POST(req: Request) {
       data: { review, reviewedAt: new Date() },
     });
 
-    // Send review to Telegram (non-blocking — UI response doesn't wait for this)
-    void notifyReviewReady({
+    // Send review to Telegram/Zalo (non-blocking — UI response doesn't wait for this)
+    void notifyBoardReviewReady({
       boardId: card.list.board.id,
       cardId: card.id,
       cardTitle: card.title,

@@ -6,7 +6,7 @@ import { AddCardMember } from "@/actions/manage-card-members/schema";
 import type { AddInputType } from "@/actions/manage-card-members/types";
 import { ActionState } from "@/lib/create-safe-action";
 import { CardMember } from "@prisma/client";
-import { notifyCardAssigned } from "@/lib/board-telegram";
+import { notifyBoardCardAssigned } from "@/lib/board-notify";
 import { createNotifications } from "@/lib/create-notification";
 import { toApiRoute } from "@/lib/api-route";
 
@@ -35,7 +35,7 @@ const addHandler = async (data: AddInputType): Promise<ActionState<AddInputType,
 
   const member = await db.cardMember.create({ data: { cardId, userId: memberId, userName: resolvedName, userImage } });
 
-  await notifyCardAssigned({
+  await notifyBoardCardAssigned({
     boardId,
     orgId,
     cardId: card.id,

@@ -5,7 +5,7 @@ import { UpdateCardOrder } from "@/actions/update-card-order/schema";
 import { InputType, ReturnType } from "@/actions/update-card-order/types";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
-import { notifyReviewReady } from "@/lib/board-telegram";
+import { notifyBoardReviewReady } from "@/lib/board-notify";
 import { toApiRoute } from "@/lib/api-route";
 import { syncParentList } from "@/lib/sync-parent-list";
 import { extractFileContent } from "@/lib/extract-file-content";
@@ -52,7 +52,7 @@ async function triggerAiReviewsForCards(cardIds: string[], boardId: string, orgI
             data: { review, reviewedAt: new Date() },
           });
 
-          await notifyReviewReady({
+          await notifyBoardReviewReady({
             boardId,
             cardId: card.id,
             cardTitle: card.title,
