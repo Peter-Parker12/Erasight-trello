@@ -14,6 +14,7 @@ import { Logo } from "@/components/logo";
 import { isOrgAdmin } from "@/lib/board-access";
 import { MobileSidebar } from "./mobile-sidebar";
 import { TelegramAccount } from "./telegram-account";
+import { ZaloAccount } from "./zalo-account";
 import { DisplayNameAccount } from "./display-name-account";
 import { NotificationBell } from "@/components/notification-bell";
 
@@ -50,6 +51,7 @@ export const Navbar = async () => {
         <ClerkLoaded>
           <DisplayNameAccount />
           <TelegramAccount />
+          <ZaloAccount />
           <NotificationBell />
           <OrganizationSwitcher
             hidePersonal

@@ -14,22 +14,32 @@ const getEnabledConfig = async (boardId: string) => {
 
 export const notifyZaloCardAssigned = async ({
   boardId,
+  orgId,
   cardId,
   cardTitle,
+  assigneeUserId,
   assigneeName,
 }: {
   boardId: string;
+  orgId: string;
   cardId: string;
   cardTitle: string;
+  assigneeUserId: string;
   assigneeName: string;
 }): Promise<void> => {
   const config = await getEnabledConfig(boardId);
   if (!config) return;
 
+  const account = await db.userZaloAccount.findUnique({
+    where: { orgId_userId: { orgId, userId: assigneeUserId } },
+  });
+
+  const mention = account ? `@${account.zaloName}` : assigneeName;
+
   await sendZaloMessage({
     botToken: config.botToken,
     chatId: config.chatId,
-    text: `📌 ${cardTitleText(boardId, cardId, cardTitle)} has been assigned to ${assigneeName}`,
+    text: `📌 ${cardTitleText(boardId, cardId, cardTitle)} has been assigned to ${mention}`,
   });
 };
 

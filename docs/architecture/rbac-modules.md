@@ -35,7 +35,7 @@ Free-form action strings (e.g. `"crm:lead:delete"`) stored on `Role.actions`, as
 | Access control | `ModuleAccess`, `Role`, `UserRoleAssignment`, `ApiKey`, `CustomFieldDefinition` |
 | CRM | `Company`, `Contact`, `PipelineStage`, `Lead`, `Product`, `ProductCategory`, `ProductBundle`, `ProductBundleItem`, `CompanyBundle`, `LeadProduct` |
 | Knowledge Base | `KbIndustry`, `KbFolder`, `KbDocument` |
-| Org/People | `Department`, `UserTelegramAccount`, `UserDisplayName`, `OrgTelegramConfig` |
+| Org/People | `Department`, `UserTelegramAccount`, `UserZaloAccount`, `UserDisplayName`, `OrgTelegramConfig` |
 | OKR/KPI/Dashboard | `Objective`, `KeyResult`, `OkrCheckIn`, `Kpi`, `KpiEntry`, `DailyReport` |
 
 ## Route structure
